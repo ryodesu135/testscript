@@ -12,7 +12,7 @@ local Window = Rayfield:CreateWindow({
 local MainTab = Window:CreateTab("🏠 | Main", nil)
 local MainSection = MainTab:CreateSection("Main")
 
-local WalkSlider = MainTab:CreateSlider({
+local Slider = MainTab:CreateSlider({
    Name = "Walk Speed",
    Range = {30, 150},
    Increment = 1,
@@ -24,7 +24,7 @@ local WalkSlider = MainTab:CreateSlider({
    end, 
 })
 
-local JumpSlider = MainTab:CreateSlider({
+local Slider = MainTab:CreateSlider({
    Name = "Jump Power",
    Range = {50, 200},
    Increment = 1,
