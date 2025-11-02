@@ -41,30 +41,38 @@ local Window = Rayfield:CreateWindow({
 local MainTab = Window:CreateTab("🏠 | Main", nil)
 local MainSection = MainTab:CreateSection("Main")
 
--- 1️⃣ 先建立 Dropdown（先放空）
-local MobDropdown = MainTab:CreateDropdown({
-    Name = "Nearby Mobs",
-    Options = {"None"},
-    CurrentOption = {"None"},
-    MultipleOptions = false,
-    Flag = "MobDropdown",
-    Callback = function(Option)
-        print("你选择了:", Option[1])
-    end,
-})
+local MobDropdown -- 先声明变量在外面
 
--- 2️⃣ 建立一个按钮
+local function CreateMobDropdown(options)
+    if MobDropdown then
+        MobDropdown:Destroy() -- 删除旧的 Dropdown（Rayfield 支持）
+    end
+
+    MobDropdown = MainTab:CreateDropdown({
+        Name = "Nearby Mobs",
+        Options = options or {"None"},
+        CurrentOption = options and {options[1]} or {"None"},
+        MultipleOptions = false,
+        Flag = "MobDropdown",
+        Callback = function(Option)
+            print("你选择了:", Option[1])
+        end,
+    })
+end
+
+-- 先建立一个空的 Dropdown
+CreateMobDropdown({"None"})
+
+-- 再建立按钮
 local ScanButton = MainTab:CreateButton({
     Name = "🔍 Scan Nearby Mobs",
     Callback = function()
         print("正在扫描附近的 mobs...")
 
-        -- 模拟扫描逻辑
         local mobs = {}
 
         for _, mob in pairs(workspace:GetChildren()) do
             if mob:IsA("Model") and mob:FindFirstChild("Humanoid") then
-                -- 判断是否是 mob，例如可以通过名字过滤
                 if string.find(string.lower(mob.Name), "mob") then
                     table.insert(mobs, mob.Name)
                 end
@@ -75,8 +83,8 @@ local ScanButton = MainTab:CreateButton({
             mobs = {"未找到任何 mobs"}
         end
 
-        -- 更新 Dropdown 的选项
-        MobDropdown:SetOptions(mobs)
+        -- 用新的选项重新生成 Dropdown
+        CreateMobDropdown(mobs)
 
         print("扫描完成，找到:", table.concat(mobs, ", "))
     end,
