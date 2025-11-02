@@ -1,0 +1,83 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "Lights Hub",
+   Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+   LoadingTitle = "Loading Lights Hub",
+   LoadingSubtitle = "by Ryo",
+   ShowText = "Rayfield", -- for mobile users to unhide rayfield, change if you'd like
+   Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+
+   ToggleUIKeybind = "K", -- The keybind to toggle the UI visibility (string like "K" or Enum.KeyCode)
+
+   DisableRayfieldPrompts = false,
+   DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
+
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "Lights Hub"
+   },
+
+   Discord = {
+      Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
+      Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+      RememberJoins = false -- Set this to false to make them join the discord every time they load it up
+   },
+
+   KeySystem = true, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "Lights Hub | Key",
+      Subtitle = "Get Free Key On Discord",
+      Note = "Premium Key Also Avilable in Discord", -- Use this to tell the user how to get a key
+      FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+      SaveKey = false, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+      GrabKeyFromSite = true, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = {"https://pastebin.com/raw/Zmnc6B0q"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+   }
+})
+
+
+local MainTab = Window:CreateTab("🏠 | Main", nil)
+local MainSection = MainTab:CreateSection("Main")
+
+-- 1️⃣ 先建立 Dropdown（先放空）
+local MobDropdown = MainTab:CreateDropdown({
+    Name = "Nearby Mobs",
+    Options = {"None"},
+    CurrentOption = {"None"},
+    MultipleOptions = false,
+    Flag = "MobDropdown",
+    Callback = function(Option)
+        print("你选择了:", Option[1])
+    end,
+})
+
+-- 2️⃣ 建立一个按钮
+local ScanButton = MainTab:CreateButton({
+    Name = "🔍 Scan Nearby Mobs",
+    Callback = function()
+        print("正在扫描附近的 mobs...")
+
+        -- 模拟扫描逻辑
+        local mobs = {}
+
+        for _, mob in pairs(workspace:GetChildren()) do
+            if mob:IsA("Model") and mob:FindFirstChild("Humanoid") then
+                -- 判断是否是 mob，例如可以通过名字过滤
+                if string.find(string.lower(mob.Name), "mob") then
+                    table.insert(mobs, mob.Name)
+                end
+            end
+        end
+
+        if #mobs == 0 then
+            mobs = {"未找到任何 mobs"}
+        end
+
+        -- 更新 Dropdown 的选项
+        MobDropdown:SetOptions(mobs)
+
+        print("扫描完成，找到:", table.concat(mobs, ", "))
+    end,
+})
