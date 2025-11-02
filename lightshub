@@ -24,6 +24,18 @@ local WalkSlider = MainTab:CreateSlider({
    end, 
 })
 
+local JumpSlider = MainTab:CreateSlider({
+   Name = "Jump Power",
+   Range = {50, 200},
+   Increment = 1,
+   Suffix = "Power",
+   CurrentValue = 50,
+   Flag = "Slider2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+   game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value --workspace.isu002.Humanoid
+   end, 
+})
+
 -- 先创建 Dropdown
 local MobDropdown = MainTab:CreateDropdown({
     Name = "Nearby Mobs",
