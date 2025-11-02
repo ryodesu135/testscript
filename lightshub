@@ -20,8 +20,8 @@ local WalkSlider = MainTab:CreateSlider({
    CurrentValue = 35,
    Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Value)
-   game.Model.LocalHumanoid:SetGame("WalkSpeed", Value)
-   end,
+   game.workspace.LocalHumanoid:SetGame("WalkSpeed", Value) --workspace.isu002.Humanoid
+   end, 
 })
 
 -- 先创建 Dropdown
