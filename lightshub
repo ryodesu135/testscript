@@ -35,3 +35,17 @@ local Slider = MainTab:CreateSlider({
    game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value --workspace.isu002.Humanoid
    end, 
 })
+
+local Toggle = MainTab:CreateToggle({
+   Name = "Anti AFK",
+   CurrentValue = false,
+   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+   local bbbatusxxxddddd = game:service'VirtualUser'
+
+game:service'Players'.LocalPlayer.Idled:connect(function()
+	bbbatusxxxddddd:CaptureController()
+	bbbatusxxxddddd:ClickButton2(Vector2.new())
+end)
+   end,
+})
