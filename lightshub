@@ -46,24 +46,26 @@ local Toggle = MainTab:CreateToggle({
    Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Value)
 
-    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-           ["Value"] = false,
-           ["Path"] = {
-               [1] = "Settings",
-               [2] = "AFK_MODE",
-           },
-           ["Action"] = "Settings",
-       })
+    if Value then
+           -- 当开启时，关掉游戏里的 AFK MODE
+           game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+               ["Value"] = false,
+               ["Path"] = {
+                   [1] = "Settings",
+                   [2] = "AFK_MODE",
+               },
+               ["Action"] = "Settings",
+           })
 
-       if Value then
-           -- 开启 Anti AFK
+           -- 启动 Anti AFK
            connection = player.Idled:Connect(function()
                bb:CaptureController()
                bb:ClickButton2(Vector2.new())
                wait(2)
            end)
+
        else
-           -- 关闭 Anti AFK
+           -- 关闭 Anti AFK，不改游戏里的 AFK_MODE
            if connection then
                connection:Disconnect()
                connection = nil
