@@ -39,6 +39,7 @@ local Slider = MainTab:CreateSlider({
 --Anti AFK
 local bb = game:service'VirtualUser'
 local player = game.Players.LocalPlayer
+local afkConnection
 
 local Toggle = MainTab:CreateToggle({
    Name = "Anti AFK",
@@ -58,7 +59,7 @@ local Toggle = MainTab:CreateToggle({
            })
 
            -- 启动 Anti AFK
-           connection = player.Idled:Connect(function()
+           afkConnection = player.Idled:Connect(function()
                bb:CaptureController()
                bb:ClickButton2(Vector2.new())
                wait(2)
@@ -66,9 +67,9 @@ local Toggle = MainTab:CreateToggle({
 
        else
            -- 关闭 Anti AFK，不改游戏里的 AFK_MODE
-           if connection then
-               connection:Disconnect()
-               connection = nil
+           if afkConnection then
+                afkConnection:Disconnect()
+                afkConnection = nil
            end
        end
    end,
