@@ -45,26 +45,28 @@ local Toggle = MainTab:CreateToggle({
    CurrentValue = false,
    Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Value)
-    local settingsGui = player:WaitForChild("PlayerGui"):WaitForChild("Settings")
-      local afkMode = settingsGui:WaitForChild("List"):WaitForChild("AFK_MODE")
-      local onButton = afkMode:FindFirstChild("On")
-      local offButton = afkMode:FindFirstChild("Off")
+   game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+           ["Value"] = Value,
+           ["Path"] = {
+               [1] = "Settings",
+               [2] = "AFK_MODE",
+           },
+           ["Action"] = "Settings",
+       })
 
-      if Value then
-         -- ❌ 先关闭游戏内AFK
-         if offButton then
-            offButton.MouseButton1Click:Fire()
-            print("🟥 In-game AFK disabled")
-         end
-                
- player.Idled:Connect(function()
-            bb:CaptureController()
-            bb:ClickButton2(Vector2.new())
-            print("🟢 Anti AFK Triggered")
-            wait(2)
-         end)
-      else
-         print("⏹️ Anti AFK Disabled")
-      end
+       if Value then
+           -- 开启 Anti AFK
+           connection = player.Idled:Connect(function()
+               bb:CaptureController()
+               bb:ClickButton2(Vector2.new())
+               wait(2)
+           end)
+       else
+           -- 关闭 Anti AFK
+           if connection then
+               connection:Disconnect()
+               connection = nil
+           end
+       end
    end,
 })
