@@ -39,7 +39,6 @@ local Slider = MainTab:CreateSlider({
 --Anti AFK
 local bb = game:service'VirtualUser'
 local player = game.Players.LocalPlayer
-local connection
 
 local Toggle = MainTab:CreateToggle({
    Name = "Anti AFK",
