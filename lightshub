@@ -39,30 +39,46 @@ local Slider = MainTab:CreateSlider({
 --Anti AFK
 local bb = game:service'VirtualUser'
 local player = game.Players.LocalPlayer
+local connection
 
 local Toggle = MainTab:CreateToggle({
    Name = "Anti AFK",
    CurrentValue = false,
    Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Value)
-   game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-           ["Value"] = not Value, -- ✅ 反转这里
-           ["Path"] = {
-               [1] = "Settings",
-               [2] = "AFK_MODE",
-           },
-           ["Action"] = "Settings",
-       })
 
-       if Value then
-           -- 开启 Anti AFK
+    local AFKMode = player:FindFirstChild("AFK_MODE")
+           or player:FindFirstChild("Settings") and player.Settings:FindFirstChild("AFK_MODE")
+           or game:GetService("Players").LocalPlayer.PlayerGui.General.Settings.List.AFK_MODE
+            
+    if Value then
+           -- 检查游戏内 AFK_MODE 状态
+           local currentState
+           pcall(function()
+               currentState = AFKMode.Value or AFKMode.On.Value
+           end)
+
+           if currentState == true then
+               -- 如果是开启的，则发请求把它关掉
+               game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                   ["Value"] = false,
+                   ["Path"] = {
+                       [1] = "Settings",
+                       [2] = "AFK_MODE",
+                   },
+                   ["Action"] = "Settings",
+               })
+           end
+
+           -- 启动 Anti-AFK 防踢逻辑
            connection = player.Idled:Connect(function()
                bb:CaptureController()
                bb:ClickButton2(Vector2.new())
                wait(2)
            end)
+
        else
-           -- 关闭 Anti AFK
+           -- 关闭 Anti-AFK 防踢逻辑
            if connection then
                connection:Disconnect()
                connection = nil
