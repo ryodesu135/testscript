@@ -36,17 +36,47 @@ local Slider = MainTab:CreateSlider({
    end, 
 })
 
+--Anti AFK
 local bb = game:service'VirtualUser'
+local player = game.Players.LocalPlayer
+
 local Toggle = MainTab:CreateToggle({
    Name = "Anti AFK",
    CurrentValue = false,
    Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Value)
-    game:service'Players'.LocalPlayer.Idled:connect(function()
-    bb:CaptureController()
-    bb:ClickButton2(Vector2.new())
-    print("Sucess")
-    wait(2)
-end)
+    if Value then
+         -- 🧠 Step 1: 自动关闭游戏内的 AFK MODE
+         local settingsGui = player:WaitForChild("PlayerGui"):FindFirstChild("Settings")
+         if settingsGui and settingsGui:FindFirstChild("List") then
+            local afkMode = settingsGui.List:FindFirstChild("AFK_MODE")
+            if afkMode then
+               local onButton = afkMode:FindFirstChild("On")
+               local offButton = afkMode:FindFirstChild("Off")
+
+               -- 如果AFK模式开启就关掉它
+               if onButton and onButton.Visible then
+                  onButton.Visible = false
+                  if offButton then
+                     offButton.Visible = true
+                  end
+                  offButton:Activate()  -- 模拟点“Off”按钮
+                  print("🔴 Disabled in-game AFK Mode")
+               end
+            end
+         end
+
+         -- 🧠 Step 2: 开启防AFK机制
+         print("✅ Anti-AFK Enabled")
+         player.Idled:Connect(function()
+            bb:CaptureController()
+            bb:ClickButton2(Vector2.new())
+            print("🟢 Anti-AFK Triggered")
+            wait(2)
+         end)
+      else
+         -- 🧠 Step 3: 关闭时提示
+         print("⏹️ Anti-AFK Disabled")
+      end
    end,
 })
