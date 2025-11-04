@@ -76,34 +76,33 @@ local Toggle = MainTab:CreateToggle({
 })
 
 
---Farm
+-- Farm
 local mobNames = {}
 local mobMap = {}
 
-
 local FarmTab = Window:CreateTab("🌾 | Farm", nil)
 local FarmSection = FarmTab:CreateSection("Farm")
+
 local AutoFarmMobsListDropdown = FarmTab:CreateDropdown({
    Name = "Mobs List",
-   Options = {"Option 1","Option 2"},
+   Options = {"Option 1", "Option 2"},
    CurrentOption = {"nil"},
    MultipleOptions = true,
-   Flag = "Dropdown1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Flag = "Dropdown1",
    Callback = function(Options)
-   -- The function that takes place when the selected option is changed
-   -- The variable (Options) is a table of strings for the current selected options
+       -- 这里是你选了哪些 mobs，Options 是一个表
    end,
 })
 
 local ScanMobsButton = FarmTab:CreateButton({
    Name = "Refresh Mobs List",
    Callback = function()
-    mobNames = {}
+      mobNames = {}
       mobMap = {}
 
       local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
       if not monstersFolder then
-         return -- 没找到就直接退出，不提示
+         return -- 没找到就直接退出
       end
 
       for _, mob in pairs(monstersFolder:GetChildren()) do
@@ -112,19 +111,16 @@ local ScanMobsButton = FarmTab:CreateButton({
             if mobstitle then
                local mobsname
 
-               -- 尝试取得 mob 名称
                if mobstitle:IsA("TextLabel") or mobstitle:IsA("TextButton") then
                   mobsname = mobstitle.Text
                elseif mobstitle:IsA("StringValue") then
                   mobsname = mobstitle.Value
                end
 
-               -- 如果取不到名字，就用 Model 名称
                if not mobsname or mobsname == "" then
                   mobsname = mob.Name
                end
 
-               -- 去重并记录
                if not mobMap[mobsname] then
                   mobMap[mobsname] = {}
                   table.insert(mobNames, mobsname)
@@ -134,10 +130,9 @@ local ScanMobsButton = FarmTab:CreateButton({
          end
       end
 
-      -- 如果你有一个 MobDropdown，可以加上：
-      if AutoFarmMobsListDropdown then
-         AutoFarmMobsListDropdown:SetOptions(mobNames)
-      end
+      -- 更新下拉菜单，用正确的方法 :Refresh()
+      AutoFarmMobsListDropdown:Refresh(mobNames)
+
    end,
 })
 
