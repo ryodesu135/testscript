@@ -119,7 +119,7 @@ local ScanMobsButton = FarmTab:CreateButton({
             -- 组合成 "[Rank] Name" 格式
             local mobsdisplayname
             if mobsrank and mobsrank ~= "" then
-               mobsdisplayname = string.format("[%s] %s", mobsrank, mobsname)
+               mobsdisplayname = string.format("["mobsrank"]", mobsname)
             else
                mobsdisplayname = mobsname
             end
