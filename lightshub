@@ -131,8 +131,6 @@ local ScanMobsButton = FarmTab:CreateButton({
       end
 
       -- 更新 Dropdown 列表
-      if AutoFarmMobsListDropdown then
-         AutoFarmMobsListDropdown:SetOptions(mobNames)
-      end
+      AutoFarmMobsListDropdown:Refresh(mobNames)
    end,
 })
