@@ -74,3 +74,8 @@ local Toggle = MainTab:CreateToggle({
        end
    end,
 })
+
+
+--Farm
+local FarmTab = Window:CreateTab("🌾 | Farm", nil)
+local FarmSection = FarmTab:CreateSection("Farm")
