@@ -128,3 +128,4 @@ local ScanMobsButton = FarmTab:CreateButton({
       AutoFarmMobsListDropdown:Refresh(mobNames)
    end,
 })
+
