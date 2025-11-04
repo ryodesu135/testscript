@@ -109,16 +109,22 @@ local ScanMobsButton = FarmTab:CreateButton({
          if mob and mob:IsA("Model") then
             -- 从 Attributes 读取 Title
             local mobsname = mob:GetAttribute("Title")
+            local mobsrank = mob:GetAttribute("Rank")
 
             -- 如果没有 Title，就用模型名字代替
             if not mobsname or mobsname == "" then
                mobsname = mob.Name
             end
 
+            if not mobsrank or mobsrank == "" then
+               mobsrank = mob.Rank
+            end        
+
             -- 去重并保存
-            if not mobMap[mobsname] then
+            if not mobMap[mobsname] or mobMap[mobsrank] then
                mobMap[mobsname] = {}
-               table.insert(mobNames, mobsname)
+                mobMap[mobsrank] = {}
+               table.insert("[%s] %s %s"mobsrank, mobNames, mobsname)
             end
             table.insert(mobMap[mobsname], mob)
          end
