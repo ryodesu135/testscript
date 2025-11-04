@@ -77,6 +77,10 @@ local Toggle = MainTab:CreateToggle({
 
 
 --Farm
+local mobNames = {}
+local mobMap = {}
+
+
 local FarmTab = Window:CreateTab("🌾 | Farm", nil)
 local FarmSection = FarmTab:CreateSection("Farm")
 local AutoFarmMobsListDropdown = FarmTab:CreateDropdown({
@@ -90,3 +94,50 @@ local AutoFarmMobsListDropdown = FarmTab:CreateDropdown({
    -- The variable (Options) is a table of strings for the current selected options
    end,
 })
+
+local ScanMobsButton = FarmTab:CreateButton({
+   Name = "Refresh Mobs List",
+   Callback = function()
+    mobNames = {}
+      mobMap = {}
+
+      local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
+      if not monstersFolder then
+         return -- 没找到就直接退出，不提示
+      end
+
+      for _, mob in pairs(monstersFolder:GetChildren()) do
+         if mob and mob:IsA("Model") then
+            local mobstitle = mob:FindFirstChild("Title")
+            if mobstitle then
+               local mobsname
+
+               -- 尝试取得 mob 名称
+               if mobstitle:IsA("TextLabel") or mobstitle:IsA("TextButton") then
+                  mobsname = mobstitle.Text
+               elseif mobstitle:IsA("StringValue") then
+                  mobsname = mobstitle.Value
+               end
+
+               -- 如果取不到名字，就用 Model 名称
+               if not mobsname or mobsname == "" then
+                  mobsname = mob.Name
+               end
+
+               -- 去重并记录
+               if not mobMap[mobsname] then
+                  mobMap[mobsname] = {}
+                  table.insert(mobNames, mobsname)
+               end
+               table.insert(mobMap[mobsname], mob)
+            end
+         end
+      end
+
+      -- 如果你有一个 MobDropdown，可以加上：
+      if AutoFarmMobsListDropdown then
+         AutoFarmMobsListDropdown:SetOptions(mobNames)
+      end
+   end,
+})
+
