@@ -83,7 +83,7 @@ local mobMap = {}
 local FarmTab = Window:CreateTab("🌾 | Farm", nil)
 local FarmSection = FarmTab:CreateSection("Farm")
 
-local AutoFarmMobsListDropdown = FarmTab:CreateDropdown({
+local AFMobsListDropdown = FarmTab:CreateDropdown({
    Name = "Mobs List",
    Options = {"Option 1", "Option 2"},
    CurrentOption = {"nil"},
@@ -134,6 +134,6 @@ local ScanMobsButton = FarmTab:CreateButton({
       end
 
       -- 更新 Rayfield Dropdown
-      AutoFarmMobsListDropdown:SetOptions(mobNames)
+      AFMobsListDropdown:Refresh(mobNames)
    end,
 })
