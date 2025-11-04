@@ -76,7 +76,7 @@ local Toggle = MainTab:CreateToggle({
 })
 
 
--- Farm
+--Farm
 local mobNames = {}
 local mobMap = {}
 
@@ -85,12 +85,12 @@ local FarmSection = FarmTab:CreateSection("Farm")
 
 local AutoFarmMobsListDropdown = FarmTab:CreateDropdown({
    Name = "Mobs List",
-   Options = {"None"},
+   Options = {"Option 1","Option 2"},
    CurrentOption = {"nil"},
    MultipleOptions = true,
    Flag = "Dropdown1",
    Callback = function(Options)
-      -- 当选择发生变化时执行
+       -- 当选择 mobs 时触发
    end,
 })
 
@@ -107,30 +107,24 @@ local ScanMobsButton = FarmTab:CreateButton({
 
       for _, mob in pairs(monstersFolder:GetChildren()) do
          if mob and mob:IsA("Model") then
-            local mobTitle = mob:GetAttribute("Title")
-            local mobRank = mob:GetAttribute("Rank")
+            -- 从 Attributes 读取 Title
+            local mobsname = mob:GetAttribute("Title")
 
-            -- 确保有 Title 才处理
-            if mobTitle then
-               local displayName
-
-               if mobRank and mobRank ~= "" then
-                  displayName = string.format("[%s] %s", mobRank, mobTitle)
-               else
-                  displayName = mobTitle
-               end
-
-               -- 去重并记录
-               if not mobMap[displayName] then
-                  mobMap[displayName] = {}
-                  table.insert(mobNames, displayName)
-               end
-               table.insert(mobMap[displayName], mob)
+            -- 如果没有 Title，就用模型名字代替
+            if not mobsname or mobsname == "" then
+               mobsname = mob.Name
             end
+
+            -- 去重并保存
+            if not mobMap[mobsname] then
+               mobMap[mobsname] = {}
+               table.insert(mobNames, mobsname)
+            end
+            table.insert(mobMap[mobsname], mob)
          end
       end
 
-      -- 更新 Dropdown 列表
+      -- 更新 Rayfield Dropdown（正确用法）
       AutoFarmMobsListDropdown:Refresh(mobNames)
    end,
 })
