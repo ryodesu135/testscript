@@ -83,14 +83,14 @@ local mobMap = {}
 local FarmTab = Window:CreateTab("🌾 | Farm", nil)
 local FarmSection = FarmTab:CreateSection("Farm")
 
-local AFMobsListDropdown = FarmTab:CreateDropdown({
+local AutoFarmMobsListDropdown = FarmTab:CreateDropdown({
    Name = "Mobs List",
-   Options = {"Option 1", "Option 2"},
-   CurrentOption = {"nil"},
+   Options = {"None"},
+   CurrentOption = {"None"},
    MultipleOptions = true,
    Flag = "Dropdown1",
    Callback = function(Options)
-       -- 当选择 mobs 时触发
+            
    end,
 })
 
@@ -134,6 +134,24 @@ local ScanMobsButton = FarmTab:CreateButton({
       end
 
       -- 更新 Rayfield Dropdown
-      AFMobsListDropdown:Refresh(mobNames)
+      AutoFarmMobsListDropdown:Refresh(mobNames)
    end,
 })
+
+local AutoFarmToggle = FarmTab:CreateToggle({
+   Name = "Auto Farm",
+   CurrentValue = false,
+   Flag = "AutoFarm1",
+   Callback = function(Value)
+      if Value then
+         while wait(0.1) do
+
+                    local character = player.Character or player.CharacterAdded:Wait()
+                    local selectedmobs = AutoFarmMobsListDropdown.CurrentOption
+
+                    if selectedmobs then
+                        character:MoveTo(selectedmobs.Position)
+   end,
+})
+
+
