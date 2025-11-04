@@ -102,29 +102,35 @@ local ScanMobsButton = FarmTab:CreateButton({
 
       local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
       if not monstersFolder then
+         warn("⚠️ 没找到 workspace.Debris.Monsters")
          return
       end
 
       for _, mob in pairs(monstersFolder:GetChildren()) do
          if mob and mob:IsA("Model") then
-            -- 从 Attributes 读取 Title 和 Rank
             local mobsname = mob:GetAttribute("Title")
             local mobsrank = mob:GetAttribute("Rank")
 
-            -- 如果没有 Title 就用模型名代替
+            -- Debug 输出
+            print(string.format("🧟 %s | Title=%s | Rank=%s", mob.Name, tostring(mobsname), tostring(mobsrank)))
+
+            -- 如果没有 title，用 mob.Name
             if not mobsname or mobsname == "" then
                mobsname = mob.Name
             end
 
-            -- 组合成 "[Rank] Name" 格式
+            -- 拼接
             local mobsdisplayname
             if mobsrank and mobsrank ~= "" then
-               mobsdisplayname = string.format("[%s] %s", mobsrank, mobsname)
+               mobsdisplayname = "[" .. tostring(mobsrank) .. "] " .. tostring(mobsname)
             else
-               mobsdisplayname = mobsname
+               mobsdisplayname = tostring(mobsname)
             end
 
-            -- 去重记录
+            -- 确认拼接结果
+            print("✅ mobsdisplayname =", mobsdisplayname)
+
+            -- 去重
             if not mobMap[mobsdisplayname] then
                mobMap[mobsdisplayname] = {}
                table.insert(mobNames, mobsdisplayname)
@@ -133,8 +139,7 @@ local ScanMobsButton = FarmTab:CreateButton({
          end
       end
 
-      -- 更新 Rayfield Dropdown
+      -- 更新 dropdown
       AutoFarmMobsListDropdown:SetOptions(mobNames)
    end,
 })
-
