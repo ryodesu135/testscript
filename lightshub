@@ -195,7 +195,7 @@ local AutoFarmToggle = FarmTab:CreateToggle({
 
                                         -- 等待怪物被移除（击杀完成）
                                         repeat
-                                            task.wait(0.05)
+                                            task.wait(0.25)
                                         until not mob.Parent or not getgenv().AutoFarmRunning
 
                                         -- 怪物被移除 -> 立刻传送到下一个
