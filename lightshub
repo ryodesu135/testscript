@@ -9,149 +9,208 @@ local Window = Rayfield:CreateWindow({
     KeySystem = false
 })
 
+--🏠 Main Tab
 local MainTab = Window:CreateTab("🏠 | Main", nil)
 local MainSection = MainTab:CreateSection("Main")
 
 local Slider = MainTab:CreateSlider({
-   Name = "Walk Speed",
-   Range = {30, 150},
-   Increment = 1,
-   Suffix = "Speed",
-   CurrentValue = 35,
-   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(Value)
-   game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value --workspace.isu002.Humanoid
-   end, 
+    Name = "Walk Speed",
+    Range = {30, 150},
+    Increment = 1,
+    Suffix = "Speed",
+    CurrentValue = 35,
+    Flag = "Slider1",
+    Callback = function(Value)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+    end,
 })
 
 local Slider = MainTab:CreateSlider({
-   Name = "Jump Height",
-   Range = {50, 200},
-   Increment = 1,
-   Suffix = "Height",
-   CurrentValue = 50,
-   Flag = "Slider2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(Value)
-   game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value --workspace.isu002.Humanoid
-   end, 
+    Name = "Jump Height",
+    Range = {50, 200},
+    Increment = 1,
+    Suffix = "Height",
+    CurrentValue = 50,
+    Flag = "Slider2",
+    Callback = function(Value)
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+    end,
 })
 
---Anti AFK
+--🛡️ Anti AFK
 local bb = game:service'VirtualUser'
 local player = game.Players.LocalPlayer
 local afkConnection
 
 local Toggle = MainTab:CreateToggle({
-   Name = "Anti AFK",
-   CurrentValue = false,
-   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(Value)
+    Name = "Anti AFK",
+    CurrentValue = false,
+    Flag = "Toggle1",
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                ["Value"] = false,
+                ["Path"] = {"Settings", "AFK_MODE"},
+                ["Action"] = "Settings",
+            })
 
-    if Value then
-           -- 当开启时，关掉游戏里的 AFK MODE
-           game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-               ["Value"] = false,
-               ["Path"] = {
-                   [1] = "Settings",
-                   [2] = "AFK_MODE",
-               },
-               ["Action"] = "Settings",
-           })
-
-           -- 启动 Anti AFK
-           afkConnection = player.Idled:Connect(function()
-               bb:CaptureController()
-               bb:ClickButton2(Vector2.new())
-               wait(2)
-           end)
-
-       else
-           -- 关闭 Anti AFK，不改游戏里的 AFK_MODE
-           if afkConnection then
+            afkConnection = player.Idled:Connect(function()
+                bb:CaptureController()
+                bb:ClickButton2(Vector2.new())
+                wait(2)
+            end)
+        else
+            if afkConnection then
                 afkConnection:Disconnect()
                 afkConnection = nil
-           end
-       end
-   end,
+            end
+        end
+    end,
 })
 
-
---Farm
+--🌾 Farm Tab
 local mobNames = {}
 local mobMap = {}
+local selectedMobs = {}
+local farmReplicaConnection = nil
 
 local FarmTab = Window:CreateTab("🌾 | Farm", nil)
 local FarmSection = FarmTab:CreateSection("Farm")
+local rootPart = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
 
 local AutoFarmMobsListDropdown = FarmTab:CreateDropdown({
-   Name = "Mobs List",
-   Options = {"None"},
-   CurrentOption = {"None"},
-   MultipleOptions = true,
-   Flag = "Dropdown1",
-   Callback = function(Options)
-            
-   end,
+    Name = "Mobs List",
+    Options = {"None"},
+    CurrentOption = {"None"},
+    MultipleOptions = true,
+    Flag = "Dropdown1",
+    Callback = function(Options)
+        selectedMobs = Options or {}
+    end,
 })
 
 local ScanMobsButton = FarmTab:CreateButton({
-   Name = "Refresh Mobs List",
-   Callback = function()
-      mobNames = {}
-      mobMap = {}
+    Name = "Refresh Mobs List",
+    Callback = function()
+        mobNames = {}
+        mobMap = {}
 
-      local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
-      if not monstersFolder then
-         return
-      end
+        local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
+        if not monstersFolder then return end
 
-      for _, mob in pairs(monstersFolder:GetChildren()) do
-         if mob and mob:IsA("Model") then
-            -- 从 Attributes 读取 Title 和 Rank
-            local mobsname = mob:GetAttribute("Title")
-            local mobsrank = mob:GetAttribute("Rank")
+        for _, mob in pairs(monstersFolder:GetChildren()) do
+            if mob and mob:IsA("Model") then
+                local mobsname = mob:GetAttribute("Title")
+                local mobsrank = mob:GetAttribute("Rank")
+                if not mobsname or mobsname == "" then
+                    mobsname = mob.Name
+                end
 
-            -- 如果没有 Title 就用模型名代替
-            if not mobsname or mobsname == "" then
-               mobsname = mob.Name
+                local mobsdisplayname
+                if mobsrank and mobsrank ~= "" then
+                    mobsdisplayname = string.format("[%s] %s", mobsrank, mobsname)
+                else
+                    mobsdisplayname = mobsname
+                end
+
+                if not mobMap[mobsdisplayname] then
+                    mobMap[mobsdisplayname] = {}
+                    table.insert(mobNames, mobsdisplayname)
+                end
+                table.insert(mobMap[mobsdisplayname], mob)
             end
+        end
 
-            -- 组合成 "[Rank] Name" 格式
-            local mobsdisplayname
-            if mobsrank and mobsrank ~= "" then
-               mobsdisplayname = string.format("[%s] %s", mobsrank, mobsname)
-            else
-               mobsdisplayname = mobsname
-            end
-
-            -- 去重记录
-            if not mobMap[mobsdisplayname] then
-               mobMap[mobsdisplayname] = {}
-               table.insert(mobNames, mobsdisplayname)
-            end
-            table.insert(mobMap[mobsdisplayname], mob)
-         end
-      end
-
-      -- 更新 Rayfield Dropdown
-      AutoFarmMobsListDropdown:Refresh(mobNames)
-   end,
+        AutoFarmMobsListDropdown:Refresh(mobNames)
+    end,
 })
+
+local function setupFarmReplicaListener(callback)
+    local farmReplicaEvent = game:GetService("ReplicatedStorage").ReplicaRemoteEvents:FindFirstChild("Replica_ReplicaSetValue")
+    if farmReplicaEvent then
+        farmReplicaConnection = farmReplicaEvent.OnClientEvent:Connect(function(a, b, c)
+            if typeof(b) == "table" then
+                local pathString = table.concat(b, ",")
+                if pathString == "InGame,Statistics,Resources_Exp" then
+                    callback()
+                end
+            end
+        end)
+    end
+end
+
+local function disconnectFarmReplicaListener()
+    if farmReplicaConnection then
+        farmReplicaConnection:Disconnect()
+        farmReplicaConnection = nil
+    end
+end
 
 local AutoFarmToggle = FarmTab:CreateToggle({
-   Name = "Auto Farm",
-   CurrentValue = false,
-   Flag = "AutoFarm1",
-   Callback = function(Value)
-      if Value then
-         while wait(0.1) do
+    Name = "Auto Farm",
+    CurrentValue = false,
+    Flag = "AutoFarm1",
+    Callback = function(Value)
+        if Value then
+            getgenv().AutoFarmRunning = true
 
-                    local character = player.Character or player.CharacterAdded:Wait()
-                    local selectedmobs = AutoFarmMobsListDropdown.CurrentOption
+            task.spawn(function()
+                while getgenv().AutoFarmRunning do
+                    local player = game.Players.LocalPlayer
+                    local char = player.Character
+                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                    if not hrp then
+                        task.wait(1)
+                        continue
+                    end
 
-                    if selectedmobs then
-                        character:MoveTo(selectedmobs.Position)
-   end,
+                    -- 刷新 mobs
+                    local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
+                    if monstersFolder then
+                        mobMap = {}
+                        for _, mob in pairs(monstersFolder:GetChildren()) do
+                            if mob and mob:IsA("Model") then
+                                local mobsname = mob:GetAttribute("Title") or mob.Name
+                                local mobsrank = mob:GetAttribute("Rank")
+                                local mobsdisplayname = mobsrank and mobsrank ~= "" and string.format("[%s] %s", mobsrank, mobsname) or mobsname
+                                if not mobMap[mobsdisplayname] then
+                                    mobMap[mobsdisplayname] = {}
+                                end
+                                table.insert(mobMap[mobsdisplayname], mob)
+                            end
+                        end
+                    end
+
+                    -- 自动打怪循环
+                    for _, mobName in ipairs(selectedMobs) do
+                        local mobList = mobMap[mobName]
+                        if mobList and #mobList > 0 then
+                            for _, mob in ipairs(mobList) do
+                                if not getgenv().AutoFarmRunning then break end
+                                if mob and mob.Parent then
+                                    local mobHRP = mob:FindFirstChild("HumanoidRootPart")
+                                    if mobHRP then
+                                        -- 传送到怪物位置
+                                        hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 0)
+
+                                        -- 等待怪物被移除（击杀完成）
+                                        repeat
+                                            task.wait(0.05)
+                                        until not mob.Parent or not getgenv().AutoFarmRunning
+
+                                        -- 怪物被移除 -> 立刻传送到下一个
+                                    end
+                                end
+                            end
+                        end
+                    end
+
+                    task.wait(0.1)
+                end
+            end)
+        else
+            getgenv().AutoFarmRunning = false
+        end
+    end,
 })
-
 
