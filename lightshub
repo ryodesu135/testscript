@@ -9,39 +9,87 @@ local Window = Rayfield:CreateWindow({
     KeySystem = false
 })
 
+-- 🧠 初始化全局变量
+getgenv().UserSetWalkSpeed = nil
+getgenv().UserSetJumpPower = nil
+getgenv().SpeedMonitorRunning = false
+
+-- ✅ 捕捉当前角色 WalkSpeed / JumpPower
+local player = game.Players.LocalPlayer
+
+local function captureCurrentStats()
+    local char = player.Character or player.CharacterAdded:Wait()
+    local humanoid = char:WaitForChild("Humanoid")
+    getgenv().CurrentWalkSpeed = humanoid.WalkSpeed
+    getgenv().CurrentJumpPower = humanoid.JumpPower
+    print("[DEBUG] 捕捉当前速度:", getgenv().CurrentWalkSpeed, " 跳跃力:", getgenv().CurrentJumpPower)
+end
+
+-- ✅ 维持设定的速度与跳跃力
+task.spawn(function()
+    getgenv().SpeedMonitorRunning = true
+    while getgenv().SpeedMonitorRunning do
+        pcall(function()
+            local char = player.Character
+            local humanoid = char and char:FindFirstChild("Humanoid")
+            if humanoid then
+                if getgenv().UserSetWalkSpeed and humanoid.WalkSpeed ~= getgenv().UserSetWalkSpeed then
+                    humanoid.WalkSpeed = getgenv().UserSetWalkSpeed
+                end
+                if getgenv().UserSetJumpPower and humanoid.JumpPower ~= getgenv().UserSetJumpPower then
+                    humanoid.JumpPower = getgenv().UserSetJumpPower
+                end
+            end
+        end)
+        task.wait(0.3)
+    end
+end)
+
 --🏠 Main Tab
 local MainTab = Window:CreateTab("🏠 | Main", nil)
 local MainSection = MainTab:CreateSection("Main")
 
-local Slider = MainTab:CreateSlider({
+-- ✅ WalkSpeed Slider
+local SpeedSlider = MainTab:CreateSlider({
     Name = "Walk Speed",
     Range = {30, 150},
     Increment = 1,
     Suffix = "Speed",
-    CurrentValue = 35,
+    CurrentValue = getgenv().CurrentWalkSpeed or 35,
     Flag = "Slider1",
     Callback = function(Value)
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+        local char = player.Character
+        local humanoid = char and char:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = Value
+            getgenv().UserSetWalkSpeed = Value
+            print("[DEBUG] 玩家设定 WalkSpeed:", Value)
+        end
     end,
 })
 
-local Slider = MainTab:CreateSlider({
+-- ✅ JumpPower Slider
+local HeightSlider = MainTab:CreateSlider({
     Name = "Jump Height",
     Range = {50, 200},
     Increment = 1,
     Suffix = "Height",
-    CurrentValue = 50,
+    CurrentValue = getgenv().CurrentJumpPower or 50,
     Flag = "Slider2",
     Callback = function(Value)
-        game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+        local char = player.Character
+        local humanoid = char and char:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.JumpPower = Value
+            getgenv().UserSetJumpPower = Value
+            print("[DEBUG] 玩家设定 JumpPower:", Value)
+        end
     end,
 })
 
 --🛡️ Anti AFK
 local bb = game:service'VirtualUser'
-local player = game.Players.LocalPlayer
 local afkConnection
-
 local Toggle = MainTab:CreateToggle({
     Name = "Anti AFK",
     CurrentValue = false,
@@ -53,7 +101,6 @@ local Toggle = MainTab:CreateToggle({
                 ["Path"] = {"Settings", "AFK_MODE"},
                 ["Action"] = "Settings",
             })
-
             afkConnection = player.Idled:Connect(function()
                 bb:CaptureController()
                 bb:ClickButton2(Vector2.new())
@@ -68,16 +115,45 @@ local Toggle = MainTab:CreateToggle({
     end,
 })
 
+-- ✅ Auto Rank Up
+local AutoRankUpToggle = MainTab:CreateToggle({
+    Name = "Auto Rank Up",
+    CurrentValue = false,
+    Flag = "RankUp1",
+    Callback = function(Value)
+        if Value then
+            getgenv().AutoRankUpRunning = true
+            task.spawn(function()
+                while getgenv().AutoRankUpRunning do
+                    pcall(function()
+                        game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                            ["Upgrading_Name"] = "Rank",
+                            ["Action"] = "_Upgrades",
+                            ["Upgrade_Name"] = "Rank_Up",
+                        })
+                    end)
+                    task.wait(10)
+                end
+            end)
+        else
+            getgenv().AutoRankUpRunning = false
+        end
+    end,
+})
+
 --🌾 Farm Tab
 local mobNames = {}
 local mobMap = {}
 local selectedMobs = {}
 local farmReplicaConnection = nil
+getgenv().AutoFarmRunning = false
+getgenv().FarmTargetChanged = false
 
 local FarmTab = Window:CreateTab("🌾 | Farm", nil)
 local FarmSection = FarmTab:CreateSection("Farm")
 local rootPart = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
 
+-- ✅ Dropdown 选择变化时立即触发切换
 local AutoFarmMobsListDropdown = FarmTab:CreateDropdown({
     Name = "Mobs List",
     Options = {"None"},
@@ -86,17 +162,24 @@ local AutoFarmMobsListDropdown = FarmTab:CreateDropdown({
     Flag = "Dropdown1",
     Callback = function(Options)
         selectedMobs = Options or {}
+        getgenv().FarmTargetChanged = true -- ✅ 触发重新目标
+        print("[DEBUG] 🎯 Mob target changed:", table.concat(selectedMobs, ", "))
     end,
 })
 
+-- ✅ 刷新按钮
 local ScanMobsButton = FarmTab:CreateButton({
     Name = "Refresh Mobs List",
     Callback = function()
         mobNames = {}
         mobMap = {}
+        selectedMobs = {}
 
         local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
-        if not monstersFolder then return end
+        if not monstersFolder then
+            AutoFarmMobsListDropdown:Refresh({"None"})
+            return
+        end
 
         for _, mob in pairs(monstersFolder:GetChildren()) do
             if mob and mob:IsA("Model") then
@@ -121,31 +204,17 @@ local ScanMobsButton = FarmTab:CreateButton({
             end
         end
 
-        AutoFarmMobsListDropdown:Refresh(mobNames)
+        if #mobNames == 0 then
+            AutoFarmMobsListDropdown:Refresh({"None"})
+        else
+            AutoFarmMobsListDropdown:Refresh(mobNames)
+        end
+
+        AutoFarmMobsListDropdown.CurrentOption = {"None"}
     end,
 })
 
-local function setupFarmReplicaListener(callback)
-    local farmReplicaEvent = game:GetService("ReplicatedStorage").ReplicaRemoteEvents:FindFirstChild("Replica_ReplicaSetValue")
-    if farmReplicaEvent then
-        farmReplicaConnection = farmReplicaEvent.OnClientEvent:Connect(function(a, b, c)
-            if typeof(b) == "table" then
-                local pathString = table.concat(b, ",")
-                if pathString == "InGame,Statistics,Resources_Exp" then
-                    callback()
-                end
-            end
-        end)
-    end
-end
-
-local function disconnectFarmReplicaListener()
-    if farmReplicaConnection then
-        farmReplicaConnection:Disconnect()
-        farmReplicaConnection = nil
-    end
-end
-
+-- ✅ 主 Auto Farm 逻辑
 local AutoFarmToggle = FarmTab:CreateToggle({
     Name = "Auto Farm",
     CurrentValue = false,
@@ -153,9 +222,14 @@ local AutoFarmToggle = FarmTab:CreateToggle({
     Callback = function(Value)
         if Value then
             getgenv().AutoFarmRunning = true
+            getgenv().FarmTargetChanged = true
 
             task.spawn(function()
                 while getgenv().AutoFarmRunning do
+                    if getgenv().FarmTargetChanged then
+                        getgenv().FarmTargetChanged = false
+                    end
+
                     local player = game.Players.LocalPlayer
                     local char = player.Character
                     local hrp = char and char:FindFirstChild("HumanoidRootPart")
@@ -164,7 +238,6 @@ local AutoFarmToggle = FarmTab:CreateToggle({
                         continue
                     end
 
-                    -- 刷新 mobs
                     local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
                     if monstersFolder then
                         mobMap = {}
@@ -183,22 +256,24 @@ local AutoFarmToggle = FarmTab:CreateToggle({
 
                     -- 自动打怪循环
                     for _, mobName in ipairs(selectedMobs) do
+                        if not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged then break end
+
                         local mobList = mobMap[mobName]
                         if mobList and #mobList > 0 then
                             for _, mob in ipairs(mobList) do
-                                if not getgenv().AutoFarmRunning then break end
+                                if not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged then break end
                                 if mob and mob.Parent then
                                     local mobHRP = mob:FindFirstChild("HumanoidRootPart")
                                     if mobHRP then
-                                        -- 传送到怪物位置
-                                        hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 0)
+                                        hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
 
-                                        -- 等待怪物被移除（击杀完成）
-                                        repeat
-                                            task.wait(0.25)
-                                        until not mob.Parent or not getgenv().AutoFarmRunning
-
-                                        -- 怪物被移除 -> 立刻传送到下一个
+                                        -- ✅ 实时检测关闭或目标变化，立即 break
+                                        while mob.Parent and getgenv().AutoFarmRunning and not getgenv().FarmTargetChanged do
+                                            task.wait(0.1)
+                                        end
+                                        if not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged then
+                                            break
+                                        end
                                     end
                                 end
                             end
@@ -210,7 +285,81 @@ local AutoFarmToggle = FarmTab:CreateToggle({
             end)
         else
             getgenv().AutoFarmRunning = false
+            getgenv().FarmTargetChanged = true -- ✅ 强制中断当前 mob
         end
     end,
 })
 
+
+--🌌 Auto Dungeon Tab
+local AutoDungeonTab = Window:CreateTab("🏰 | Dungeon", nil)
+local AutoDungeonSection = AutoDungeonTab:CreateSection("Dungeon Selection")
+
+-- 全局变量
+getgenv().SelectedDungeon = nil
+getgenv().AutoDungeonEnabled = false
+
+-- ✅ Dungeon 选项
+local DungeonOptions = {
+    "Dungeon Easy",
+    "Dungeon Medium",
+    "Dungeon Hard",
+    "Dungeon Insane",
+    "Dungeon Crazy",
+    "Dungeon Nightmare",
+    "Leaf Raid",
+}
+
+-- ✅ 选择 Dungeon
+local SelectDungeonDropdown = AutoDungeonTab:CreateDropdown({
+    Name = "Select Dungeon",
+    Options = DungeonOptions,
+    CurrentOption = {"Dungeon Easy"},
+    MultipleOptions = false,
+    Flag = "DungeonSelect1",
+    Callback = function(Options)
+        local selected = Options[1]
+        getgenv().SelectedDungeon = selected
+        print("[DEBUG] 🏰 已选择副本:", selected)
+    end,
+})
+
+-- ✅ 开关
+local AutoDungeonToggle = AutoDungeonTab:CreateToggle({
+    Name = "Auto Join Dungeon",
+    CurrentValue = false,
+    Flag = "AutoJoinDungeon1",
+    Callback = function(Value)
+        getgenv().AutoDungeonEnabled = Value
+        if Value then
+            print("[DEBUG] 🟢 Auto Dungeon Enabled")
+        else
+            print("[DEBUG] 🔴 Auto Dungeon Disabled")
+        end
+    end,
+})
+
+-- ✅ 监听游戏广播
+local remote = game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("To_Client")
+
+remote.OnClientEvent:Connect(function(data)
+    if not getgenv().AutoDungeonEnabled then return end
+    if type(data) ~= "table" then return end
+    if data.Action ~= "System_Message" then return end
+    if not data.Text or data.Text.Type ~= "Dungeon_Message" then return end
+
+    local message = data.Text.Text or ""
+    local selected = getgenv().SelectedDungeon
+
+    if selected and string.find(message, selected) then
+        print("[DEBUG] ⚔️ 检测到副本开启:", message)
+
+        local dungeonName = selected:gsub(" ", "_")
+        game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+            ["Action"] = "_Enter_Dungeon",
+            ["Name"] = dungeonName,
+        })
+
+        print("[DEBUG] ✅ 已自动进入副本:", dungeonName)
+    end
+end)
