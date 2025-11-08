@@ -296,8 +296,11 @@ local AutoDungeonTab = Window:CreateTab("🏰 | Dungeon", nil)
 local AutoDungeonSection = AutoDungeonTab:CreateSection("Dungeon Selection")
 
 -- 全局变量
-getgenv().SelectedDungeon = nil
+getgenv().SelectedDungeons = {}
 getgenv().AutoDungeonEnabled = false
+getgenv().AutoDungeonFarmRunning = false
+
+local player = game.Players.LocalPlayer
 
 -- ✅ Dungeon 选项
 local DungeonOptions = {
@@ -310,23 +313,22 @@ local DungeonOptions = {
     "Leaf Raid",
 }
 
--- ✅ 选择 Dungeon
+-- ✅ 选择 Dungeon（多选）
 local SelectDungeonDropdown = AutoDungeonTab:CreateDropdown({
-    Name = "Select Dungeon",
+    Name = "Select Dungeons",
     Options = DungeonOptions,
     CurrentOption = {"Dungeon Easy"},
-    MultipleOptions = false,
+    MultipleOptions = true,
     Flag = "DungeonSelect1",
     Callback = function(Options)
-        local selected = Options[1]
-        getgenv().SelectedDungeon = selected
-        print("[DEBUG] 🏰 已选择副本:", selected)
+        getgenv().SelectedDungeons = Options
+        print("[DEBUG] 🏰 已选择副本:", table.concat(Options, ", "))
     end,
 })
 
 -- ✅ 开关
 local AutoDungeonToggle = AutoDungeonTab:CreateToggle({
-    Name = "Auto Join Dungeon",
+    Name = "Auto Join Dungeon + Auto Farm",
     CurrentValue = false,
     Flag = "AutoJoinDungeon1",
     Callback = function(Value)
@@ -339,7 +341,47 @@ local AutoDungeonToggle = AutoDungeonTab:CreateToggle({
     end,
 })
 
--- ✅ 监听游戏广播
+-- ✅ 自动副本内打怪逻辑
+local function startDungeonAutoFarm()
+    if getgenv().AutoDungeonFarmRunning then return end
+    getgenv().AutoDungeonFarmRunning = true
+
+    task.spawn(function()
+        print("[DEBUG] ⚔️ 开始副本自动打怪")
+
+        local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then
+            repeat task.wait(1) until player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            hrp = player.Character.HumanoidRootPart
+        end
+
+        while getgenv().AutoDungeonEnabled and getgenv().AutoDungeonFarmRunning do
+            local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
+            if monstersFolder then
+                local mobs = monstersFolder:GetChildren()
+
+                for _, mob in ipairs(mobs) do
+                    if not getgenv().AutoDungeonEnabled or not getgenv().AutoDungeonFarmRunning then break end
+                    if mob and mob:IsA("Model") and mob:FindFirstChild("HumanoidRootPart") then
+                        local mobHRP = mob.HumanoidRootPart
+                        print("[DEBUG] 🧩 Teleporting to mob:", mob.Name)
+                        hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
+
+                        -- 等待怪被移除（打死）
+                        repeat
+                            task.wait(0.1)
+                        until not mob.Parent or not getgenv().AutoDungeonFarmRunning
+                    end
+                end
+            end
+
+            task.wait(0.1) -- 等0.5秒再检查新怪
+        end
+        print("[DEBUG] 🛑 副本自动打怪结束")
+    end)
+end
+
+-- ✅ 监听游戏广播，每次系统说 Dungeon 开启就自动进入
 local remote = game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("To_Client")
 
 remote.OnClientEvent:Connect(function(data)
@@ -349,17 +391,24 @@ remote.OnClientEvent:Connect(function(data)
     if not data.Text or data.Text.Type ~= "Dungeon_Message" then return end
 
     local message = data.Text.Text or ""
-    local selected = getgenv().SelectedDungeon
 
-    if selected and string.find(message, selected) then
-        print("[DEBUG] ⚔️ 检测到副本开启:", message)
+    for _, dungeon in ipairs(getgenv().SelectedDungeons or {}) do
+        if string.find(message, dungeon) then
+            local dungeonName = dungeon:gsub(" ", "_")
+            print("[DEBUG] ⚔️ 检测到副本开启:", dungeon)
 
-        local dungeonName = selected:gsub(" ", "_")
-        game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-            ["Action"] = "_Enter_Dungeon",
-            ["Name"] = dungeonName,
-        })
+            -- ✅ 进入副本
+            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                ["Action"] = "_Enter_Dungeon",
+                ["Name"] = dungeonName,
+            })
 
-        print("[DEBUG] ✅ 已自动进入副本:", dungeonName)
+            print("[DEBUG] ✅ 已自动进入副本:", dungeonName)
+
+            -- 延迟几秒后启动打怪
+            task.delay(3, function()
+                startDungeonAutoFarm()
+            end)
+        end
     end
 end)
