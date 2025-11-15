@@ -173,7 +173,7 @@ local RedeemCodeSection = MainTab:CreateSection("Redeem Codes")
 local RDMCodeButton = MainTab:CreateButton({
    Name = "Redeem All Codes",
    Callback = function()
-    local codes = {"SlashX", "Derp", "Heyyyo", "Update22", "365KLikes", "650KFav", "655KFav", "Update22P2", "370KLikes", "660KFav", "665KFav", "HalloweenPart3", "HalloweenPart3OCD", "HalloweenEyes", "HalloweenEyes2", "Update22P3", "670KFav", "675KFav", "200MVisits", "LastHalloweenCode", "Update23", "680KFav", "685KFav", "375KLikes", "215MVisits", "Update23Restart", "Update23P2", "690KFav", "695KFav", "380KLikes", "Update23Code", "Update24", "710KFav", "715KFav", "CodeGeass", "385KLikes"}
+    local codes = {"SlashX", "Derp", "Heyyyo", "Update22", "365KLikes", "650KFav", "655KFav", "Update22P2", "370KLikes", "660KFav", "665KFav", "HalloweenPart3", "HalloweenPart3OCD", "HalloweenEyes", "HalloweenEyes2", "Update22P3", "670KFav", "675KFav", "200MVisits", "LastHalloweenCode", "Update23", "680KFav", "685KFav", "375KLikes", "215MVisits", "Update23Restart", "Update23P2", "690KFav", "695KFav", "380KLikes", "Update23Code", "Update24", "710KFav", "715KFav", "CodeGeass", "385KLikes", "SecretCodeCookies"}
     for _, code in ipairs(codes) do
          game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
             ["Action"] = "_Redeem_Code", ["Text"] = code
