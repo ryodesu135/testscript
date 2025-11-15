@@ -492,12 +492,12 @@ FarmTab:CreateToggle({
                                 local mobHRP = mob:FindFirstChild("HumanoidRootPart")
                                 if mobHRP then
                                     hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
-                                    repeat task.wait(0.1) until not mob.Parent or not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged or getgenv().InDungeon
+                                    repeat task.wait(0.05) until not mob.Parent or not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged or getgenv().InDungeon
                                 end
                             end
                         end
                     end
-                    task.wait(0.1)
+                    task.wait(0.05)
                 end
             end)
         else
