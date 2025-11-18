@@ -722,8 +722,33 @@ end)
 local function startRaidAutoFarm()
     if getgenv().AutoRaidFarmRunning or not getgenv().InRaid or not getgenv().IsCurrentKeyDungeon then return end
     getgenv().AutoRaidFarmRunning = true
-    print("[DEBUG] ⚔️ KeyDungeon Auto Farm Started")
-    -- 在这里填充你的 KeyDungeon Auto Farm 主逻辑
+    print("[DEBUG] ⚔️ Raid Auto Farm Started")
+
+    task.spawn(function()
+        local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then repeat task.wait(1) until player.Character:FindFirstChild("HumanoidRootPart") end
+        hrp = player.Character.HumanoidRootPart
+
+        while getgenv().AutoRaidFarmRunning and getgenv().InRaid do
+            local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
+            if monstersFolder then
+                for _, mob in pairs(monstersFolder:GetChildren()) do
+                    if not getgenv().AutoRaidFarmRunning or not getgenv().InRaid then break end
+                    if mob:IsA("Model") and mob:GetAttribute("Is_Dungeon") == true then
+                        local mobHRP = mob:FindFirstChild("HumanoidRootPart")
+                        if mobHRP then
+                            hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
+                            repeat task.wait(0.1)
+                            until not mob.Parent or not getgenv().AutoRaidFarmRunning or not getgenv().InRaid
+                        end
+                    end
+                end
+            end
+            task.wait(0.3)
+        end
+print("[DEBUG] 🛑 Raid Auto Farm Ended")
+        getgenv().AutoRaidFarmRunning = false
+    end)
 end
 
 -- Raid / KeyDungeon 进入/离开监听
