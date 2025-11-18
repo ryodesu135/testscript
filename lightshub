@@ -766,8 +766,9 @@ RemoteClient.OnClientEvent:Connect(function(data)
             getgenv().WasAutoFarmRunning = true
             getgenv().AutoFarmRunning = false
         end
+        print("[DEBUG] 🟩 Entered Raid")
 
-        if getgenv().IsCurrentKeyDungeon = KeyDungeons then
+        if InSideRaid and getgenv().AutoRaidEnabled and getgenv().IsCurrentKeyDungeon == KeyDungeons then
             task.delay(2, startRaidAutoFarm)
         end
             print("[DEBUG] 🟩 Entered Raid")
