@@ -369,7 +369,7 @@ local ClaimDailyChestToggle = MainTab:CreateToggle({
 
 --Auto Find & Collect Punching Machine
 
---Auto Hero Quests
+--Auto Hero Quests 
 
 --Auto Demon Fruits Quest
 
