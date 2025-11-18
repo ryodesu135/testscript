@@ -756,16 +756,14 @@ RemoteClient.OnClientEvent:Connect(function(data)
     if type(data) ~= "table" then return end
     if data.Type ~= "Outlines" or data.Action ~= "Dungeon" then return end
 
-    local isIn = data.Players and table.find(data.Players, player)
+    local InSideRaid = data.Players and data.Players[1] == player
+        getgenv().InRaid = InSideRaid
 
-    if isIn then
-        getgenv().InRaid = true
-        local instanceName = data.Name or ""
+        if InSideRaid and getgenv().AutoRaidEnabled then
+            getgenv().InRaid = true
+            getgenv().IsCurrentKeyDungeon = KeyDungeons == true
 
-        getgenv().IsCurrentKeyDungeon = KeyDungeons == true
-
-        -- 暂停普通 AutoFarm
-        if getgenv().AutoFarmRunning then
+            if getgenv().AutoFarmRunning then
             getgenv().WasAutoFarmRunning = true
             getgenv().AutoFarmRunning = false
         end
@@ -773,11 +771,10 @@ RemoteClient.OnClientEvent:Connect(function(data)
         if getgenv().IsCurrentKeyDungeon then
             task.delay(2, startRaidAutoFarm)
         end
+            print("[DEBUG] 🟩 Entered Raid")
 
-        print("[DEBUG] 🟩 Entered Raid / KeyDungeon:", cleaned)
-
-    else
-        getgenv().InRaid = false
+        else
+            getgenv().InRaid = false
         getgenv().AutoRaidFarmRunning = false
         getgenv().IsCurrentKeyDungeon = false
 
