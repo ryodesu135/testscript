@@ -369,7 +369,7 @@ local ClaimDailyChestToggle = MainTab:CreateToggle({
 
 --Auto Find & Collect Punching Machine
 
---Auto Hero Quests 
+--Auto Hero Quests
 
 --Auto Demon Fruits Quest
 
@@ -532,7 +532,6 @@ local RaidOptions = {
 }
 
 local SpeedRaids = {
-    ["Restaurant Raid"] = true,
     ["Cursed Raid"] = true,
     ["Progression Raid"] = true,
     ["Progression Raid 2"] = true,
@@ -544,12 +543,24 @@ local KeyDungeons = {
     "Dungeon_Adventure",
     "Dungeon_Torment",
     "Maze_Level_1",
+    "Restaurant_Raid"
 }
 
 local RaidSpeedOptions = {"1x Speed", "2x Speed", "3x Speed"}
 
 local function convertName(str)
     return str:gsub(" ", "_")
+end
+
+-- Helper function to check if a raid is a KeyDungeon
+local function isKeyDungeon(raid)
+    local converted = convertName(raid)
+    for _, kd in ipairs(KeyDungeons) do
+        if kd == converted then
+            return true
+        end
+    end
+    return false
 end
 
 -------------------------------------------------
@@ -746,7 +757,7 @@ local function startRaidAutoFarm()
             end
             task.wait(0.3)
         end
-print("[DEBUG] 🛑 Raid Auto Farm Ended")
+        print("[DEBUG] 🛑 Raid Auto Farm Ended")
         getgenv().AutoRaidFarmRunning = false
     end)
 end
@@ -757,26 +768,24 @@ RemoteClient.OnClientEvent:Connect(function(data)
     if data.Type ~= "Outlines" or data.Action ~= "Dungeon" then return end
 
     local InSideRaid = data.Players and data.Players[1] == player
-        getgenv().InRaid = InSideRaid
+    getgenv().InRaid = InSideRaid
 
-        if InSideRaid and getgenv().AutoRaidEnabled then
-            getgenv().InRaid = true
+    if InSideRaid and getgenv().AutoRaidEnabled then
+        getgenv().InRaid = true
 
-            if getgenv().AutoFarmRunning then
+        if getgenv().AutoFarmRunning then
             getgenv().WasAutoFarmRunning = true
             getgenv().AutoFarmRunning = false
         end
 
         print("[DEBUG] 🟩 Entered Raid")
 
-
-        if InSideRaid and getgenv().AutoRaidEnabled and getgenv().IsCurrentKeyDungeon == KeyDungeons then
+        if InSideRaid and getgenv().AutoRaidEnabled and getgenv().IsCurrentKeyDungeon then
             task.delay(2, startRaidAutoFarm)
         end
-            print("[DEBUG] 🟩 Entered Raid")
 
-        else
-            getgenv().InRaid = false
+    else
+        getgenv().InRaid = false
         getgenv().AutoRaidFarmRunning = false
         getgenv().IsCurrentKeyDungeon = false
 
@@ -798,7 +807,7 @@ task.spawn(function()
 
         local raid = getgenv().SelectedRaids[1]
         local name = convertName(raid)
-        getgenv().IsCurrentKeyDungeon = KeyDungeons[raid] == true
+        getgenv().IsCurrentKeyDungeon = isKeyDungeon(raid)
 
         local args = {
             ["Action"] = "_Enter_Dungeon",
@@ -816,7 +825,7 @@ task.spawn(function()
         end
 
         -- KeyDungeon 不允许 Speed
-        if KeyDungeons[raid] then
+        if isKeyDungeon(raid) then
             args["Name"] = name
             args["Is_New"] = nil
         end
