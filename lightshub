@@ -539,11 +539,11 @@ local SpeedRaids = {
 }
 
 local KeyDungeons = {
-    ["Kaiju Dungeon"] = true,
-    ["Dungeon Suffering"] = true,
-    ["Dungeon Adventure"] = true,
-    ["Dungeon Torment"] = true,
-    ["Maze Level 1"] = true,
+    ["Kaiju_Dungeon"] = true,
+    ["Dungeon_Suffering"] = true,
+    ["Dungeon_Adventure"] = true,
+    ["Dungeon_Torment"] = true,
+    ["Maze_Level_1"] = true,
 }
 
 local RaidSpeedOptions = {"1x Speed", "2x Speed", "3x Speed"}
@@ -761,8 +761,8 @@ RemoteClient.OnClientEvent:Connect(function(data)
     if isIn then
         getgenv().InRaid = true
         local instanceName = data.Name or ""
-        local cleaned = instanceName:gsub("_x%d", ""):gsub("_", " ")
-        getgenv().IsCurrentKeyDungeon = KeyDungeons[cleaned] == true
+
+        getgenv().IsCurrentKeyDungeon = KeyDungeons == true
 
         -- 暂停普通 AutoFarm
         if getgenv().AutoFarmRunning then
