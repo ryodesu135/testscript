@@ -539,11 +539,11 @@ local SpeedRaids = {
 }
 
 local KeyDungeons = {
-    ["Kaiju_Dungeon"],
-    ["Dungeon_Suffering"],
-    ["Dungeon_Adventure"],
-    ["Dungeon_Torment"],
-    ["Maze_Level_1"],
+    "Kaiju_Dungeon",
+    "Dungeon_Suffering",
+    "Dungeon_Adventure",
+    "Dungeon_Torment",
+    "Maze_Level_1",
 }
 
 local RaidSpeedOptions = {"1x Speed", "2x Speed", "3x Speed"}
@@ -766,7 +766,9 @@ RemoteClient.OnClientEvent:Connect(function(data)
             getgenv().WasAutoFarmRunning = true
             getgenv().AutoFarmRunning = false
         end
+
         print("[DEBUG] 🟩 Entered Raid")
+
 
         if InSideRaid and getgenv().AutoRaidEnabled and getgenv().IsCurrentKeyDungeon == KeyDungeons then
             task.delay(2, startRaidAutoFarm)
