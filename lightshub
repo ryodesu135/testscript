@@ -896,6 +896,7 @@ local function startRaidAutoFarm()
 
         -- 主要 Raid AutoFarm Loop
         while getgenv().AutoRaidFarmRunning and getgenv().InRaid do
+            AutoOpenMazeDoor()
             local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
             if monstersFolder then
                 for _, mob in pairs(monstersFolder:GetChildren()) do
