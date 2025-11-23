@@ -932,16 +932,12 @@ Remote.OnClientEvent:Connect(function(data)
         end
 
     else
-        getgenv().InRaid = false
-        getgenv().AutoRaidFarmRunning = false
-        getgenv().IsCurrentKeyDungeon = false
-
-        if getgenv().WasAutoFarmRunning then
-            getgenv().AutoFarmRunning = true
-            getgenv().WasAutoFarmRunning = false
+        if getgenv().InRaid then
+            print("[DEBUG] 🟥 Exited Raid")
+            getgenv().InRaid = false
+            getgenv().AutoRaidFarmRunning = false
         end
-
-        print("[DEBUG] 🟥 Left Raid / KeyDungeon")
+        end
     end
 end)
 
