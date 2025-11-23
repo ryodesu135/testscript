@@ -658,73 +658,87 @@ AutoRaidTab:CreateToggle({
     end,
 })
 
--------------------------------------------------
--- 🔥 Auto Maze Door Opener
--------------------------------------------------
 local function AutoOpenMazeDoor()
     if not getgenv().InRaid then return end
     if not getgenv().IsCurrentKeyDungeon then return end
 
-    local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
-    if monstersFolder then
-        -- 如果还有怪 = 不打开门
-        for _, mob in pairs(monstersFolder:GetChildren()) do
-            if mob:IsA("Model") and mob:GetAttribute("Is_Dungeon") == true then
-                return
+    -------------------------------------------------
+    -- 🕷 1. 检查怪是否清完（支持所有 Maze 怪物位置）
+    -------------------------------------------------
+    local function hasAliveMobs()
+        local searchFolders = {
+            workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters"),
+            workspace:FindFirstChild("Monsters"),
+            workspace:FindFirstChild("_Dungeon") and workspace._Dungeon:FindFirstChild("Mobs"),
+        }
+
+        for _, folder in ipairs(searchFolders) do
+            if folder then
+                for _, mob in ipairs(folder:GetChildren()) do
+                    if mob:IsA("Model") and mob:FindFirstChild("HumanoidRootPart") then
+                        return true
+                    end
+                end
             end
         end
+
+        return false
     end
 
- -------------------------------------------------
-    -- 🔍 1. 找 Maze 的门（含 ProximityPrompt 或 ClickDetector）
+    if hasAliveMobs() then return end  -- ❗有怪 → 不开门
+
     -------------------------------------------------
-    local door
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("ProximityPrompt") or obj:IsA("ClickDetector") then
-            local parent = obj.Parent
-            if parent and parent.Name:lower():find("door") then
-                door = parent
-                break
+    -- 🚪 2. 搜索 Maze 门（更宽松匹配）
+    -------------------------------------------------
+    local function findMazeDoor()
+        local keywords = { "door", "gate", "exit", "next", "stage" }
+
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            -- 找到触发器
+            if obj:IsA("ProximityPrompt") or obj:IsA("ClickDetector") then
+                local parent = obj.Parent
+                
+                if parent and parent:IsA("Model") then
+                    local lower = parent.Name:lower()
+                    for _, key in ipairs(keywords) do
+                        if lower:find(key) then
+                            return parent, obj
+                        end
+                    end
+                end
             end
         end
+
+        return nil, nil
     end
 
-    if not door then return end
+    local doorModel, trigger = findMazeDoor()
+    if not doorModel or not trigger then return end
 
     -------------------------------------------------
-    -- 🧭 2. 传送到门前
+    -- 🧭 3. 传送到门前
     -------------------------------------------------
     local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
-    local doorPos = door:FindFirstChild("HumanoidRootPart") or door:FindFirstChild("Part") or door:FindFirstChildWhichIsA("BasePart")
-    if not doorPos then return end
+    local doorPart = doorModel:FindFirstChildWhichIsA("BasePart", true)
+    if not doorPart then return end
 
-    hrp.CFrame = doorPos.CFrame + Vector3.new(0, 0, 3)
-    task.wait(0.3)
+    hrp.CFrame = doorPart.CFrame + Vector3.new(0, 0, 3)
+    task.wait(0.2)
 
     -------------------------------------------------
-    -- ✋ 3. 自动按 E 或 Click Prompt
+    -- ✋ 4. 触发门
     -------------------------------------------------
-    local prompt = door:FindFirstChildWhichIsA("ProximityPrompt", true)
-    if prompt then
-        print("[DEBUG] 🟦 Auto Opening Maze Door (ProximityPrompt)")
-
-        pcall(function()
-            fireproximityprompt(prompt, 3) -- 多触发几次更稳
-        end)
-
+    if trigger:IsA("ProximityPrompt") then
+        print("[DEBUG] 🚪 Opening Maze Door (ProximityPrompt)")
+        pcall(function() fireproximityprompt(trigger, 5) end)
         return
     end
 
-    local clicker = door:FindFirstChildWhichIsA("ClickDetector", true)
-    if clicker then
-        print("[DEBUG] 🟦 Auto Opening Maze Door (ClickDetector)")
-
-        pcall(function()
-            fireclickdetector(clicker)
-        end)
-
+    if trigger:IsA("ClickDetector") then
+        print("[DEBUG] 🚪 Opening Maze Door (ClickDetector)")
+        pcall(function() fireclickdetector(trigger) end)
         return
     end
 end
