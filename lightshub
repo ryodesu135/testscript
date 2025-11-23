@@ -529,7 +529,7 @@ local RaidOptions = {
     "Sin Raid","Kaiju Dungeon","Dragon Room Raid","Gleam Raid","Progression Raid 2",
     "Ghoul Raid","Chainsaw Defense","Netherworld Defense","Green Planet Raid",
     "Hollow Raid","Tomb Arena Raid","Halloween Raid","Graveyard Raid",
-    "Dungeon Suffering","Dungeon Adventure","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3"
+    "Dungeon Suffering","Dungeon Adventure","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3","Dungeon Labyrinth"
 }
 
 local SpeedRaids = {
@@ -546,7 +546,8 @@ local KeyDungeons = {
     "Dungeon_Torment",
     "Maze_Level_1",
     "Maze_Level_2",
-    "Maze_Level_3"
+    "Maze_Level_3",
+    "Dungeon_Labyrinth"
 }
 
 local RaidSpeedOptions = {"1x Speed", "2x Speed", "3x Speed"}
