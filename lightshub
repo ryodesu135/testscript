@@ -7,8 +7,8 @@ local Window = Rayfield:CreateWindow({
     Theme = "Amethysty",
     ToggleUIKeybind = "K",
     KeySystem = false
-}) 
- 
+})
+
 -- 🧠 初始化全局变量
 getgenv().UserSetWalkSpeed = nil
 getgenv().UserSetJumpPower = nil
