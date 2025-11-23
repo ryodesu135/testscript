@@ -743,49 +743,27 @@ local function startDungeonAutoFarm()
     end)
 end
 
--- Dungeon 进入/离开监听（修正）
+-- Dungeon 进入/离开监听
 RemoteClient.OnClientEvent:Connect(function(data)
     if type(data) ~= "table" or not data.Action or not data.Type then return end
     if data.Action == "Dungeon" and data.Type == "Outlines" then
-        local inDungeon = data.Players and table.find(data.Players, player)
+        local inDungeon = data.Players and data.Players[1] == player
 
-        -- 进入 Dungeon
-        if inDungeon then
-            if getgenv().AutoDungeonEnabled then
-                -- 暂停普通 AutoFarm（并记住之前状态）
-                if getgenv().AutoFarmRunning then
-                    getgenv().WasAutoFarmRunning = true
-                    getgenv().AutoFarmRunning = false
-                    getgenv().FarmTargetChanged = true
-                else
-                    getgenv().WasAutoFarmRunning = false
-                end
-
-                getgenv().InDungeon = true
-                print("[DEBUG] 🟩 Entered Dungeon")
-
-                -- 延迟给游戏加载资源，然后开始 Dungeon Auto Farm
-                task.delay(3, function()
-                    if getgenv().InDungeon then
-                        startDungeonAutoFarm()
-                    end
-                end)
-            end
+        if inDungeon and getgenv().AutoDungeonEnabled then
+             getgenv().AutoFarmRunning then
+                getgenv().WasAutoFarmRunning = true
+                getgenv().AutoFarmRunning = false
+                getgenv().FarmTargetChanged = true
+            print("[DEBUG] 🟩 Entered Dungeon")
+            getgenv().InDungeon = inDungeon
+            task.delay(3, function()
+                if getgenv().InDungeon then startDungeonAutoFarm() end
+            end)
         else
-            -- 离开 Dungeon
             if getgenv().InDungeon then
-                print("[DEBUG] 🟥 Left Dungeon")
-            end
-
+            print("[DEBUG] 🟥 Left Dungeon")
             getgenv().InDungeon = false
             getgenv().AutoDungeonFarmRunning = false
-
-            -- 如果之前普通 AutoFarm 是开的，恢复它
-            if getgenv().WasAutoFarmRunning then
-                getgenv().AutoFarmRunning = true
-                getgenv().FarmTargetChanged = true
-                getgenv().WasAutoFarmRunning = false
-                print("[DEBUG] ▶️ Restored normal Auto Farm after Dungeon")
             end
         end
     end
@@ -899,67 +877,38 @@ local function startRaidAutoFarm()
 end
 
 -- Raid / KeyDungeon 进入/离开监听
--- Raid / KeyDungeon 进入/离开监听（含 KeyDungeon 检测与恢复普通 AutoFarm）
 RemoteClient.OnClientEvent:Connect(function(data)
     if type(data) ~= "table" then return end
     if data.Type ~= "Outlines" or data.Action ~= "Dungeon" then return end
 
-    local inInstance = data.Players and table.find(data.Players, player)
+    local InSideRaid = data.Players and data.Players[1] == player
+    getgenv().InRaid = InSideRaid
 
-    -- 进入 Raid / KeyDungeon / Defense
-    if inInstance then
-        -- 先暂停普通 AutoFarm（并记住）
+    if InSideRaid and getgenv().AutoRaidEnabled then
+        getgenv().InRaid = true
+
         if getgenv().AutoFarmRunning then
             getgenv().WasAutoFarmRunning = true
             getgenv().AutoFarmRunning = false
-            getgenv().FarmTargetChanged = true
-        else
-            getgenv().WasAutoFarmRunning = false
         end
 
-        getgenv().InRaid = true
-        print("[DEBUG] 🟩 Entered Raid/KeyDungeon/Defense")
+        print("[DEBUG] 🟩 Entered Raid")
 
-        -- 试着判断此次实例是否是 KeyDungeon：
-        -- 方法：查看 Debris.Monsters 是否有 Is_Dungeon == true 的 mob
-        local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
-        local foundKeyDungeon = false
-        if monstersFolder then
-            for _, m in pairs(monstersFolder:GetChildren()) do
-                if m and m:IsA("Model") and m:GetAttribute("Is_Dungeon") == true then
-                    foundKeyDungeon = true
-                    break
-                end
-            end
-        end
-        getgenv().IsCurrentKeyDungeon = foundKeyDungeon
-
-        -- 如果判断为 KeyDungeon，则启动 KeyDungeon auto-farm（延迟让怪刷出）
-        if getgenv().IsCurrentKeyDungeon and getgenv().AutoRaidEnabled then
-            task.delay(2, function()
-                if getgenv().InRaid and getgenv().IsCurrentKeyDungeon then
-                    startRaidAutoFarm()
-                end
-            end)
+        if InSideRaid and getgenv().AutoRaidEnabled and getgenv().IsCurrentKeyDungeon then
+            task.delay(2, startRaidAutoFarm)
         end
 
     else
-        -- 离开实例
-        if getgenv().InRaid then
-            print("[DEBUG] 🟥 Left Raid/KeyDungeon/Defense")
-        end
-
         getgenv().InRaid = false
         getgenv().AutoRaidFarmRunning = false
         getgenv().IsCurrentKeyDungeon = false
 
-        -- 恢复普通 AutoFarm（如果之前是开的）
         if getgenv().WasAutoFarmRunning then
             getgenv().AutoFarmRunning = true
-            getgenv().FarmTargetChanged = true
             getgenv().WasAutoFarmRunning = false
-            print("[DEBUG] ▶️ Restored normal Auto Farm after Raid/KeyDungeon")
         end
+
+        print("[DEBUG] 🟥 Left Raid / KeyDungeon")
     end
 end)
 
