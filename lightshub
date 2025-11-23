@@ -581,9 +581,9 @@ getgenv().AutoRaidFarmRunning = false
 getgenv().IsCurrentKeyDungeon = false
 
 -- 普通 AutoFarm 暂停恢复控制
---getgenv().AutoFarmRunning = false
---getgenv().WasAutoFarmRunning = false
---getgenv().FarmTargetChanged = false
+getgenv().AutoFarmRunning = {}
+getgenv().WasAutoFarmRunning = {}
+getgenv().FarmTargetChanged = {}
 
 -------------------------------------------------
 -- UI: Dungeon Tab
