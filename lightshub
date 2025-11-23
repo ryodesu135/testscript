@@ -937,7 +937,6 @@ Remote.OnClientEvent:Connect(function(data)
             getgenv().InRaid = false
             getgenv().AutoRaidFarmRunning = false
         end
-        end
     end
 end)
 
