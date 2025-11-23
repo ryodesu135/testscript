@@ -807,7 +807,7 @@ client.OnClientEvent:Connect(function(data)
 end)
 
 -------------------------------------------------
--- Raid / KeyDungeon / Defense Auto Farm 逻辑
+-- Raid / KeyDungeon Auto Farm 逻辑（含恢复 AutoFarm）
 -------------------------------------------------
 local function startRaidAutoFarm()
     if getgenv().AutoRaidFarmRunning or not getgenv().InRaid or not getgenv().IsCurrentKeyDungeon then return end
@@ -815,10 +815,13 @@ local function startRaidAutoFarm()
     print("[DEBUG] ⚔️ Raid Auto Farm Started")
 
     task.spawn(function()
+
+        -- 等角色加载 HRP
         local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
         if not hrp then repeat task.wait(1) until player.Character:FindFirstChild("HumanoidRootPart") end
         hrp = player.Character.HumanoidRootPart
 
+        -- 主要 Raid AutoFarm Loop
         while getgenv().AutoRaidFarmRunning and getgenv().InRaid do
             local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
             if monstersFolder then
@@ -836,8 +839,73 @@ local function startRaidAutoFarm()
             end
             task.wait(0.3)
         end
+
         print("[DEBUG] 🛑 Raid Auto Farm Ended")
         getgenv().AutoRaidFarmRunning = false
+
+        -------------------------------------------------
+        -- 🔥 Raid 结束后恢复普通 AutoFarm（你要求加的）
+        -------------------------------------------------
+        task.wait(3)
+
+        if getgenv().WasAutoFarmRunning then
+            getgenv().AutoFarmRunning = true
+            getgenv().FarmTargetChanged = true
+            getgenv().WasAutoFarmRunning = false
+
+            print("[DEBUG] ▶️ Raid 结束 → 恢复普通 Auto Farm")
+
+            -- 完整恢复普通 AutoFarm 循环
+            task.spawn(function()
+                while getgenv().AutoFarmRunning and not getgenv().InRaid do
+                    if getgenv().FarmTargetChanged then
+                        getgenv().FarmTargetChanged = false
+                    end
+
+                    local char = player.Character
+                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                    if not hrp then task.wait(1) continue end
+
+                    local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
+                    if monstersFolder then
+                        mobMap = {}
+                        for _, mob in pairs(monstersFolder:GetChildren()) do
+                            if mob and mob:IsA("Model") then
+                                local mobsname = mob:GetAttribute("Title") or mob.Name
+                                local mobsrank = mob:GetAttribute("Rank")
+                                local mobsdisplayname = (mobsrank and mobsrank ~= "")
+                                    and string.format("[%s] %s", mobsrank, mobsname)
+                                    or mobsname
+
+                                mobMap[mobsdisplayname] = mobMap[mobsdisplayname] or {}
+                                table.insert(mobMap[mobsdisplayname], mob)
+                            end
+                        end
+                    end
+
+                    for _, mobName in ipairs(selectedMobs) do
+                        if not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged or getgenv().InRaid then break end
+                        local mobList = mobMap[mobName]
+                        if mobList then
+                            for _, mob in ipairs(mobList) do
+                                if not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged or getgenv().InRaid then break end
+                                local mobHRP = mob:FindFirstChild("HumanoidRootPart")
+                                if mobHRP then
+                                    hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
+                                    repeat task.wait(0.1)
+                                    until not mob.Parent or not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged or getgenv().InRaid
+                                end
+                            end
+                        end
+                    end
+
+                    task.wait(0.1)
+                end
+            end)
+        end
+
+        -------------------------------------------------
+
     end)
 end
 
