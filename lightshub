@@ -842,7 +842,7 @@ local function startRaidAutoFarm()
 end
 
 -- Raid / KeyDungeon 进入/离开监听
-RemoteClient.OnClientEvent:Connect(function(data)
+Remote.OnClientEvent:Connect(function(data)
     if type(data) ~= "table" then return end
     if data.Type ~= "Outlines" or data.Action ~= "Dungeon" then return end
 
@@ -859,7 +859,7 @@ RemoteClient.OnClientEvent:Connect(function(data)
 
         print("[DEBUG] 🟩 Entered Raid")
 
-        if InSideRaid and getgenv().AutoRaidEnabled and getgenv().IsCurrentKeyDungeon then
+        if getgenv().AutoRaidEnabled and getgenv().IsCurrentKeyDungeon then
             task.delay(2, startRaidAutoFarm)
         end
 
@@ -897,6 +897,7 @@ task.spawn(function()
         if SpeedRaids[raid] then
             local speed = getgenv().SelectedRaidSpeed[1] or "1x Speed"
             local num = speed:match("(%d)x")
+
             if tonumber(num) and tonumber(num) > 1 then
                 args["Name"] = name .. "_x" .. num
             end
@@ -909,9 +910,10 @@ task.spawn(function()
             args["Is_New"] = nil
         end
 
-        RemoteServer:FireServer(args)
-        getgenv().InRaid = true
-        print("[DEBUG] 🚪 Auto Join:", args.Name)
+        -- 正确 FireServer
+        game:GetService("ReplicatedStorage").Events.To_Server:FireServer(args)
+
+        print("[DEBUG] 🚪 Requested Join:", args.Name)
         task.wait(5)
     end
 end)
