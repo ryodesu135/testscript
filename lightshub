@@ -581,9 +581,9 @@ getgenv().AutoRaidFarmRunning = false
 getgenv().IsCurrentKeyDungeon = false
 
 -- 普通 AutoFarm 暂停恢复控制
-getgenv().AutoFarmRunning = {}
-getgenv().WasAutoFarmRunning = {}
-getgenv().FarmTargetChanged = {}
+getgenv().AutoFarmRunning = false
+getgenv().WasAutoFarmRunning = false
+getgenv().FarmTargetChanged = false
 
 -------------------------------------------------
 -- UI: Dungeon Tab
@@ -688,58 +688,6 @@ local function startDungeonAutoFarm()
 
         print("[DEBUG] 🛑 Dungeon Auto Farm Ended")
         getgenv().AutoDungeonFarmRunning = false
-        task.wait(3)
-
-        if getgenv().WasAutoFarmRunning then
-            getgenv().AutoFarmRunning = true
-            getgenv().FarmTargetChanged = true
-            print("[DEBUG] ▶️ 恢复普通 Auto Farm")
-            
-            -- 🔧 修复：手动重新启动普通 Auto Farm 的循环（复制 Toggle Callback 中的逻辑）
-            task.spawn(function()
-                while getgenv().AutoFarmRunning and not getgenv().InDungeon do
-                    if getgenv().FarmTargetChanged then
-                        getgenv().FarmTargetChanged = false
-                    end
-
-                    local char = player.Character
-                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                    if not hrp then task.wait(1) continue end
-
-                    local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
-                    if monstersFolder then
-                        mobMap = {}
-                        for _, mob in pairs(monstersFolder:GetChildren()) do
-                            if mob and mob:IsA("Model") then
-                                local mobsname = mob:GetAttribute("Title") or mob.Name
-                                local mobsrank = mob:GetAttribute("Rank")
-                                local mobsdisplayname = mobsrank and mobsrank ~= "" and string.format("[%s] %s", mobsrank, mobsname) or mobsname
-                                if not mobMap[mobsdisplayname] then
-                                    mobMap[mobsdisplayname] = {}
-                                end
-                                table.insert(mobMap[mobsdisplayname], mob)
-                            end
-                        end
-                    end
-
-                    for _, mobName in ipairs(selectedMobs) do
-                        if not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged or getgenv().InDungeon then break end
-                        local mobList = mobMap[mobName]
-                        if mobList then
-                            for _, mob in ipairs(mobList) do
-                                if not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged or getgenv().InDungeon then break end
-                                local mobHRP = mob:FindFirstChild("HumanoidRootPart")
-                                if mobHRP then
-                                    hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
-                                    repeat task.wait(0.1) until not mob.Parent or not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged or getgenv().InDungeon
-                                end
-                            end
-                        end
-                    end
-                    task.wait(0.1)
-                end
-            end)
-        end
     end)
 end
 
@@ -748,23 +696,14 @@ RemoteClient.OnClientEvent:Connect(function(data)
     if type(data) ~= "table" or not data.Action or not data.Type then return end
     if data.Action == "Dungeon" and data.Type == "Outlines" then
         local inDungeon = data.Players and data.Players[1] == player
+        getgenv().InDungeon = inDungeon
 
         if inDungeon and getgenv().AutoDungeonEnabled then
-             getgenv().AutoFarmRunning then
-                getgenv().WasAutoFarmRunning = true
-                getgenv().AutoFarmRunning = false
-                getgenv().FarmTargetChanged = true
+            task.delay(3, startDungeonAutoFarm)
             print("[DEBUG] 🟩 Entered Dungeon")
-            getgenv().InDungeon = inDungeon
-            task.delay(3, function()
-                if getgenv().InDungeon then startDungeonAutoFarm() end
-            end)
         else
-            if getgenv().InDungeon then
-            print("[DEBUG] 🟥 Left Dungeon")
-            getgenv().InDungeon = false
             getgenv().AutoDungeonFarmRunning = false
-            end
+            print("[DEBUG] 🟥 Left Dungeon")
         end
     end
 end)
@@ -787,7 +726,6 @@ RemoteClient.OnClientEvent:Connect(function(data)
         end
     end
 end)
-
 
 -------------------------------------------------
 -- Raid / KeyDungeon / Defense Auto Farm 逻辑
@@ -821,58 +759,6 @@ local function startRaidAutoFarm()
         end
         print("[DEBUG] 🛑 Raid Auto Farm Ended")
         getgenv().AutoRaidFarmRunning = false
-        task.wait(3)
-
-        if getgenv().WasAutoFarmRunning then
-            getgenv().AutoFarmRunning = true
-            getgenv().FarmTargetChanged = true
-            print("[DEBUG] ▶️ 恢复普通 Auto Farm")
-            
-            -- 🔧 修复：手动重新启动普通 Auto Farm 的循环（复制 Toggle Callback 中的逻辑）
-            task.spawn(function()
-                while getgenv().AutoFarmRunning and not getgenv().InRaid do
-                    if getgenv().FarmTargetChanged then
-                        getgenv().FarmTargetChanged = false
-                    end
-
-                    local char = player.Character
-                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                    if not hrp then task.wait(1) continue end
-
-                    local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
-                    if monstersFolder then
-                        mobMap = {}
-                        for _, mob in pairs(monstersFolder:GetChildren()) do
-                            if mob and mob:IsA("Model") then
-                                local mobsname = mob:GetAttribute("Title") or mob.Name
-                                local mobsrank = mob:GetAttribute("Rank")
-                                local mobsdisplayname = mobsrank and mobsrank ~= "" and string.format("[%s] %s", mobsrank, mobsname) or mobsname
-                                if not mobMap[mobsdisplayname] then
-                                    mobMap[mobsdisplayname] = {}
-                                end
-                                table.insert(mobMap[mobsdisplayname], mob)
-                            end
-                        end
-                    end
-
-                    for _, mobName in ipairs(selectedMobs) do
-                        if not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged or getgenv().InRaid then break end
-                        local mobList = mobMap[mobName]
-                        if mobList then
-                            for _, mob in ipairs(mobList) do
-                                if not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged or getgenv().InRaid then break end
-                                local mobHRP = mob:FindFirstChild("HumanoidRootPart")
-                                if mobHRP then
-                                    hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
-                                    repeat task.wait(0.1) until not mob.Parent or not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged or getgenv().InRaid
-                                end
-                            end
-                        end
-                    end
-                    task.wait(0.1)
-                end
-            end)
-        end
     end)
 end
 
