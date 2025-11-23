@@ -512,10 +512,10 @@ FarmTab:CreateToggle({
 -------------------------------------------------
 -- CONSTANTS / TABLES
 -------------------------------------------------
-local player = game.Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RemoteClient = ReplicatedStorage.Events.To_Client
-local RemoteServer = ReplicatedStorage.Events.To_Server
+--local player = game.Players.LocalPlayer
+--local ReplicatedStorage = game:GetService("ReplicatedStorage")
+--local RemoteClient = ReplicatedStorage.Events.To_Client
+--local RemoteServer = ReplicatedStorage.Events.To_Server
 
 -- Dungeon 选项
 local DungeonOptions = {
@@ -746,24 +746,45 @@ local function startDungeonAutoFarm()
 end
 
 -- Dungeon 进入/离开监听
-RemoteClient.OnClientEvent:Connect(function(data)
+local Remote = game:GetService("ReplicatedStorage").Events.To_Client
+
+Remote.OnClientEvent:Connect(function(data)
     if type(data) ~= "table" or not data.Action or not data.Type then return end
     if data.Action == "Dungeon" and data.Type == "Outlines" then
-        local inDungeon = data.Players and data.Players[1] == player
-        getgenv().InDungeon = inDungeon
-
-        if inDungeon and getgenv().AutoDungeonEnabled then
-            task.delay(3, startDungeonAutoFarm)
-            print("[DEBUG] 🟩 Entered Dungeon")
+        if data.Players and data.Players[1] == player then
+            if
+             getgenv().AutoFarmRunning then
+                getgenv().WasAutoFarmRunning = true
+                getgenv().AutoFarmRunning = false
+                getgenv().FarmTargetChanged = true
+                end
+                
+                
+            -- 🟢 进入Dungeon
+            print("[DEBUG] 🟩 进入 Dungeon")
+            getgenv().InDungeon = true
+                
+                
+            task.delay(3, function()
+                if getgenv().InDungeon then startDungeonAutoFarm() end
+            end)
         else
-            getgenv().AutoDungeonFarmRunning = false
-            print("[DEBUG] 🟥 Left Dungeon")
+            -- 🔴 离开Dungeon
+            if getgenv().InDungeon then
+                print("[DEBUG] 🟥 离开 Dungeon")
+                getgenv().InDungeon = false
+                getgenv().AutoDungeonFarmRunning = false
+
+                
+            end
         end
     end
 end)
 
--- Dungeon 系统消息自动进入
-RemoteClient.OnClientEvent:Connect(function(data)
+-- 📣 监听系统广播自动进入副本
+local client = game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("To_Client")
+
+client.OnClientEvent:Connect(function(data)
     if not getgenv().AutoDungeonEnabled then return end
     if type(data) ~= "table" or data.Action ~= "System_Message" then return end
     if not data.Text or data.Text.Type ~= "Dungeon_Message" then return end
@@ -771,11 +792,15 @@ RemoteClient.OnClientEvent:Connect(function(data)
     local message = data.Text.Text or ""
     for _, dungeon in ipairs(getgenv().SelectedDungeons or {}) do
         if string.find(message, dungeon) then
-            RemoteServer:FireServer({
+            local dungeonName = dungeon:gsub(" ", "_")
+            print("[DEBUG] ⚔️ 检测到副本开启:", dungeon)
+
+            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                 ["Action"] = "_Enter_Dungeon",
-                ["Name"] = dungeon:gsub(" ", "_"),
+                ["Name"] = dungeonName,
             })
-            print("[DEBUG] ⚔️ Auto Enter Dungeon:", dungeon)
+
+            print("[DEBUG] ✅ 已自动进入副本:", dungeonName)
             break
         end
     end
