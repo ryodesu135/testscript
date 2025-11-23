@@ -529,13 +529,14 @@ local RaidOptions = {
     "Sin Raid","Kaiju Dungeon","Dragon Room Raid","Gleam Raid","Progression Raid 2",
     "Ghoul Raid","Chainsaw Defense","Netherworld Defense","Green Planet Raid",
     "Hollow Raid","Tomb Arena Raid","Halloween Raid","Graveyard Raid",
-    "Dungeon Suffering","Dungeon Adventure","Dungeon Torment","Maze Level 1"
+    "Dungeon Suffering","Dungeon Adventure","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3"
 }
 
 local SpeedRaids = {
     ["Cursed Raid"] = true,
     ["Progression Raid"] = true,
     ["Progression Raid 2"] = true,
+    ["Restaurant Raid"] = true
 }
 
 local KeyDungeons = {
@@ -544,7 +545,8 @@ local KeyDungeons = {
     "Dungeon_Adventure",
     "Dungeon_Torment",
     "Maze_Level_1",
-    "Restaurant_Raid"
+    "Maze_Level_2",
+    "Maze_Level_3"
 }
 
 local RaidSpeedOptions = {"1x Speed", "2x Speed", "3x Speed"}
@@ -655,6 +657,77 @@ AutoRaidTab:CreateToggle({
         print(Value and "[DEBUG] 🟢 Auto Raid Enabled" or "[DEBUG] 🔴 Auto Raid Disabled")
     end,
 })
+
+-------------------------------------------------
+-- 🔥 Auto Maze Door Opener
+-------------------------------------------------
+local function AutoOpenMazeDoor()
+    if not getgenv().InRaid then return end
+    if not getgenv().IsCurrentKeyDungeon then return end
+
+    local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
+    if monstersFolder then
+        -- 如果还有怪 = 不打开门
+        for _, mob in pairs(monstersFolder:GetChildren()) do
+            if mob:IsA("Model") and mob:GetAttribute("Is_Dungeon") == true then
+                return
+            end
+        end
+    end
+
+ -------------------------------------------------
+    -- 🔍 1. 找 Maze 的门（含 ProximityPrompt 或 ClickDetector）
+    -------------------------------------------------
+    local door
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("ProximityPrompt") or obj:IsA("ClickDetector") then
+            local parent = obj.Parent
+            if parent and parent.Name:lower():find("door") then
+                door = parent
+                break
+            end
+        end
+    end
+
+    if not door then return end
+
+    -------------------------------------------------
+    -- 🧭 2. 传送到门前
+    -------------------------------------------------
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    local doorPos = door:FindFirstChild("HumanoidRootPart") or door:FindFirstChild("Part") or door:FindFirstChildWhichIsA("BasePart")
+    if not doorPos then return end
+
+    hrp.CFrame = doorPos.CFrame + Vector3.new(0, 0, 3)
+    task.wait(0.3)
+
+    -------------------------------------------------
+    -- ✋ 3. 自动按 E 或 Click Prompt
+    -------------------------------------------------
+    local prompt = door:FindFirstChildWhichIsA("ProximityPrompt", true)
+    if prompt then
+        print("[DEBUG] 🟦 Auto Opening Maze Door (ProximityPrompt)")
+
+        pcall(function()
+            fireproximityprompt(prompt, 3) -- 多触发几次更稳
+        end)
+
+        return
+    end
+
+    local clicker = door:FindFirstChildWhichIsA("ClickDetector", true)
+    if clicker then
+        print("[DEBUG] 🟦 Auto Opening Maze Door (ClickDetector)")
+
+        pcall(function()
+            fireclickdetector(clicker)
+        end)
+
+        return
+    end
+end
 
 -------------------------------------------------
 -- Dungeon Auto Farm 逻辑
