@@ -393,6 +393,7 @@ local rootPart = player.Character:WaitForChild("HumanoidRootPart")
 getgenv().AutoFarmRunning = false
 getgenv().FarmTargetChanged = false
 getgenv().InDungeon = false
+getgenv().InRaid = false
 getgenv().AutoDungeonFarmRunning = false
 getgenv().WasAutoFarmRunning = false
 
@@ -569,14 +570,14 @@ end
 -- Dungeon Auto Farm
 getgenv().SelectedDungeons = {}
 getgenv().AutoDungeonEnabled = false
-getgenv().InDungeon = false
-getgenv().AutoDungeonFarmRunning = false
+--getgenv().InDungeon = false
+--getgenv().AutoDungeonFarmRunning = false
 
 -- Raid / KeyDungeon Auto Farm
 getgenv().SelectedRaids = {}
 getgenv().SelectedRaidSpeed = {}
 getgenv().AutoRaidEnabled = false
-getgenv().InRaid = false
+--getgenv().InRaid = false
 getgenv().AutoRaidFarmRunning = false
 getgenv().IsCurrentKeyDungeon = false
 
