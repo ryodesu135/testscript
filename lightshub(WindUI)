@@ -239,6 +239,8 @@ local function checkServerPlayers()
     end
 end
 
+UserTab:Space()
+
 --🟢 Anti Public Server Toggle
 UserTab:Toggle({
     Flag = "Toggle2",
@@ -257,11 +259,13 @@ UserTab:Toggle({
     end,
 })
 
+UserTab:Space()
+
 --📝 Whitelist 输入框
 UserTab:Input({
     Flag = "Input1",
     Title = "Whitelist Player",
-    Desc = "Enter player names separated by commas to whitelist them.",
+    Desc = "Enter player username (Not Display Name) separated by commas to whitelist them.",
     Value = "",
     Type = "Textarea",
     Placeholder = "User1, User2, User3",
@@ -271,12 +275,13 @@ UserTab:Input({
 })
 
 
-local RankUpPrestigeSection = MainTab:Section({
-    Title = "Rank Up & Prestige",
-    Opened = true,
-})
+local RankingTab = MainSection:Tab({
+        Title = "Ranking",
+    })
+
 -- ✅ Auto Rank Up
-local AutoRankUpToggle = MainTab:Toggle({
+RankingTab:Toggle({
+    Flag = "RankUp1",
     Title = "Auto Rank Up",
     Value = false,
     Callback = function(state)
@@ -301,7 +306,8 @@ local AutoRankUpToggle = MainTab:Toggle({
 })
 
 --Auto Prestige
-local LevelUpPrestigeToggle = MainTab:Toggle({
+RankingTab:Toggle({
+    Flag = "AutoPrestige1",
     Title = "Auto Prestige",
     Value = false,
     Callback = function(state)
