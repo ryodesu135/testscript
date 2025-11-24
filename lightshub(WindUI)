@@ -601,7 +601,7 @@ local MobDropdown = FarmTab:Dropdown({
 })
 
 -- ✅ 刷新按钮
-FarmTab:Button({
+local MobRefreshButton = FarmTab:Button({
     Flag = "RefreshButton1",
     Title = "Refresh Mobs List",
     Callback = function()
@@ -635,7 +635,7 @@ FarmTab:Button({
 })
 
 -- ✅ 普通 Auto Farm 逻辑
-FarmTab:Toggle({
+local AutoFarmToggle = FarmTab:Toggle({
     Flag = "AutoFarm1",
     Title = "Auto Farm",
     Default = false,
@@ -783,7 +783,7 @@ local AutoDungeonTab = Window:Tab({
         Title = "🏰 | Dungeon",
     })
 
-AutoDungeonTab:Dropdown({
+local AutoDungeonDropdown = AutoDungeonTab:Dropdown({
     Flag = "DungeonSelect1",
     Title = "Select Dungeons",
     Values = DungeonOptions,
@@ -796,7 +796,7 @@ AutoDungeonTab:Dropdown({
     end,
 })
 
-AutoDungeonTab:Toggle({
+local AutoDungeonToggle = AutoDungeonTab:Toggle({
     Flag = "AutoJoinDungeon1",
     Title = "Auto Join Dungeon + Auto Farm",
     Default = false,
@@ -813,7 +813,7 @@ local AutoRaidTab = Window:Tab({
         Title = "☠️ | [Key] Raid",
     })
 
-AutoRaidTab:Dropdown({
+local AutoRaidDropdown = AutoRaidTab:Dropdown({
     Flag = "RaidSelect1",
     Title = "Select Raid / Dungeon / Defense",
     Values = RaidOptions,
@@ -825,7 +825,7 @@ AutoRaidTab:Dropdown({
     end,
 })
 
-AutoRaidTab:Dropdown({
+local AutoRaidSpeedDropdown = AutoRaidTab:Dropdown({
     Flag = "RaidSpeedSelect1",
     Title = "Raid Speed",
     Values = RaidSpeedOptions,
@@ -837,7 +837,7 @@ AutoRaidTab:Dropdown({
     end,
 })
 
-AutoRaidTab:Toggle({
+local AutoRaidToggle = AutoRaidTab:Toggle({
     Flag = "AutoJoinRaid1",
     Title = "Auto Join Raid / Dungeon / Defense + Auto Farm",
     Default = false,
