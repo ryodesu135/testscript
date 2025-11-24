@@ -586,7 +586,7 @@ local FarmTab = Window:Tab({
     })
 
 -- ✅ Mob 列表 Dropdown
-FarmTab:Dropdown({
+local MobDropdown = FarmTab:Dropdown({
     Flag = "Dropdown1",
     Title = "Mobs List",
     Values = {"None"},
@@ -609,7 +609,7 @@ FarmTab:Button({
         local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
 
         if not monstersFolder then
-            AutoFarmMobsListDropdown:Refresh({"None"})
+            MobDropdown:Refresh({"None"})
             return
         end
 
@@ -627,9 +627,9 @@ FarmTab:Button({
         end
 
         if #mobNames == 0 then
-            AutoFarmMobsListDropdown:Refresh({"None"})
+            MobDropdown:Refresh({"None"})
         else
-            AutoFarmMobsListDropdown:Refresh(mobNames)
+            MobDropdown:Refresh(mobNames)
         end
     end,
 })
