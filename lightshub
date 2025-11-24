@@ -766,13 +766,13 @@ local function startDungeonAutoFarm()
                         local mobHRP = mob:FindFirstChild("HumanoidRootPart")
                         if mobHRP then
                             hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
-                            repeat task.wait(0.1)
+                            repeat task.wait(0.05)
                             until not mob.Parent or not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon
                         end
                     end
                 end
             end
-            task.wait(0.3)
+            task.wait(0.05)
         end
 
         print("[DEBUG] 🛑 Dungeon Auto Farm Ended")
