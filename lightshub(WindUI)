@@ -102,8 +102,13 @@ local MainTab = Window:Tab({
     Locked = false,
 })
 
-local PlayerSection = Window:Section({
+local PlayerSection = MainTab:Section({
     Title = "Player",
+    Box = false,
+    FontWeight = "SemiBold",
+    TextTransparency = 0.05,
+    TextXAlignment = "Left",
+    TextSize = 17, -- Default Size
     Opened = true,
 })
 
@@ -111,7 +116,7 @@ local PlayerSection = Window:Section({
 -- 玩家设定（WalkSpeed、Jump）
 -------------------------------------------------
 
-local Slider = PlayerSection:Slider({
+local Slider = MainTab:Slider({
     Title = "Walk Speed",
     Desc = "Adjust Your Walk Speed",
 
