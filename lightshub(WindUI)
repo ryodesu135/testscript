@@ -284,7 +284,7 @@ RankingTab:Toggle({
     Flag = "RankUp1",
     Title = "Auto Rank Up",
     Desc = "Automatically rank up",
-    Value = false,
+    Default = false,
     Callback = function(state)
         if state then
             getgenv().AutoRankUpRunning = true
@@ -311,7 +311,7 @@ RankingTab:Toggle({
     Flag = "AutoPrestige1",
     Title = "Auto Prestige",
     Desc = "Automatically prestige levels",
-    Value = false,
+    Default = false,
     Callback = function(state)
         if state then
             getgenv().AutoPrestigeRunning = true
@@ -364,7 +364,7 @@ QuestTab:Toggle({
     Flag = "DailyQuest1",
    Title = "Auto Get Daily Quest",
    Desc = "Automatically accept daily quests",
-   Value = false,
+   Default = false,
    Callback = function(state)
    local dailyquests = {"2001","2002","2003","2004","2005","2006","2007"}
    if state then
@@ -400,7 +400,7 @@ CollectTab:Toggle({
     Flag = "HourlyDailyRewards1",
     Title = "Auto Collect Hourly and Daily Rewards",
     Desc = "Automatically collect hourly and daily rewards",
-    Value = false,
+    Default = false,
     Callback = function(state)
         if state then
             getgenv().HourlyDailyRewardsRunning = true
@@ -443,7 +443,7 @@ CollectTab:Toggle({
     Flag = "ClaimGroupChest1",
     Title = "Auto Claim Group Chest",
     Desc = "Automatically claim group chest",
-    Value = false,
+    Default = false,
     Callback = function(state)
         if state then
             getgenv().ClaimGroupChestRunning = true
@@ -471,7 +471,7 @@ CollectTab:Toggle({
     Flag = "ClaimPremiumChest1",
     Title = "Auto Claim Premium Chest",
     Desc = "Automatically claim premium chest",
-    Value = false,
+    Default = false,
     Callback = function(state)
         if state then
             getgenv().ClaimPremiumChestRunning = true
@@ -499,7 +499,7 @@ CollectTab:Toggle({
     Flag = "ClaimVIPChest1",
     Title = "Auto Claim VIP Chest",
     Desc = "Automatically claim VIP chest",
-    Value = false,
+    Default = false,
     Callback = function(state)
         if state then
             getgenv().ClaimVIPChestRunning = true
@@ -527,7 +527,7 @@ CollectTab:Toggle({
     Name = "Auto Claim Daily Chest",
     Title = "Auto Claim Daily Chest",
     Desc = "Automatically claim daily chest",
-    Value = false,
+    Default = false,
     Callback = function(state)
         if state then
             getgenv().ClaimDailyChestRunning = true
@@ -638,7 +638,7 @@ FarmTab:Button({
 FarmTab:Toggle({
     Flag = "AutoFarm1",
     Title = "Auto Farm",
-    Value = false,
+    Default = false,
     Callback = function(state)
         if state then
             getgenv().AutoFarmRunning = true
@@ -799,7 +799,7 @@ AutoDungeonTab:Dropdown({
 AutoDungeonTab:Toggle({
     Flag = "AutoJoinDungeon1",
     Title = "Auto Join Dungeon + Auto Farm",
-    Value = false,
+    Default = false,
     Callback = function(state)
         getgenv().AutoDungeonEnabled = state
         print(state and "[DEBUG] 🟢 Auto Dungeon Enabled" or "[DEBUG] 🔴 Auto Dungeon Disabled")
@@ -840,7 +840,7 @@ AutoRaidTab:Dropdown({
 AutoRaidTab:Toggle({
     Flag = "AutoJoinRaid1",
     Title = "Auto Join Raid / Dungeon / Defense + Auto Farm",
-    Value = false,
+    Default = false,
     Callback = function(state)
         getgenv().AutoRaidEnabled = state
         print(state and "[DEBUG] 🟢 Auto Raid Enabled" or "[DEBUG] 🔴 Auto Raid Disabled")
