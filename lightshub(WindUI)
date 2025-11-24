@@ -144,6 +144,10 @@ PlayerTab:Slider({
     end,
 })
 
+
+local UserTab = MainSection:Tab({
+        Title = "User",
+    })
 -------------------------------------------------
 -- 🛡️ Anti AFK
 -------------------------------------------------
@@ -151,7 +155,8 @@ PlayerTab:Slider({
 local bb = game:service'VirtualUser'
 local afkConnection
 
-MainTab:Toggle({
+UserTab:Toggle({
+    Flag = "Toggle1",
     Title = "Anti AFK",
     Desc = "Prevents you from being kicked for being AFK",
     Type = "Checkbox",
@@ -235,7 +240,8 @@ local function checkServerPlayers()
 end
 
 --🟢 Anti Public Server Toggle
-MainTab:Toggle({
+UserTab:Toggle({
+    Flag = "Toggle2",
     Title = "Anti Public Server",
     Desc = "Automatically kicks you from public servers when non-whitelisted players are detected.",
     Value = false,
@@ -252,11 +258,12 @@ MainTab:Toggle({
 })
 
 --📝 Whitelist 输入框
-MainTab:Input({
+UserTab:Input({
+    Flag = "Input1",
     Title = "Whitelist Player",
     Desc = "Enter player names separated by commas to whitelist them.",
     Value = "",
-    Type = "--",
+    Type = "Textarea",
     Placeholder = "User1, User2, User3",
     Callback = function(input)
         updateWhitelist(input)
