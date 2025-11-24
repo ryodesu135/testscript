@@ -97,12 +97,12 @@ task.spawn(function()
 end)
 
 -- 🏠 Main Tab
-local MainTab = Window:Tab({
+local Tab = Window:Tab({
     Title = "🏠 | Main",
     Locked = false,
 })
 
-local PlayerSection = MainTab:Section({
+local Section = Tab:Section({
     Title = "Player",
     Box = false,
     FontWeight = "SemiBold",
@@ -116,7 +116,7 @@ local PlayerSection = MainTab:Section({
 -- 玩家设定（WalkSpeed、Jump）
 -------------------------------------------------
 
-local SpeedSlider = PlayerSection:Slider({
+local Slider = Tab:Slider({
     Title = "Walk Speed",
     Desc = "Adjust Your Walk Speed",
 
