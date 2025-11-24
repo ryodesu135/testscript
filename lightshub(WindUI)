@@ -88,31 +88,32 @@ task.spawn(function()
     end
 end)
 
--- 🏠 Main Tab
-local MainTab = Window:Tab({
+--Main Tab
+local MainSection = Window:Section({
     Title = "🏠 | Main",
-    Locked = false,
-})
+}) 
 
-local PlayerSection = MainTab:Section({
-    Title = "Player",
-})
+local PlayerTab = MainSection:Tab({
+        Title = "Player",
+    })
+
+local PlayerSection1 = PlayerTab:Section({
+        Title = "Player"
+    })
 
 -------------------------------------------------
 -- 玩家设定（WalkSpeed、Jump）
 -------------------------------------------------
-
-local Slider = MainTab:Slider({
-    Title = "Walk Speed",
-    Desc = "Adjust Your Walk Speed",
-
-    Step = {30, 150},
-    Value = {
-        Min = 30,
-        Max = 150,
-        Default = getgenv().CurrentWalkSpeed or 35,
-    },
-    Callback = function(Value)
+PlayerSection1:Slider({
+        Flag = "Slider1",
+        Title = "Walk Speed",
+        Step = 1,
+        Value = {
+            Min = 30,
+            Max = 150,
+            Default = getgenv().CurrentWalkSpeed or 35,
+        },
+        Callback = function(Value)
         local char = player.Character
         local humanoid = char and char:FindFirstChild("Humanoid")
         if humanoid then
@@ -121,7 +122,7 @@ local Slider = MainTab:Slider({
             print("[DEBUG] 玩家设定 WalkSpeed:", Value)
         end
     end,
-})
+    })
 
 local Slider = MainTab:Slider({
     Title = "Jump Height",
