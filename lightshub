@@ -33,6 +33,7 @@ local Window = WindUI:CreateWindow({
             print("clicked")
         end,
     },
+})
     
     --       remove this all, 
     -- !  ↓  if you DON'T need the key system
