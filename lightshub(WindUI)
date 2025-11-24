@@ -283,6 +283,7 @@ local RankingTab = MainSection:Tab({
 RankingTab:Toggle({
     Flag = "RankUp1",
     Title = "Auto Rank Up",
+    Desc = "Automatically rank up",
     Value = false,
     Callback = function(state)
         if state then
@@ -309,6 +310,7 @@ RankingTab:Toggle({
 RankingTab:Toggle({
     Flag = "AutoPrestige1",
     Title = "Auto Prestige",
+    Desc = "Automatically prestige levels",
     Value = false,
     Callback = function(state)
         if state then
@@ -331,16 +333,17 @@ RankingTab:Toggle({
     end,
 })
 
-local RedeemCodeSection = MainTab:Section({
-    Title = "Redeem Codes",
-    Opened = true,
-})
+local CodesTab = MainSection:Tab({
+        Title = "Codes",
+    })
+
 -- ✅ Redeem Codes Button
-local RDMCodeButton = MainTab:Button({
-   Title = "Redeem All Codes",
-   Desc = "Redeem all codes automatically.",
-   Locked = false,
-   Callback = function()
+CodesTab:Button({
+    Flag = "RedeemCodes1",
+    Title = "Redeem All Codes",
+    Desc = "Redeem all codes automatically.",
+    Locked = false,
+    Callback = function()
     local codes = {"SlashX", "Derp", "Heyyyo", "Update22", "365KLikes", "650KFav", "655KFav", "Update22P2", "370KLikes", "660KFav", "665KFav", "HalloweenPart3", "HalloweenPart3OCD", "HalloweenEyes", "HalloweenEyes2", "Update22P3", "670KFav", "675KFav", "200MVisits", "LastHalloweenCode", "Update23", "680KFav", "685KFav", "375KLikes", "215MVisits", "Update23Restart", "Update23P2", "690KFav", "695KFav", "380KLikes", "Update23Code", "Update24", "710KFav", "715KFav", "CodeGeass", "385KLikes", "SecretCodeCookies", "Update24P2", "720KFav", "725KFav", "230MVisits", "Update24Part2Code", "Update24P3", "730KFav", "735KFav", "390KLikes", "235MVisits", "Update25", "740KFav", "745KFav", "240MVisits", "StoneCode"}
     for _, code in ipairs(codes) do
          game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
@@ -352,13 +355,15 @@ local RDMCodeButton = MainTab:Button({
 })
 
 
-local QuestSection = MainTab:Section({
-    Title = "Quests",
-    Opened = true,
-})
+local QuestTab = MainSection:Tab({
+        Title = "Quests",
+    })
+
 --Auto Get Daily Quest
-local DailyQuestToggle = MainTab:Toggle({
+QuestTab:Toggle({
+    Flag = "DailyQuest1",
    Title = "Auto Get Daily Quest",
+   Desc = "Automatically accept daily quests",
    Value = false,
    Callback = function(state)
    local dailyquests = {"2001","2002","2003","2004","2005","2006","2007"}
@@ -386,13 +391,15 @@ local DailyQuestToggle = MainTab:Toggle({
 end,
 })
 
-local CollectSection = MainTab:Section({
-    Title = "Collect Rewards",
-    Opened = true,
-})
+local CollectTab = MainSection:Tab({
+        Title = "Collect",
+    })
+
 --Auto Collect Hourly and Daily Rewards
-local HourlyDailyRewardsToggle = MainTab:Toggle({
+CollectTab:Toggle({
+    Flag = "HourlyDailyRewards1",
     Title = "Auto Collect Hourly and Daily Rewards",
+    Desc = "Automatically collect hourly and daily rewards",
     Value = false,
     Callback = function(state)
         if state then
@@ -432,8 +439,10 @@ local HourlyDailyRewardsToggle = MainTab:Toggle({
 })
 
 --Auto Claim Group Chest
-local ClaimGroupChestToggle = MainTab:Toggle({
+CollectTab:Toggle({
+    Flag = "ClaimGroupChest1",
     Title = "Auto Claim Group Chest",
+    Desc = "Automatically claim group chest",
     Value = false,
     Callback = function(state)
         if state then
@@ -458,8 +467,10 @@ local ClaimGroupChestToggle = MainTab:Toggle({
 })
 
 --Auto Claim Premium Chest
-local ClaimPremiumChestToggle = MainTab:Toggle({
+CollectTab:Toggle({
+    Flag = "ClaimPremiumChest1",
     Title = "Auto Claim Premium Chest",
+    Desc = "Automatically claim premium chest",
     Value = false,
     Callback = function(state)
         if state then
@@ -484,8 +495,10 @@ local ClaimPremiumChestToggle = MainTab:Toggle({
 })
 
 --Auto Claim VIP Chest
-local ClaimVIPChestToggle = MainTab:Toggle({
+CollectTab:Toggle({
+    Flag = "ClaimVIPChest1",
     Title = "Auto Claim VIP Chest",
+    Desc = "Automatically claim VIP chest",
     Value = false,
     Callback = function(state)
         if state then
@@ -510,8 +523,10 @@ local ClaimVIPChestToggle = MainTab:Toggle({
 })
 
 --Auto Claim Daily Chest
-local ClaimDailyChestToggle = MainTab:Toggle({
+CollectTab:Toggle({
+    Name = "Auto Claim Daily Chest",
     Title = "Auto Claim Daily Chest",
+    Desc = "Automatically claim daily chest",
     Value = false,
     Callback = function(state)
         if state then
