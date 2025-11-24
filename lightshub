@@ -1,64 +1,13 @@
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local Window = WindUI:CreateWindow({
-    Title = "Lights Hub",
-    Author = "by Ryo",
-    Folder = "LightsHub",
-    
-    -- ↓ This all is Optional. You can remove it.
-    Size = UDim2.fromOffset(580, 460),
-    MinSize = Vector2.new(560, 350),
-    MaxSize = Vector2.new(850, 560),
-    Transparent = true,
-    Theme = "Dark",
-    Resizable = true,
-    SideBarWidth = 200,
-    BackgroundImageTransparency = 0.42,
-    HideSearchBar = true,
-    ScrollBarEnabled = false,
-    
-    -- ↓ Optional. You can remove it.
-    --[[ You can set 'rbxassetid://' or video to Background.
-        'rbxassetid://':
-            Background = "rbxassetid://", -- rbxassetid
-        Video:
-            Background = "video:YOUR-RAW-LINK-TO-VIDEO.webm", -- video 
-    --]]
-    
-    -- ↓ Optional. You can remove it.
-    User = {
-        Enabled = true,
-        Anonymous = true,
-        Callback = function()
-            print("clicked")
-        end,
-    },
+local Window = Rayfield:CreateWindow({
+    Name = "Lights Hub",
+    LoadingTitle = "Loading Lights Hub",
+    LoadingSubtitle = "by Ryo",
+    Theme = "Amethysty",
+    ToggleUIKeybind = "K",
+    KeySystem = false
 })
-    
-    --       remove this all, 
-    -- !  ↓  if you DON'T need the key system
-    --[[KeySystem = { 
-        -- ↓ Optional. You can remove it.
-        Key = { "1234", "5678" },
-        
-        Note = "Example Key System.",
-        
-        -- ↓ Optional. You can remove it.
-        Thumbnail = {
-            Image = "rbxassetid://",
-            Title = "Thumbnail",
-        },
-        
-        -- ↓ Optional. You can remove it.
-        URL = "YOUR LINK TO GET KEY (Discord, Linkvertise, Pastebin, etc.)",
-        
-        -- ↓ Optional. You can remove it.
-        SaveKey = false, -- automatically save and load the key.
-        
-        -- ↓ Optional. You can remove it.
-        -- API = {} ← Services. Read about it below ↓
-    },
-})--]]
 
 -- 🧠 初始化全局变量
 getgenv().UserSetWalkSpeed = nil
@@ -97,30 +46,20 @@ task.spawn(function()
 end)
 
 -- 🏠 Main Tab
-local MainTab = Window:Tab({
-    Title = "🏠 | Main",
-    Locked = false,
-})
-
-local PlayerSection = MainTab:Section({
-    Title = "Player",
-    Opened = true,
-})
+local MainTab = Window:CreateTab("🏠 | Main", nil)
+local PlayerSection = MainTab:CreateSection("Player")
 
 -------------------------------------------------
 -- 玩家设定（WalkSpeed、Jump）
 -------------------------------------------------
 
-local SpeedSlider = PlayerSection:Slider({
-    Title = "Walk Speed",
-    Desc = "Adjust Your Walk Speed",
-
-    Step = {30, 150},
-    Value = {
-        Min = 30,
-        Max = 150,
-        Default = getgenv().CurrentWalkSpeed or 35,
-    },
+local SpeedSlider = MainTab:CreateSlider({
+    Name = "Walk Speed",
+    Range = {30, 150},
+    Increment = 1,
+    Suffix = "Speed",
+    CurrentValue = getgenv().CurrentWalkSpeed or 35,
+    Flag = "Slider1",
     Callback = function(Value)
         local char = player.Character
         local humanoid = char and char:FindFirstChild("Humanoid")
@@ -132,15 +71,13 @@ local SpeedSlider = PlayerSection:Slider({
     end,
 })
 
-local HeightSlider = MainTab:Slider({
-    Title = "Jump Height",
-    Desc = "Adjust Your Jump Height",
-    Step = 1,
-    Value = {
-        Min = 50,
-        Max = 200,
-        Default = getgenv().CurrentJumpPower or 50,
-    },
+local HeightSlider = MainTab:CreateSlider({
+    Name = "Jump Height",
+    Range = {50, 200},
+    Increment = 1,
+    Suffix = "Height",
+    CurrentValue = getgenv().CurrentJumpPower or 50,
+    Flag = "Slider2",
     Callback = function(Value)
         local char = player.Character
         local humanoid = char and char:FindFirstChild("Humanoid")
@@ -159,13 +96,12 @@ local HeightSlider = MainTab:Slider({
 local bb = game:service'VirtualUser'
 local afkConnection
 
-MainTab:Toggle({
-    Title = "Anti AFK",
-    Desc = "Prevents you from being kicked for being AFK",
-    Type = "Checkbox",
-    Value = false,
-    Callback = function(state)
-        if state then
+MainTab:CreateToggle({
+    Name = "Anti AFK",
+    CurrentValue = false,
+    Flag = "Toggle1",
+    Callback = function(Value)
+        if Value then
             game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                 ["Value"] = false,
                 ["Path"] = {"Settings", "AFK_MODE"},
@@ -243,14 +179,14 @@ local function checkServerPlayers()
 end
 
 --🟢 Anti Public Server Toggle
-MainTab:Toggle({
-    Title = "Anti Public Server",
-    Desc = "Automatically kicks you from public servers when non-whitelisted players are detected.",
-    Value = false,
-    Callback = function(state)
-        getgenv().AntiPublicEnabled = state
+MainTab:CreateToggle({
+    Name = "Anti Public Server",
+    CurrentValue = false,
+    Flag = "Toggle2",
+    Callback = function(Value)
+        getgenv().AntiPublicEnabled = Value
 
-        if state then
+        if Value then
             print("[DEBUG] Anti Public Server Enabled")
             task.spawn(checkServerPlayers)
         else
@@ -260,28 +196,27 @@ MainTab:Toggle({
 })
 
 --📝 Whitelist 输入框
-MainTab:Input({
-    Title = "Whitelist Player",
-    Desc = "Enter player names separated by commas to whitelist them.",
-    Value = "",
-    Type = "--",
-    Placeholder = "User1, User2, User3",
-    Callback = function(input)
-        updateWhitelist(input)
+MainTab:CreateInput({
+    Name = "Whitelist Player",
+    CurrentValue = "",
+    PlaceholderText = "User1, User2, User3",
+    RemoveTextAfterFocusLost = false,
+    Flag = "Input1",
+    Callback = function(Text)
+        updateWhitelist(Text)
     end,
 })
 
 
-local RankUpPrestigeSection = MainTab:Section({
-    Title = "Rank Up & Prestige",
-    Opened = true,
-})
+
+local RankUpPrestigeSection = MainTab:CreateSection("Rank Up & Prestige")
 -- ✅ Auto Rank Up
-local AutoRankUpToggle = MainTab:Toggle({
-    Title = "Auto Rank Up",
-    Value = false,
-    Callback = function(state)
-        if state then
+local AutoRankUpToggle = MainTab:CreateToggle({
+    Name = "Auto Rank Up",
+    CurrentValue = false,
+    Flag = "RankUp1",
+    Callback = function(Value)
+        if Value then
             getgenv().AutoRankUpRunning = true
             task.spawn(function()
                 while getgenv().AutoRankUpRunning do
@@ -302,11 +237,12 @@ local AutoRankUpToggle = MainTab:Toggle({
 })
 
 --Auto Prestige
-local LevelUpPrestigeToggle = MainTab:Toggle({
-    Title = "Auto Prestige",
-    Value = false,
-    Callback = function(state)
-        if state then
+local LevelUpPrestigeToggle = MainTab:CreateToggle({
+    Name = "Auto Prestige",
+    CurrentValue = false,
+    Flag = "AutoPrestige1",
+    Callback = function(Value)
+        if Value then
             getgenv().AutoPrestigeRunning = true
             task.spawn(function()
                 while getgenv().AutoPrestigeRunning do
@@ -326,15 +262,10 @@ local LevelUpPrestigeToggle = MainTab:Toggle({
     end,
 })
 
-local RedeemCodeSection = MainTab:Section({
-    Title = "Redeem Codes",
-    Opened = true,
-})
+local RedeemCodeSection = MainTab:CreateSection("Redeem Codes")
 -- ✅ Redeem Codes Button
-local RDMCodeButton = MainTab:Button({
-   Title = "Redeem All Codes",
-   Desc = "Redeem all codes automatically.",
-   Locked = false,
+local RDMCodeButton = MainTab:CreateButton({
+   Name = "Redeem All Codes",
    Callback = function()
     local codes = {"SlashX", "Derp", "Heyyyo", "Update22", "365KLikes", "650KFav", "655KFav", "Update22P2", "370KLikes", "660KFav", "665KFav", "HalloweenPart3", "HalloweenPart3OCD", "HalloweenEyes", "HalloweenEyes2", "Update22P3", "670KFav", "675KFav", "200MVisits", "LastHalloweenCode", "Update23", "680KFav", "685KFav", "375KLikes", "215MVisits", "Update23Restart", "Update23P2", "690KFav", "695KFav", "380KLikes", "Update23Code", "Update24", "710KFav", "715KFav", "CodeGeass", "385KLikes", "SecretCodeCookies", "Update24P2", "720KFav", "725KFav", "230MVisits", "Update24Part2Code", "Update24P3", "730KFav", "735KFav", "390KLikes", "235MVisits", "Update25", "740KFav", "745KFav", "240MVisits", "StoneCode"}
     for _, code in ipairs(codes) do
@@ -347,17 +278,15 @@ local RDMCodeButton = MainTab:Button({
 })
 
 
-local QuestSection = MainTab:Section({
-    Title = "Quests",
-    Opened = true,
-})
+local QuestSection = MainTab:CreateSection("Quests")
 --Auto Get Daily Quest
-local DailyQuestToggle = MainTab:Toggle({
-   Title = "Auto Get Daily Quest",
-   Value = false,
-   Callback = function(state)
+local DailyQuestToggle = MainTab:CreateToggle({
+   Name = "Auto Get Daily Quest",
+   CurrentValue = false,
+   Flag = "DailyQuest1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
    local dailyquests = {"2001","2002","2003","2004","2005","2006","2007"}
-   if state then
+   if Value then
     getgenv().AutoDailyQuestRunning = true
     task.spawn(function()
         while getgenv().AutoDailyQuestRunning do
@@ -381,16 +310,14 @@ local DailyQuestToggle = MainTab:Toggle({
 end,
 })
 
-local CollectSection = MainTab:Section({
-    Title = "Collect Rewards",
-    Opened = true,
-})
+local CollectSection = MainTab:CreateSection("Collect Rewards")
 --Auto Collect Hourly and Daily Rewards
-local HourlyDailyRewardsToggle = MainTab:Toggle({
-    Title = "Auto Collect Hourly and Daily Rewards",
-    Value = false,
-    Callback = function(state)
-        if state then
+local HourlyDailyRewardsToggle = MainTab:CreateToggle({
+    Name = "Auto Collect Hourly and Daily Rewards",
+    CurrentValue = false,
+    Flag = "HourlyDailyRewards1",
+    Callback = function(Value)
+        if Value then
             getgenv().HourlyDailyRewardsRunning = true
             task.spawn(function()
                 while getgenv().HourlyDailyRewardsRunning do
@@ -427,11 +354,12 @@ local HourlyDailyRewardsToggle = MainTab:Toggle({
 })
 
 --Auto Claim Group Chest
-local ClaimGroupChestToggle = MainTab:Toggle({
-    Title = "Auto Claim Group Chest",
-    Value = false,
-    Callback = function(state)
-        if state then
+local ClaimGroupChestToggle = MainTab:CreateToggle({
+    Name = "Auto Claim Group Chest",
+    CurrentValue = false,
+    Flag = "ClaimGroupChest1",
+    Callback = function(Value)
+        if Value then
             getgenv().ClaimGroupChestRunning = true
             task.spawn(function()
                 while getgenv().ClaimGroupChestRunning do
@@ -453,11 +381,12 @@ local ClaimGroupChestToggle = MainTab:Toggle({
 })
 
 --Auto Claim Premium Chest
-local ClaimPremiumChestToggle = MainTab:Toggle({
-    Title = "Auto Claim Premium Chest",
-    Value = false,
-    Callback = function(state)
-        if state then
+local ClaimPremiumChestToggle = MainTab:CreateToggle({
+    Name = "Auto Claim Premium Chest",
+    CurrentValue = false,
+    Flag = "ClaimPremiumChest1",
+    Callback = function(Value)
+        if Value then
             getgenv().ClaimPremiumChestRunning = true
             task.spawn(function()
                 while getgenv().ClaimPremiumChestRunning do
@@ -479,11 +408,12 @@ local ClaimPremiumChestToggle = MainTab:Toggle({
 })
 
 --Auto Claim VIP Chest
-local ClaimVIPChestToggle = MainTab:Toggle({
-    Title = "Auto Claim VIP Chest",
-    Value = false,
-    Callback = function(state)
-        if state then
+local ClaimVIPChestToggle = MainTab:CreateToggle({
+    Name = "Auto Claim VIP Chest",
+    CurrentValue = false,
+    Flag = "ClaimVIPChest1",
+    Callback = function(Value)
+        if Value then
             getgenv().ClaimVIPChestRunning = true
             task.spawn(function()
                 while getgenv().ClaimVIPChestRunning do
@@ -505,11 +435,12 @@ local ClaimVIPChestToggle = MainTab:Toggle({
 })
 
 --Auto Claim Daily Chest
-local ClaimDailyChestToggle = MainTab:Toggle({
-    Title = "Auto Claim Daily Chest",
-    Value = false,
-    Callback = function(state)
-        if state then
+local ClaimDailyChestToggle = MainTab:CreateToggle({
+    Name = "Auto Claim Daily Chest",
+    CurrentValue = false,
+    Flag = "ClaimDailyChest1",
+    Callback = function(Value)
+        if Value then
             getgenv().ClaimDailyChestRunning = true
             task.spawn(function()
                 while getgenv().ClaimDailyChestRunning do
@@ -560,32 +491,26 @@ getgenv().InRaid = false
 getgenv().AutoDungeonFarmRunning = false
 getgenv().WasAutoFarmRunning = false
 
-local FarmTab = Window:Tab({
-    Title = "🌾 | Farm",
-    Icon = nil,
-    Priority = nil,
-})
-FarmTab:Section({
-    Title = "Farm",
-})
+local FarmTab = Window:CreateTab("🌾 | Farm", nil)
+FarmTab:CreateSection("Farm")
 
 -- ✅ Mob 列表 Dropdown
-local AutoFarmMobsListDropdown = FarmTab:Dropdown({
-    Title = "Mobs List",
-    Values = {"None"},
-    Value = {"None"},
-    Multi = true,
-    AllowNone = true,
-    Callback = function(option)
-        selectedMobs = option or {}
+local AutoFarmMobsListDropdown = FarmTab:CreateDropdown({
+    Name = "Mobs List",
+    Options = {"None"},
+    CurrentOption = {"None"},
+    MultipleOptions = true,
+    Flag = "Dropdown1",
+    Callback = function(Options)
+        selectedMobs = Options or {}
         getgenv().FarmTargetChanged = true
         print("[DEBUG] 🎯 Mob target changed:", table.concat(selectedMobs, ", "))
     end,
 })
 
 -- ✅ 刷新按钮
-FarmTab:Button({
-    Title = "Refresh Mobs List",
+FarmTab:CreateButton({
+    Name = "Refresh Mobs List",
     Callback = function()
         mobNames, mobMap, selectedMobs = {}, {}, {}
         local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
@@ -617,11 +542,12 @@ FarmTab:Button({
 })
 
 -- ✅ 普通 Auto Farm 逻辑
-FarmTab:Toggle({
-    Title = "Auto Farm",
-    Value = false,
-    Callback = function(state)
-        if state then
+FarmTab:CreateToggle({
+    Name = "Auto Farm",
+    CurrentValue = false,
+    Flag = "AutoFarm1",
+    Callback = function(Value)
+        if Value then
             getgenv().AutoFarmRunning = true
             getgenv().FarmTargetChanged = true
             getgenv().WasAutoFarmRunning = true
@@ -760,84 +686,70 @@ getgenv().IsCurrentKeyDungeon = false
 -------------------------------------------------
 -- UI: Dungeon Tab
 -------------------------------------------------
-local AutoDungeonTab = Window:Tab({
-    Title = "🏰 | Dungeon",
-    Locked = false,
-})
-AutoDungeonTab:Section({
-    Title = "Dungeon Selection",
-})
+local AutoDungeonTab = Window:CreateTab("🏰 | Dungeon", nil)
+AutoDungeonTab:CreateSection("Dungeon Selection")
 
-AutoDungeonTab:Dropdown({
-    Title = "Select Dungeons",
-    Values = DungeonOptions,
-    Value = {},
-    Multi = true,
-    AllowNone = true,
-    Callback = function(option)
-        getgenv().SelectedDungeons = option
-        print("[DEBUG] 🏰 Selected Dungeons:", table.concat(option, ", "))
+AutoDungeonTab:CreateDropdown({
+    Name = "Select Dungeons",
+    Options = DungeonOptions,
+    CurrentOption = {},
+    MultipleOptions = true,
+    Flag = "DungeonSelect1",
+    Callback = function(Options)
+        getgenv().SelectedDungeons = Options
+        print("[DEBUG] 🏰 Selected Dungeons:", table.concat(Options, ", "))
     end,
 })
 
-AutoDungeonTab:Section({
-    Title = "Dungeon Auto Farm",
-})
-AutoDungeonTab:Toggle({
-    Title = "Auto Join Dungeon + Auto Farm",
-    Value = false,
+AutoDungeonTab:CreateSection("Dungeon Auto Farm")
+AutoDungeonTab:CreateToggle({
+    Name = "Auto Join Dungeon + Auto Farm",
+    CurrentValue = false,
     Flag = "AutoJoinDungeon1",
-    Callback = function(state)
-        getgenv().AutoDungeonEnabled = state
-        print(state and "[DEBUG] 🟢 Auto Dungeon Enabled" or "[DEBUG] 🔴 Auto Dungeon Disabled")
+    Callback = function(Value)
+        getgenv().AutoDungeonEnabled = Value
+        print(Value and "[DEBUG] 🟢 Auto Dungeon Enabled" or "[DEBUG] 🔴 Auto Dungeon Disabled")
     end,
 })
 
 -------------------------------------------------
 -- UI: Raid / KeyDungeon / Defense Tab
 -------------------------------------------------
-local AutoRaidTab = Window:Tab({
-    Title = "☠️ | Raid / KeyDungeon / Defense",
-    Locked = false,
-})
-AutoRaidTab:Section({
-    Title = "Raid / Dungeon / Defense Selection",
-})
+local AutoRaidTab = Window:CreateTab("☠️ | [Key] Dungeon", nil)
+AutoRaidTab:CreateSection("Raid / Dungeon / Defense Selection")
 
-AutoRaidTab:Dropdown({
-    Title = "Select Raid / Dungeon / Defense",
-    Values = RaidOptions,
-    Value = {},
-    Multi = true,
+AutoRaidTab:CreateDropdown({
+    Name = "Select Raid / Dungeon / Defense",
+    Options = RaidOptions,
+    CurrentOption = {},
+    MultipleOptions = true,
     Flag = "RaidSelect1",
-    Callback = function(option)
-        getgenv().SelectedRaids = option
-        print("[DEBUG] ☠️ Selected Raids:", table.concat(option, ", "))
+    Callback = function(Options)
+        getgenv().SelectedRaids = Options
+        print("[DEBUG] ☠️ Selected Raids:", table.concat(Options, ", "))
     end,
 })
 
-AutoRaidTab:Dropdown({
-    Title = "Raid Speed",
-    Values = RaidSpeedOptions,
-    Value = {},
-    Multi = false,
+AutoRaidTab:CreateDropdown({
+    Name = "Raid Speed",
+    Options = RaidSpeedOptions,
+    CurrentOption = {},
+    MultipleOptions = false,
     Flag = "RaidSpeedSelect1",
-    Callback = function(option)
-        getgenv().SelectedRaidSpeed = option
-        print("[DEBUG] ☠️ Raid Speed Selected:", option[1])
+    Callback = function(Options)
+        getgenv().SelectedRaidSpeed = Options
+        print("[DEBUG] ☠️ Raid Speed Selected:", Options[1])
     end,
 })
 
-AutoRaidTab:Section({
-    Title = "Raid / Dungeon / Defense Auto Farm",
-})
-AutoRaidTab:Toggle({
-    Title = "Auto Join Raid / Dungeon / Defense + Auto Farm",
-    Value = false,
+AutoRaidTab:CreateSection("Raid / Dungeon / Defense Auto Farm")
+AutoRaidTab:CreateToggle({
+    Name = "Auto Join Raid / Dungeon / Defense + Auto Farm",
+    CurrentValue = false,
     Flag = "AutoJoinRaid1",
-    Callback = function(state)
-        getgenv().AutoRaidEnabled = state
-        print(state and "[DEBUG] 🟢 Auto Raid Enabled" or "[DEBUG] 🔴 Auto Raid Disabled")
+    Callback = function(Value)
+        getgenv().AutoRaidEnabled = Value
+        print(Value and "[DEBUG] 🟢 Auto Raid Enabled" or "[DEBUG] 🔴 Auto Raid Disabled")
     end,
 })
 
