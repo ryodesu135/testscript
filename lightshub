@@ -45,11 +45,14 @@ task.spawn(function()
     end
 end)
 
---🏠 Main Tab
+-- 🏠 Main Tab
 local MainTab = Window:CreateTab("🏠 | Main", nil)
 local PlayerSection = MainTab:CreateSection("Player")
 
--- ✅ WalkSpeed Slider
+-------------------------------------------------
+-- 玩家设定（WalkSpeed、Jump）
+-------------------------------------------------
+
 local SpeedSlider = MainTab:CreateSlider({
     Name = "Walk Speed",
     Range = {30, 150},
@@ -68,7 +71,6 @@ local SpeedSlider = MainTab:CreateSlider({
     end,
 })
 
--- ✅ JumpPower Slider
 local HeightSlider = MainTab:CreateSlider({
     Name = "Jump Height",
     Range = {50, 200},
@@ -87,10 +89,14 @@ local HeightSlider = MainTab:CreateSlider({
     end,
 })
 
---🛡️ Anti AFK
+-------------------------------------------------
+-- 🛡️ Anti AFK
+-------------------------------------------------
+
 local bb = game:service'VirtualUser'
 local afkConnection
-local Toggle = MainTab:CreateToggle({
+
+MainTab:CreateToggle({
     Name = "Anti AFK",
     CurrentValue = false,
     Flag = "Toggle1",
@@ -114,6 +120,94 @@ local Toggle = MainTab:CreateToggle({
         end
     end,
 })
+
+-------------------------------------------------
+-- 🛑 Anti Public Server（功能完整整合）
+-------------------------------------------------
+
+getgenv().AntiPublicEnabled = false
+getgenv().AntiPublicWhitelist = {}
+
+--✨ 将输入框内容 → 表转换
+local function updateWhitelist(text)
+    local list = {}
+    for name in string.gmatch(text, "([^,%s]+)") do
+        table.insert(list, name)
+    end
+    getgenv().AntiPublicWhitelist = list
+    print("[DEBUG] Whitelist Updated:", table.concat(list, ", "))
+end
+
+--✨ 主功能：检测是否要 kick 自己
+local function checkServerPlayers()
+    while getgenv().AntiPublicEnabled do
+        task.wait(3)
+
+        if not getgenv().AntiPublicEnabled then break end
+
+        local Players = game:GetService("Players")
+        local others = {}
+        local whitelistFound = false
+
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= player then
+                local name = p.Name
+
+                -- 检查是不是 whitelist 人
+                local isWhitelisted = table.find(getgenv().AntiPublicWhitelist, name) ~= nil
+
+                if isWhitelisted then
+                    whitelistFound = true
+                else
+                    table.insert(others, name)
+                end
+            end
+        end
+
+        -- 🟢 如果 whitelist 里面的人在，但**没有其他人** → 不 kick
+        if whitelistFound and #others == 0 then
+            continue
+        end
+
+        -- ❌ 有陌生玩家（others > 0）→ Kick
+        if #others > 0 then
+            local reason = "Anti Public Server: Detected Non-Whitelist Player(s): " .. table.concat(others, ", ")
+            player:Kick(reason)
+            break
+        end
+    end
+end
+
+--🟢 Anti Public Server Toggle
+MainTab:CreateToggle({
+    Name = "Anti Public Server",
+    CurrentValue = false,
+    Flag = "Toggle2",
+    Callback = function(Value)
+        getgenv().AntiPublicEnabled = Value
+
+        if Value then
+            print("[DEBUG] Anti Public Server Enabled")
+            task.spawn(checkServerPlayers)
+        else
+            print("[DEBUG] Anti Public Server Disabled")
+        end
+    end,
+})
+
+--📝 Whitelist 输入框
+MainTab:CreateInput({
+    Name = "Whitelist Player",
+    CurrentValue = "",
+    PlaceholderText = "User1, User2, User3",
+    RemoveTextAfterFocusLost = false,
+    Flag = "Input1",
+    Callback = function(Text)
+        updateWhitelist(Text)
+    end,
+})
+
+
 
 local RankUpPrestigeSection = MainTab:CreateSection("Rank Up & Prestige")
 -- ✅ Auto Rank Up
@@ -766,13 +860,13 @@ local function startDungeonAutoFarm()
                         local mobHRP = mob:FindFirstChild("HumanoidRootPart")
                         if mobHRP then
                             hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
-                            repeat task.wait(0.05)
+                            repeat task.wait(0.1)
                             until not mob.Parent or not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon
                         end
                     end
                 end
             end
-            task.wait(0.05)
+            task.wait(0.3)
         end
 
         print("[DEBUG] 🛑 Dungeon Auto Farm Ended")
