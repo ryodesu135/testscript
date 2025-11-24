@@ -102,7 +102,7 @@ local MainTab = Window:Tab({
     Locked = false,
 })
 
-local PlayerSection = MainTab:Section({
+local PlayerSection = Window:Section({
     Title = "Player",
     Opened = true,
 })
