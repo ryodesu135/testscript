@@ -116,7 +116,7 @@ local PlayerSection = MainTab:Section({
 -- 玩家设定（WalkSpeed、Jump）
 -------------------------------------------------
 
-local Slider = MainTab:Slider({
+local SpeedSlider = PlayerSection:Slider({
     Title = "Walk Speed",
     Desc = "Adjust Your Walk Speed",
 
