@@ -580,17 +580,14 @@ getgenv().InRaid = false
 getgenv().AutoDungeonFarmRunning = false
 getgenv().WasAutoFarmRunning = false
 
+--Farm Tab
 local FarmTab = Window:Tab({
-    Title = "🌾 | Farm",
-    Icon = nil,
-    Priority = nil,
-})
-FarmTab:Section({
-    Title = "Farm",
-})
+        Title = "🌾 | Farm",
+    })
 
 -- ✅ Mob 列表 Dropdown
-local AutoFarmMobsListDropdown = FarmTab:Dropdown({
+FarmTab:Dropdown({
+    Flag = "Dropdown1",
     Title = "Mobs List",
     Values = {"None"},
     Value = {"None"},
@@ -605,6 +602,7 @@ local AutoFarmMobsListDropdown = FarmTab:Dropdown({
 
 -- ✅ 刷新按钮
 FarmTab:Button({
+    Flag = "RefreshButton1",
     Title = "Refresh Mobs List",
     Callback = function()
         mobNames, mobMap, selectedMobs = {}, {}, {}
@@ -638,6 +636,7 @@ FarmTab:Button({
 
 -- ✅ 普通 Auto Farm 逻辑
 FarmTab:Toggle({
+    Flag = "AutoFarm1",
     Title = "Auto Farm",
     Value = false,
     Callback = function(state)
@@ -781,14 +780,11 @@ getgenv().IsCurrentKeyDungeon = false
 -- UI: Dungeon Tab
 -------------------------------------------------
 local AutoDungeonTab = Window:Tab({
-    Title = "🏰 | Dungeon",
-    Locked = false,
-})
-AutoDungeonTab:Section({
-    Title = "Dungeon Selection",
-})
+        Title = "🏰 | Dungeon",
+    })
 
 AutoDungeonTab:Dropdown({
+    Flag = "DungeonSelect1",
     Title = "Select Dungeons",
     Values = DungeonOptions,
     Value = {},
@@ -800,13 +796,10 @@ AutoDungeonTab:Dropdown({
     end,
 })
 
-AutoDungeonTab:Section({
-    Title = "Dungeon Auto Farm",
-})
 AutoDungeonTab:Toggle({
+    Flag = "AutoJoinDungeon1",
     Title = "Auto Join Dungeon + Auto Farm",
     Value = false,
-    Flag = "AutoJoinDungeon1",
     Callback = function(state)
         getgenv().AutoDungeonEnabled = state
         print(state and "[DEBUG] 🟢 Auto Dungeon Enabled" or "[DEBUG] 🔴 Auto Dungeon Disabled")
@@ -817,19 +810,15 @@ AutoDungeonTab:Toggle({
 -- UI: Raid / KeyDungeon / Defense Tab
 -------------------------------------------------
 local AutoRaidTab = Window:Tab({
-    Title = "☠️ | Raid / KeyDungeon / Defense",
-    Locked = false,
-})
-AutoRaidTab:Section({
-    Title = "Raid / Dungeon / Defense Selection",
-})
+        Title = "☠️ | [Key] Raid",
+    })
 
 AutoRaidTab:Dropdown({
+    Flag = "RaidSelect1",
     Title = "Select Raid / Dungeon / Defense",
     Values = RaidOptions,
     Value = {},
     Multi = true,
-    Flag = "RaidSelect1",
     Callback = function(option)
         getgenv().SelectedRaids = option
         print("[DEBUG] ☠️ Selected Raids:", table.concat(option, ", "))
@@ -837,24 +826,21 @@ AutoRaidTab:Dropdown({
 })
 
 AutoRaidTab:Dropdown({
+    Flag = "RaidSpeedSelect1",
     Title = "Raid Speed",
     Values = RaidSpeedOptions,
     Value = {},
     Multi = false,
-    Flag = "RaidSpeedSelect1",
     Callback = function(option)
         getgenv().SelectedRaidSpeed = option
         print("[DEBUG] ☠️ Raid Speed Selected:", option[1])
     end,
 })
 
-AutoRaidTab:Section({
-    Title = "Raid / Dungeon / Defense Auto Farm",
-})
 AutoRaidTab:Toggle({
+    Flag = "AutoJoinRaid1",
     Title = "Auto Join Raid / Dungeon / Defense + Auto Farm",
     Value = false,
-    Flag = "AutoJoinRaid1",
     Callback = function(state)
         getgenv().AutoRaidEnabled = state
         print(state and "[DEBUG] 🟢 Auto Raid Enabled" or "[DEBUG] 🔴 Auto Raid Disabled")
