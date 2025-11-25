@@ -839,7 +839,7 @@ local AutoRaidSpeedDropdown = AutoRaidTab:Dropdown({
 
 local AutoRaidToggle = AutoRaidTab:Toggle({
     Flag = "AutoJoinRaid1",
-    Title = "Auto Join Raid / Dungeon / Defense + Auto Farm",
+    Title = "Auto Join Raid + Auto Farm",
     Default = false,
     Callback = function(state)
         getgenv().AutoRaidEnabled = state
