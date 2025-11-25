@@ -815,7 +815,7 @@ local AutoRaidTab = Window:Tab({
 
 local AutoRaidDropdown = AutoRaidTab:Dropdown({
     Flag = "RaidSelect1",
-    Title = "Select Raid / Dungeon / Defense",
+    Title = "Select Raid",
     Values = RaidOptions,
     Value = {},
     Multi = true,
