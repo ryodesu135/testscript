@@ -695,3 +695,260 @@ local AutoFarmToggle = FarmTab:Toggle({
         end
     end,
 })
+
+-------------------------------------------------
+-- CONSTANTS / TABLES
+-------------------------------------------------
+--local player = game.Players.LocalPlayer
+--local ReplicatedStorage = game:GetService("ReplicatedStorage")
+--local RemoteClient = ReplicatedStorage.Events.To_Client
+--local RemoteServer = ReplicatedStorage.Events.To_Server
+
+-- Dungeon 选项
+local DungeonOptions = {
+    "Dungeon Easy","Dungeon Medium","Dungeon Hard","Dungeon Insane",
+    "Dungeon Crazy","Dungeon Nightmare","Leaf Raid"
+}
+
+-- Raid / KeyDungeon / Defense 选项
+local RaidOptions = {
+    "Restaurant Raid","Cursed Raid","Progression Raid","Titan Defense",
+    "Sin Raid","Kaiju Dungeon","Dragon Room Raid","Gleam Raid","Progression Raid 2",
+    "Ghoul Raid","Chainsaw Defense","Netherworld Defense","Green Planet Raid",
+    "Hollow Raid","Tomb Arena Raid","Halloween Raid","Graveyard Raid",
+    "Dungeon Suffering","Dungeon Adventure","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3","Dungeon Labyrinth"
+}
+
+local SpeedRaids = {
+    ["Cursed Raid"] = true,
+    ["Progression Raid"] = true,
+    ["Progression Raid 2"] = true,
+    ["Restaurant Raid"] = true
+}
+
+local KeyDungeons = {
+    "Kaiju_Dungeon",
+    "Dungeon_Suffering",
+    "Dungeon_Adventure",
+    "Dungeon_Torment",
+    "Maze_Level_1",
+    "Maze_Level_2",
+    "Maze_Level_3",
+    "Dungeon_Labyrinth"
+}
+
+local RaidSpeedOptions = {"1x Speed", "2x Speed", "3x Speed"}
+
+local function convertName(str)
+    return str:gsub(" ", "_")
+end
+
+-- Helper function to check if a raid is a KeyDungeon
+local function isKeyDungeon(raid)
+    local converted = convertName(raid)
+    for _, kd in ipairs(KeyDungeons) do
+        if kd == converted then
+            return true
+        end
+    end
+    return false
+end
+
+-------------------------------------------------
+-- GLOBAL VARIABLES
+-------------------------------------------------
+-- Dungeon Auto Farm
+getgenv().SelectedDungeons = {}
+getgenv().AutoDungeonEnabled = false
+--getgenv().InDungeon = false
+--getgenv().AutoDungeonFarmRunning = false
+
+-- Raid / KeyDungeon Auto Farm
+getgenv().SelectedRaids = {}
+getgenv().SelectedRaidSpeed = {}
+getgenv().AutoRaidEnabled = false
+--getgenv().InRaid = false
+getgenv().AutoRaidFarmRunning = false
+getgenv().IsCurrentKeyDungeon = false
+
+-- 普通 AutoFarm 暂停恢复控制
+--getgenv().AutoFarmRunning = false
+--getgenv().WasAutoFarmRunning = false
+--getgenv().FarmTargetChanged = false
+
+-------------------------------------------------
+-- UI: Dungeon Tab
+-------------------------------------------------
+local AutoDungeonTab = Window:Tab({
+        Title = "🏰 | Dungeon",
+    })
+
+local AutoDungeonDropdown = AutoDungeonTab:Dropdown({
+    Flag = "DungeonSelect1",
+    Title = "Select Dungeons",
+    Values = DungeonOptions,
+    Value = {},
+    Multi = true,
+    AllowNone = true,
+    Callback = function(option)
+        getgenv().SelectedDungeons = option
+        print("[DEBUG] 🏰 Selected Dungeons:", table.concat(option, ", "))
+    end,
+})
+
+local AutoDungeonToggle = AutoDungeonTab:Toggle({
+    Flag = "AutoJoinDungeon1",
+    Title = "Auto Join Dungeon + Auto Farm",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoDungeonEnabled = state
+        print(state and "[DEBUG] 🟢 Auto Dungeon Enabled" or "[DEBUG] 🔴 Auto Dungeon Disabled")
+    end,
+})
+
+local function startDungeonAutoFarm()
+    if getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then return end
+    getgenv().AutoDungeonFarmRunning = true
+    print("[DEBUG] ⚔️ Dungeon Auto Farm Started")
+
+    task.spawn(function()
+        local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then repeat task.wait(1) until player.Character:FindFirstChild("HumanoidRootPart") end
+        hrp = player.Character.HumanoidRootPart
+
+        while getgenv().AutoDungeonFarmRunning and getgenv().InDungeon do
+            local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
+            if monstersFolder then
+                for _, mob in pairs(monstersFolder:GetChildren()) do
+                    if not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then break end
+                    if mob:IsA("Model") and mob:GetAttribute("Is_Dungeon") == true then
+                        local mobHRP = mob:FindFirstChild("HumanoidRootPart")
+                        if mobHRP then
+                            hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
+                            repeat task.wait(0.1)
+                            until not mob.Parent or not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon
+                        end
+                    end
+                end
+            end
+            task.wait(0.3)
+        end
+
+        print("[DEBUG] 🛑 Dungeon Auto Farm Ended")
+        getgenv().AutoDungeonFarmRunning = false
+
+         task.wait(3)
+
+        if getgenv().WasAutoFarmRunning then
+            getgenv().AutoFarmRunning = true
+            getgenv().FarmTargetChanged = true
+            print("[DEBUG] ▶️ 恢复普通 Auto Farm")
+            
+            -- 🔧 修复：手动重新启动普通 Auto Farm 的循环（复制 Toggle Callback 中的逻辑）
+            task.spawn(function()
+                while getgenv().AutoFarmRunning and not getgenv().InDungeon do
+                    if getgenv().FarmTargetChanged then
+                        getgenv().FarmTargetChanged = false
+                    end
+
+                    local char = player.Character
+                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                    if not hrp then task.wait(1) continue end
+
+                    local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
+                    if monstersFolder then
+                        mobMap = {}
+                        for _, mob in pairs(monstersFolder:GetChildren()) do
+                            if mob and mob:IsA("Model") then
+                                local mobsname = mob:GetAttribute("Title") or mob.Name
+                                local mobsrank = mob:GetAttribute("Rank")
+                                local mobsdisplayname = mobsrank and mobsrank ~= "" and string.format("[%s] %s", mobsrank, mobsname) or mobsname
+                                if not mobMap[mobsdisplayname] then
+                                    mobMap[mobsdisplayname] = {}
+                                end
+                                table.insert(mobMap[mobsdisplayname], mob)
+                            end
+                        end
+                    end
+
+                    for _, mobName in ipairs(selectedMobs) do
+                        if not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged or getgenv().InDungeon then break end
+                        local mobList = mobMap[mobName]
+                        if mobList then
+                            for _, mob in ipairs(mobList) do
+                                if not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged or getgenv().InDungeon then break end
+                                local mobHRP = mob:FindFirstChild("HumanoidRootPart")
+                                if mobHRP then
+                                    hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
+                                    repeat task.wait(0.1) until not mob.Parent or not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged or getgenv().InDungeon
+                                end
+                            end
+                        end
+                    end
+                    task.wait(0.1)
+                end
+            end)
+        end
+    end)
+end
+
+-- Dungeon 进入/离开监听
+local Remote = game:GetService("ReplicatedStorage").Events.To_Client
+
+Remote.OnClientEvent:Connect(function(data)
+    if type(data) ~= "table" or not data.Action or not data.Type then return end
+    if data.Action == "Dungeon" and data.Type == "Outlines" then
+        if data.Players and data.Players[1] == player then
+            if
+             getgenv().AutoFarmRunning then
+                getgenv().WasAutoFarmRunning = true
+                getgenv().AutoFarmRunning = false
+                getgenv().FarmTargetChanged = true
+                end
+                
+                
+            -- 🟢 进入Dungeon
+            print("[DEBUG] 🟩 进入 Dungeon")
+            getgenv().InDungeon = true
+                
+                
+            task.delay(3, function()
+                if getgenv().InDungeon then startDungeonAutoFarm() end
+            end)
+        else
+            -- 🔴 离开Dungeon
+            if getgenv().InDungeon then
+                print("[DEBUG] 🟥 离开 Dungeon")
+                getgenv().InDungeon = false
+                getgenv().AutoDungeonFarmRunning = false
+
+                
+            end
+        end
+    end
+end)
+
+-- 📣 监听系统广播自动进入副本
+local client = game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("To_Client")
+
+client.OnClientEvent:Connect(function(data)
+    if not getgenv().AutoDungeonEnabled then return end
+    if type(data) ~= "table" or data.Action ~= "System_Message" then return end
+    if not data.Text or data.Text.Type ~= "Dungeon_Message" then return end
+
+    local message = data.Text.Text or ""
+    for _, dungeon in ipairs(getgenv().SelectedDungeons or {}) do
+        if string.find(message, dungeon) then
+            local dungeonName = dungeon:gsub(" ", "_")
+            print("[DEBUG] ⚔️ 检测到副本开启:", dungeon)
+
+            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                ["Action"] = "_Enter_Dungeon",
+                ["Name"] = dungeonName,
+            })
+
+            print("[DEBUG] ✅ 已自动进入副本:", dungeonName)
+            break
+        end
+    end
+end)
