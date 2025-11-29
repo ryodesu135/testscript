@@ -1287,10 +1287,10 @@ local function StartDungeonAutoFarm()
                         end
                         print("[DEBUG] Has Wall:", hasWall)
                         if not hasWall then
-                            -- 可开门：传送到靠近门的位置（门前10单位）
-                            local teleportPos = doorPart.CFrame + Vector3.new(0, 0, -10)
-                            print("[DEBUG] Teleporting near door to:", teleportPos)
-                            hrp.CFrame = teleportPos
+                            -- 可开门：传送到门的中心前方（使用LookVector确保正中间）
+                            local teleportPos = doorPart.Position + (doorPart.CFrame.LookVector * -10)
+                            print("[DEBUG] Teleporting to center front of door:", teleportPos)
+                            hrp.CFrame = CFrame.new(teleportPos)
                             -- 设置角色和相机面向门
                             hrp.CFrame = CFrame.lookAt(hrp.Position, doorPart.Position)
                             workspace.CurrentCamera.CFrame = CFrame.lookAt(hrp.Position, doorPart.Position)
@@ -1301,6 +1301,7 @@ local function StartDungeonAutoFarm()
                             task.wait(2)  -- 等待开门后继续
                             openedDoorsInRoom[door.Name] = true
                             openedDoor = true
+                            print("[DEBUG] Door opened in room:", door.Name)
                             break  -- 开一个门后停止检查
                         else
                             print("[DEBUG] Door has Wall, skipping")
@@ -1314,6 +1315,7 @@ local function StartDungeonAutoFarm()
                     processedRooms[currentRoom.Name] = true
                     currentRoom = nil
                     openedDoorsInRoom = {}
+                    print("[DEBUG] All doors in room opened, processed room:", currentRoom.Name, "set currentRoom to nil")
                 end
             else
                 print("[DEBUG] Not opening: hasMonsters =", hasMonsters, "Doors count =", #doors, "currentRoom =", currentRoom and currentRoom.Name or "nil")
