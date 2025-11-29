@@ -1132,6 +1132,7 @@ local function StartDungeonAutoFarm()
     print("[DEBUG] AutoDungeonFarm started")
     local processedRooms = {}  -- 跟踪已处理的room
     local currentRoom = nil  -- 当前正在处理的room
+    local currentDungeon = nil  -- 当前raid
     task.spawn(function()
         while getgenv().AutoDungeonFarmRunning and getgenv().InDungeon do
             print("[DEBUG] Loop running, InDungeon:", getgenv().InDungeon)
@@ -1143,72 +1144,104 @@ local function StartDungeonAutoFarm()
             local hasMonsters = monstersFolder and #monstersFolder:GetChildren() > 0
             print("[DEBUG] Monsters folder exists:", monstersFolder ~= nil, "Has monsters:", hasMonsters, "Count:", monstersFolder and #monstersFolder:GetChildren() or 0)
 
-            -- 获取当前raid和门列表
-            local doors = {}
-            pcall(function()
-                for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
-                    if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
-                        print("[DEBUG] Found dungeon:", dungeon.Name)
-                        -- 打印dungeon的所有子对象以调试
-                        print("[DEBUG] Dungeon children:")
-                        for _, child in pairs(dungeon:GetChildren()) do
-                            print("[DEBUG] Child: Name=" .. child.Name .. ", Class=" .. child.ClassName)
-                        end
-                        if not currentRoom then
-                            -- 查找下一个未处理的room（先Starting_Room，然后Monsters_Room）
-                            local rooms = {}
-                            for _, room in pairs(dungeon:GetChildren()) do
-                                if room.Name:find("^Starting_Room_") or room.Name:find("^Monsters_Room_") then
-                                    table.insert(rooms, room)
-                                end
-                            end
-                            print("[DEBUG] Found rooms count:", #rooms)
-                            for _, room in ipairs(rooms) do
-                                print("[DEBUG] Room: Name=" .. room.Name .. ", Processed=" .. tostring(processedRooms[room.Name] or false))
-                            end
-                            -- 排序：Starting_Room优先，然后Monsters_Room按名称
-                            table.sort(rooms, function(a, b)
-                                if a.Name:find("^Starting_Room_") and not b.Name:find("^Starting_Room_") then return true end
-                                if b.Name:find("^Starting_Room_") and not a.Name:find("^Starting_Room_") then return false end
-                                return a.Name < b.Name
-                            end)
-                            for _, room in ipairs(rooms) do
-                                if not processedRooms[room.Name] then
-                                    currentRoom = room
-                                    print("[DEBUG] Set currentRoom to:", room.Name)
+            -- 检测当前raid（基于玩家位置）
+            if not currentDungeon then
+                pcall(function()
+                    for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
+                        if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
+                            -- 检查玩家是否在raid内（简单检查：raid内是否有BasePart包含玩家位置）
+                            local isInDungeon = false
+                            for _, part in pairs(dungeon:GetDescendants()) do
+                                if part:IsA("BasePart") and (hrp.Position - part.Position).Magnitude < 100 then  -- 假设raid范围100单位
+                                    isInDungeon = true
                                     break
                                 end
                             end
+                            if isInDungeon then
+                                currentDungeon = dungeon
+                                print("[DEBUG] Set currentDungeon to:", dungeon.Name)
+                                break
+                            end
                         end
-                        if currentRoom then
-                            local doorsFolder = currentRoom:FindFirstChild("Doors")
-                            if doorsFolder then
-                                -- 打印所有Doors子对象以调试
-                                print("[DEBUG] Doors folder children:")
-                                for _, child in pairs(doorsFolder:GetChildren()) do
-                                    print("[DEBUG] Door child: Name=" .. child.Name .. ", Class=" .. child.ClassName)
-                                end
-                                -- 尝试获取门（根据你的路径）
-                                doors = {
-                                    doorsFolder:GetChildren()[3],
-                                    doorsFolder:FindFirstChild("ModelX"),  -- 使用FindFirstChild以防不存在
-                                    doorsFolder:GetChildren()[2],
-                                    doorsFolder:GetChildren()[4]
-                                }
-                                print("[DEBUG] Doors attempted, count:", #doors)
-                                for i, door in ipairs(doors) do
-                                    print("[DEBUG] Door", i, "Name:", door and door.Name or "nil", "Class:", door and door.ClassName or "nil")
-                                end
-                            else
-                                print("[DEBUG] Doors folder not found in currentRoom")
+                    end
+                    -- Fallback：如果没找到，使用第一个匹配的raid
+                    if not currentDungeon then
+                        for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
+                            if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
+                                currentDungeon = dungeon
+                                print("[DEBUG] Fallback: Set currentDungeon to:", dungeon.Name)
+                                break
+                            end
+                        end
+                    end
+                end)
+            end
+
+            -- 获取当前raid和门列表
+            local doors = {}
+            if currentDungeon then
+                pcall(function()
+                    print("[DEBUG] Processing currentDungeon:", currentDungeon.Name)
+                    -- 打印dungeon的所有子对象以调试
+                    print("[DEBUG] Dungeon children:")
+                    for _, child in pairs(currentDungeon:GetChildren()) do
+                        print("[DEBUG] Child: Name=" .. child.Name .. ", Class=" .. child.ClassName)
+                    end
+                    if not currentRoom then
+                        -- 查找下一个未处理的room（先Starting_Room，然后Monsters_Room）
+                        local rooms = {}
+                        for _, room in pairs(currentDungeon:GetChildren()) do
+                            if room.Name:find("^Starting_Room_") or room.Name:find("^Monsters_Room_") then
+                                table.insert(rooms, room)
+                            end
+                        end
+                        print("[DEBUG] Found rooms count:", #rooms)
+                        for _, room in ipairs(rooms) do
+                            print("[DEBUG] Room: Name=" .. room.Name .. ", Processed=" .. tostring(processedRooms[room.Name] or false))
+                        end
+                        -- 排序：Starting_Room优先，然后Monsters_Room按名称
+                        table.sort(rooms, function(a, b)
+                            if a.Name:find("^Starting_Room_") and not b.Name:find("^Starting_Room_") then return true end
+                            if b.Name:find("^Starting_Room_") and not a.Name:find("^Starting_Room_") then return false end
+                            return a.Name < b.Name
+                        end)
+                        for _, room in ipairs(rooms) do
+                            if not processedRooms[room.Name] then
+                                currentRoom = room
+                                print("[DEBUG] Set currentRoom to:", room.Name)
+                                break
+                            end
+                        end
+                    end
+                    if currentRoom then
+                        local doorsFolder = currentRoom:FindFirstChild("Doors")
+                        if doorsFolder then
+                            -- 打印所有Doors子对象以调试
+                            print("[DEBUG] Doors folder children:")
+                            for _, child in pairs(doorsFolder:GetChildren()) do
+                                print("[DEBUG] Door child: Name=" .. child.Name .. ", Class=" .. child.ClassName)
+                            end
+                            -- 尝试获取门（根据你的路径）
+                            doors = {
+                                doorsFolder:GetChildren()[3],
+                                doorsFolder:FindFirstChild("ModelX"),  -- 使用FindFirstChild以防不存在
+                                doorsFolder:GetChildren()[2],
+                                doorsFolder:GetChildren()[4]
+                            }
+                            print("[DEBUG] Doors attempted, count:", #doors)
+                            for i, door in ipairs(doors) do
+                                print("[DEBUG] Door", i, "Name:", door and door.Name or "nil", "Class:", door and door.ClassName or "nil")
                             end
                         else
-                            print("[DEBUG] No currentRoom set")
+                            print("[DEBUG] Doors folder not found in currentRoom")
                         end
-                        break  -- 找到一个raid后停止
+                    else
+                        print("[DEBUG] No currentRoom set")
                     end
-                end
-            end)
+                end)
+            else
+                print("[DEBUG] No currentDungeon set")
+            end
 
             -- 检查门并开门（如果怪物清空且有currentRoom）
             if not hasMonsters and #doors > 0 and currentRoom then
