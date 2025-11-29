@@ -1149,6 +1149,11 @@ local function StartDungeonAutoFarm()
                 for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
                     if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
                         print("[DEBUG] Found dungeon:", dungeon.Name)
+                        -- 打印dungeon的所有子对象以调试
+                        print("[DEBUG] Dungeon children:")
+                        for _, child in pairs(dungeon:GetChildren()) do
+                            print("[DEBUG] Child: Name=" .. child.Name .. ", Class=" .. child.ClassName)
+                        end
                         if not currentRoom then
                             -- 查找下一个未处理的room（先Starting_Room，然后Monsters_Room）
                             local rooms = {}
@@ -1156,6 +1161,10 @@ local function StartDungeonAutoFarm()
                                 if room.Name:find("^Starting_Room_") or room.Name:find("^Monsters_Room_") then
                                     table.insert(rooms, room)
                                 end
+                            end
+                            print("[DEBUG] Found rooms count:", #rooms)
+                            for _, room in ipairs(rooms) do
+                                print("[DEBUG] Room: Name=" .. room.Name .. ", Processed=" .. tostring(processedRooms[room.Name] or false))
                             end
                             -- 排序：Starting_Room优先，然后Monsters_Room按名称
                             table.sort(rooms, function(a, b)
