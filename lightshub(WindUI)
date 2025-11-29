@@ -1133,6 +1133,7 @@ local function StartDungeonAutoFarm()
     local processedRooms = {}  -- 跟踪已处理的room
     local currentRoom = nil  -- 当前正在处理的room
     local currentDungeon = nil  -- 当前raid
+    local openedDoorsInRoom = {}  -- 跟踪当前room内已开的门
     task.spawn(function()
         while getgenv().AutoDungeonFarmRunning and getgenv().InDungeon do
             print("[DEBUG] Loop running, InDungeon:", getgenv().InDungeon)
@@ -1194,6 +1195,7 @@ local function StartDungeonAutoFarm()
                         for _, room in ipairs(rooms) do
                             if not processedRooms[room.Name] then
                                 currentRoom = room
+                                openedDoorsInRoom = {}  -- 重置room内门跟踪
                                 print("[DEBUG] Set currentRoom to:", room.Name)
                                 break
                             end
@@ -1229,10 +1231,15 @@ local function StartDungeonAutoFarm()
                 print("[DEBUG] No currentDungeon set")
             end
 
-            -- 检查门并开门（如果怪物清空且有currentRoom）
+            -- 检查门并开门（如果怪物清空且有currentRoom，且room内还有未开的门）
             if not hasMonsters and #doors > 0 and currentRoom then
                 print("[DEBUG] Monsters cleared, checking doors for currentRoom:", currentRoom.Name)
+                local openedDoor = false
                 for _, door in ipairs(doors) do
+                    if openedDoorsInRoom[door and door.Name] then
+                        print("[DEBUG] Door already opened in room, skipping:", door.Name)
+                        continue
+                    end
                     local doorPart = nil
                     if door and door:IsA("BasePart") then
                         doorPart = door
@@ -1274,8 +1281,9 @@ local function StartDungeonAutoFarm()
                             task.wait(0.1)
                             game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
                             task.wait(2)  -- 等待开门后继续
-                            processedRooms[currentRoom.Name] = true
-                            currentRoom = nil  -- 清除当前room
+                            openedDoorsInRoom[door.Name] = true
+                            openedDoor = true
+                            print("[DEBUG] Door opened in room:", door.Name)
                             break  -- 开一个门后停止检查
                         else
                             print("[DEBUG] Door has Wall, skipping")
@@ -1283,6 +1291,13 @@ local function StartDungeonAutoFarm()
                     else
                         print("[DEBUG] Door part not BasePart or nil")
                     end
+                end
+                -- 如果room内所有门都开过，清除room
+                if not openedDoor then
+                    processedRooms[currentRoom.Name] = true
+                    currentRoom = nil
+                    openedDoorsInRoom = {}
+                    print("[DEBUG] All doors in room opened, processed room:", currentRoom.Name, "set currentRoom to nil")
                 end
             else
                 print("[DEBUG] Not opening: hasMonsters =", hasMonsters, "Doors count =", #doors, "currentRoom =", currentRoom and currentRoom.Name or "nil")
