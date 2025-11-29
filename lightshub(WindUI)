@@ -1132,6 +1132,7 @@ local function StartDungeonAutoFarm()
     print("[DEBUG] AutoDungeonFarm started")
     local initialFarmingDone = false  -- 标志是否已完成初始farm
     local initialDoorOpened = false  -- 标志是否已开初始门
+    local cycleDoorOpened = false  -- 标志当前循环是否已开门
     task.spawn(function()
         while getgenv().AutoDungeonFarmRunning and getgenv().InDungeon do
             print("[DEBUG] Loop running, InDungeon:", getgenv().InDungeon)
@@ -1162,8 +1163,8 @@ local function StartDungeonAutoFarm()
                                     break
                                 end
                             end
-                        elseif initialDoorOpened and not hasMonsters then
-                            -- 继续farm完后：查找Monsters_Room
+                        elseif initialDoorOpened and not hasMonsters and not cycleDoorOpened then
+                            -- 清完mobs后：查找Monsters_Room
                             for _, room in pairs(dungeon:GetChildren()) do
                                 if room.Name:find("^Monsters_Room_") then
                                     targetRoom = room
@@ -1203,8 +1204,8 @@ local function StartDungeonAutoFarm()
             end)
 
             -- 检查门并开门
-            if #doors > 0 and ((not initialDoorOpened and initialFarmingDone) or (initialDoorOpened and not hasMonsters)) then
-                print("[DEBUG] Checking doors, initialFarmingDone:", initialFarmingDone, "initialDoorOpened:", initialDoorOpened, "hasMonsters:", hasMonsters)
+            if #doors > 0 and ((not initialDoorOpened and initialFarmingDone) or (initialDoorOpened and not hasMonsters and not cycleDoorOpened)) then
+                print("[DEBUG] Checking doors, initialFarmingDone:", initialFarmingDone, "initialDoorOpened:", initialDoorOpened, "hasMonsters:", hasMonsters, "cycleDoorOpened:", cycleDoorOpened)
                 for _, door in ipairs(doors) do
                     local doorPart = nil
                     if door and door:IsA("BasePart") then
@@ -1250,6 +1251,9 @@ local function StartDungeonAutoFarm()
                             if not initialDoorOpened then
                                 initialDoorOpened = true
                                 print("[DEBUG] Initial door opened, set initialDoorOpened to true")
+                            else
+                                cycleDoorOpened = true
+                                print("[DEBUG] Cycle door opened, set cycleDoorOpened to true")
                             end
                             print("[DEBUG] Door opened")
                             break  -- 开一个门后停止检查
@@ -1261,7 +1265,7 @@ local function StartDungeonAutoFarm()
                     end
                 end
             else
-                print("[DEBUG] Not opening: initialFarmingDone =", initialFarmingDone, "initialDoorOpened =", initialDoorOpened, "hasMonsters =", hasMonsters, "Doors count =", #doors)
+                print("[DEBUG] Not opening: initialFarmingDone =", initialFarmingDone, "initialDoorOpened =", initialDoorOpened, "hasMonsters =", hasMonsters, "cycleDoorOpened =", cycleDoorOpened, "Doors count =", #doors)
             end
 
             -- 原有农场逻辑
@@ -1281,6 +1285,11 @@ local function StartDungeonAutoFarm()
                 if not initialFarmingDone and not hasMonsters then
                     initialFarmingDone = true
                     print("[DEBUG] Initial farming done, set initialFarmingDone to true")
+                end
+                -- 清完mobs后清除cycleDoorOpened
+                if initialDoorOpened and not hasMonsters and cycleDoorOpened then
+                    cycleDoorOpened = false
+                    print("[DEBUG] Monsters cleared again, reset cycleDoorOpened to false")
                 end
             end
             task.wait(0.05)
