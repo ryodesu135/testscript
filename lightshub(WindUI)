@@ -1306,7 +1306,7 @@ local function StartDungeonAutoFarm()
                             game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
                             task.wait(0.5)
                             game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
-                            task.wait(0.5))  -- 等待开门后继续
+                            task.wait(0.5)  -- 等待开门后继续
                             openedDoorsInRoom[door.Name] = true
                             openedDoor = true
                             print("[DEBUG] Door opened in room:", door.Name)
