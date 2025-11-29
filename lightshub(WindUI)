@@ -1130,6 +1130,7 @@ local function StartDungeonAutoFarm()
     if getgenv().AutoDungeonFarmRunning then return end
     getgenv().AutoDungeonFarmRunning = true
     print("[DEBUG] AutoDungeonFarm started")
+    task.wait(0.7)  -- 进入raid后等待0.7秒
     local processedRooms = {}  -- 跟踪已处理的room
     local currentRoom = nil  -- 当前正在处理的room
     local currentDungeon = nil  -- 当前raid
@@ -1286,11 +1287,13 @@ local function StartDungeonAutoFarm()
                         end
                         print("[DEBUG] Has Wall:", hasWall)
                         if not hasWall then
-                            -- 可开门：传送到靠近门的位置（门前10单位）
-                            local teleportPos = doorPart.CFrame + Vector3.new(0, 0, -10)
+                            -- 可开门：传送到靠近门的位置（门前6单位）
+                            local teleportPos = doorPart.CFrame + Vector3.new(0, 0, -6)
                             print("[DEBUG] Teleporting near door to:", teleportPos)
                             hrp.CFrame = teleportPos
-                            task.wait(0.5)  -- 等待传送
+                            -- 设置视角面向门
+                            hrp.CFrame = CFrame.new(hrp.Position, doorPart.Position)
+                            task.wait(0.5)  -- 等待传送和视角调整
                             game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
                             task.wait(0.1)
                             game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
