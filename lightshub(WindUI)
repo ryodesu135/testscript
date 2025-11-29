@@ -1308,6 +1308,7 @@ local function StartDungeonAutoFarm()
                             task.wait(2)  -- 等待开门后继续
                             openedDoorsInRoom[door.Name] = true
                             openedDoor = true
+                            print("[DEBUG] Door opened in room:", door.Name)
                             break  -- 开一个门后停止检查
                         else
                             print("[DEBUG] Door has Wall, skipping")
@@ -1340,9 +1341,6 @@ local function StartDungeonAutoFarm()
                     end
                 end
             end
-
-            -- 持续更新相机跟随玩家
-            workspace.CurrentCamera.CFrame = CFrame.lookAt(hrp.Position, hrp.Position + hrp.CFrame.LookVector * 10)
             task.wait(0.05)
         end
     end)
