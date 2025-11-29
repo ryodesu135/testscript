@@ -1276,7 +1276,6 @@ local function StartDungeonAutoFarm()
                             task.wait(2)  -- 等待开门后继续
                             processedRooms[currentRoom.Name] = true
                             currentRoom = nil  -- 清除当前room
-                            print("[DEBUG] Door opened, processed room:", currentRoom.Name, "set currentRoom to nil")
                             break  -- 开一个门后停止检查
                         else
                             print("[DEBUG] Door has Wall, skipping")
