@@ -1297,10 +1297,8 @@ local function StartDungeonAutoFarm()
                             local teleportPos = doorCenter + (doorPart.CFrame.LookVector * -15)  -- 更远距离
                             print("[DEBUG] Teleporting to center front of door:", teleportPos)
                             hrp.CFrame = CFrame.new(teleportPos)
-                            -- 设置角色面向门，相机面向玩家character的面向方向
+                            -- 设置角色面向门
                             hrp.CFrame = CFrame.lookAt(hrp.Position, doorCenter)
-                            workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
-                            workspace.CurrentCamera.CFrame = CFrame.lookAt(hrp.Position, hrp.Position + hrp.CFrame.LookVector * 10)
                             task.wait(0.5)  -- 等待传送和视角调整
                             game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
                             task.wait(0.1)
@@ -1341,9 +1339,6 @@ local function StartDungeonAutoFarm()
                     end
                 end
             end
-
-            -- 持续更新相机跟随玩家
-            workspace.CurrentCamera.CFrame = CFrame.lookAt(hrp.Position, hrp.Position + hrp.CFrame.LookVector * 10)
             task.wait(0.05)
         end
     end)
