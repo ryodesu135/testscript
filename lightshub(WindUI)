@@ -1222,9 +1222,10 @@ local function StartDungeonAutoFarm()
                         end
                         print("[DEBUG] Has Wall:", hasWall)
                         if not hasWall then
-                            -- 可开门：传送并按 E
-                            print("[DEBUG] Opening door at:", doorPart.CFrame)
-                            hrp.CFrame = doorPart.CFrame
+                            -- 可开门：传送到靠近门的位置（门前3单位）
+                            local teleportPos = doorPart.CFrame + Vector3.new(0, 0, -3)
+                            print("[DEBUG] Teleporting near door to:", teleportPos)
+                            hrp.CFrame = teleportPos
                             task.wait(0.5)  -- 等待传送
                             game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
                             task.wait(0.1)
