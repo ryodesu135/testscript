@@ -1144,34 +1144,20 @@ local function StartDungeonAutoFarm()
             local hasMonsters = monstersFolder and #monstersFolder:GetChildren() > 0
             print("[DEBUG] Monsters folder exists:", monstersFolder ~= nil, "Has monsters:", hasMonsters, "Count:", monstersFolder and #monstersFolder:GetChildren() or 0)
 
-            -- 检测当前raid（基于玩家位置）
+            -- 检测当前raid（查找有Starting_Room的raid）
             if not currentDungeon then
                 pcall(function()
                     for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
                         if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
-                            -- 检查玩家是否在raid内（简单检查：raid内是否有BasePart包含玩家位置）
-                            local isInDungeon = false
-                            for _, part in pairs(dungeon:GetDescendants()) do
-                                if part:IsA("BasePart") and (hrp.Position - part.Position).Magnitude < 100 then  -- 假设raid范围100单位
-                                    isInDungeon = true
+                            -- 检查raid是否有Starting_Room（假设只有一个活跃raid）
+                            for _, room in pairs(dungeon:GetChildren()) do
+                                if room.Name:find("^Starting_Room_") then
+                                    currentDungeon = dungeon
+                                    print("[DEBUG] Set currentDungeon to:", dungeon.Name)
                                     break
                                 end
                             end
-                            if isInDungeon then
-                                currentDungeon = dungeon
-                                print("[DEBUG] Set currentDungeon to:", dungeon.Name)
-                                break
-                            end
-                        end
-                    end
-                    -- Fallback：如果没找到，使用第一个匹配的raid
-                    if not currentDungeon then
-                        for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
-                            if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
-                                currentDungeon = dungeon
-                                print("[DEBUG] Fallback: Set currentDungeon to:", dungeon.Name)
-                                break
-                            end
+                            if currentDungeon then break end
                         end
                     end
                 end)
