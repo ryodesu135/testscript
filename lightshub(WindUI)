@@ -1130,7 +1130,6 @@ local function StartDungeonAutoFarm()
     if getgenv().AutoDungeonFarmRunning then return end
     getgenv().AutoDungeonFarmRunning = true
     print("[DEBUG] AutoDungeonFarm started")
-    local openedDoors = {}  -- 记录已开的门（使用门名称作为键）
     task.spawn(function()
         while getgenv().AutoDungeonFarmRunning and getgenv().InDungeon do
             print("[DEBUG] Loop running, InDungeon:", getgenv().InDungeon)
@@ -1189,12 +1188,8 @@ local function StartDungeonAutoFarm()
 
             -- 检查门并开门（如果怪物清空）
             if not hasMonsters and #doors > 0 then
-                print("[DEBUG] Monsters cleared, checking doors. Opened doors count:", #openedDoors)
+                print("[DEBUG] Monsters cleared, checking doors")
                 for _, door in ipairs(doors) do
-                    if openedDoors[door and door.Name] then
-                        print("[DEBUG] Door already opened, skipping:", door.Name)
-                        continue  -- 跳过已开的门
-                    end
                     local doorPart = nil
                     if door and door:IsA("BasePart") then
                         doorPart = door
@@ -1236,8 +1231,7 @@ local function StartDungeonAutoFarm()
                             task.wait(0.1)
                             game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
                             task.wait(2)  -- 等待开门后继续
-                            openedDoors[door.Name] = true  -- 记录已开的门
-                            print("[DEBUG] Door opened, added to openedDoors:", door.Name)
+                            print("[DEBUG] Door opened")
                             break  -- 开一个门后停止检查
                         else
                             print("[DEBUG] Door has Wall, skipping")
