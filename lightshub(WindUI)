@@ -1190,9 +1190,25 @@ local function StartDungeonAutoFarm()
             if not hasMonsters and #doors > 0 then
                 print("[DEBUG] Monsters cleared, checking doors")
                 for _, door in ipairs(doors) do
+                    local doorPart = nil
                     if door and door:IsA("BasePart") then
+                        doorPart = door
+                    elseif door and door:IsA("Model") then
+                        -- 如果是Model，使用PrimaryPart或第一个BasePart子对象
+                        doorPart = door.PrimaryPart
+                        if not doorPart then
+                            for _, child in pairs(door:GetChildren()) do
+                                if child:IsA("BasePart") then
+                                    doorPart = child
+                                    break
+                                end
+                            end
+                        end
+                        print("[DEBUG] Using door part from Model:", doorPart and doorPart.Name or "nil")
+                    end
+                    if doorPart and doorPart:IsA("BasePart") then
                         local hasWall = false
-                        for _, child in pairs(door:GetChildren()) do
+                        for _, child in pairs(doorPart:GetChildren()) do
                             if child.ClassName == "Part" and child.Name == "Wall" then
                                 hasWall = true
                                 print("[DEBUG] Door has Wall:", child.Name)
@@ -1201,8 +1217,8 @@ local function StartDungeonAutoFarm()
                         end
                         if not hasWall then
                             -- 可开门：传送并按 E
-                            print("[DEBUG] Opening door at:", door.CFrame)
-                            hrp.CFrame = door.CFrame
+                            print("[DEBUG] Opening door at:", doorPart.CFrame)
+                            hrp.CFrame = doorPart.CFrame
                             task.wait(0.5)  -- 等待传送
                             game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
                             task.wait(0.1)
@@ -1213,7 +1229,7 @@ local function StartDungeonAutoFarm()
                             print("[DEBUG] Door has Wall, skipping")
                         end
                     else
-                        print("[DEBUG] Door not BasePart or nil")
+                        print("[DEBUG] Door part not BasePart or nil")
                     end
                 end
             else
