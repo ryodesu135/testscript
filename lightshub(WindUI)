@@ -1207,14 +1207,20 @@ local function StartDungeonAutoFarm()
                         print("[DEBUG] Using door part from Model:", doorPart and doorPart.Name or "nil")
                     end
                     if doorPart and doorPart:IsA("BasePart") then
+                        -- 打印门子对象以调试
+                        print("[DEBUG] Door part children for", doorPart.Name .. ":")
+                        for _, child in pairs(doorPart:GetChildren()) do
+                            print("[DEBUG] Child: Name=" .. child.Name .. ", Class=" .. child.ClassName)
+                        end
                         local hasWall = false
                         for _, child in pairs(doorPart:GetChildren()) do
                             if child.ClassName == "Part" and child.Name == "Wall" then
                                 hasWall = true
-                                print("[DEBUG] Door has Wall:", child.Name)
+                                print("[DEBUG] Found Wall:", child.Name)
                                 break
                             end
                         end
+                        print("[DEBUG] Has Wall:", hasWall)
                         if not hasWall then
                             -- 可开门：传送并按 E
                             print("[DEBUG] Opening door at:", doorPart.CFrame)
