@@ -1341,6 +1341,9 @@ local function StartDungeonAutoFarm()
                     end
                 end
             end
+
+            -- 持续更新相机跟随玩家
+            workspace.CurrentCamera.CFrame = CFrame.lookAt(hrp.Position, hrp.Position + hrp.CFrame.LookVector * 10)
             task.wait(0.05)
         end
     end)
