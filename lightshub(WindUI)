@@ -1130,6 +1130,8 @@ local function StartDungeonAutoFarm()
     if getgenv().AutoDungeonFarmRunning then return end
     getgenv().AutoDungeonFarmRunning = true
     print("[DEBUG] AutoDungeonFarm started")
+    local initialFarmingDone = false  -- 标志是否已完成初始farm
+    local initialDoorOpened = false  -- 标志是否已开初始门
     task.spawn(function()
         while getgenv().AutoDungeonFarmRunning and getgenv().InDungeon do
             print("[DEBUG] Loop running, InDungeon:", getgenv().InDungeon)
@@ -1141,56 +1143,68 @@ local function StartDungeonAutoFarm()
             local hasMonsters = monstersFolder and #monstersFolder:GetChildren() > 0
             print("[DEBUG] Monsters folder exists:", monstersFolder ~= nil, "Has monsters:", hasMonsters, "Count:", monstersFolder and #monstersFolder:GetChildren() or 0)
 
-            -- 获取当前raid和门列表（在怪物清空时查找Monsters_Room的门）
+            -- 获取当前raid和门列表
             local doors = {}
-            if not hasMonsters then
-                pcall(function()
-                    for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
-                        if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
-                            print("[DEBUG] Found dungeon:", dungeon.Name)
-                            -- 动态查找 Monsters_Room（名称以 "Monsters_Room_" 开头）
-                            local monstersRoom = nil
+            pcall(function()
+                for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
+                    if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
+                        print("[DEBUG] Found dungeon:", dungeon.Name)
+                        local targetRoom = nil
+                        if not initialFarmingDone and hasMonsters then
+                            -- 初始farm：有怪物时不查找门
+                            print("[DEBUG] Initial farming in progress")
+                        elseif not initialDoorOpened then
+                            -- 初始farm完后：查找Starting_Room
+                            for _, room in pairs(dungeon:GetChildren()) do
+                                if room.Name:find("^Starting_Room_") then
+                                    targetRoom = room
+                                    print("[DEBUG] Found Starting_Room:", room.Name)
+                                    break
+                                end
+                            end
+                        elseif initialDoorOpened and not hasMonsters then
+                            -- 继续farm完后：查找Monsters_Room
                             for _, room in pairs(dungeon:GetChildren()) do
                                 if room.Name:find("^Monsters_Room_") then
-                                    monstersRoom = room
+                                    targetRoom = room
                                     print("[DEBUG] Found Monsters_Room:", room.Name)
                                     break
                                 end
                             end
-                            if monstersRoom then
-                                local doorsFolder = monstersRoom:FindFirstChild("Doors")
-                                if doorsFolder then
-                                    -- 打印所有Doors子对象以调试
-                                    print("[DEBUG] Doors folder children:")
-                                    for _, child in pairs(doorsFolder:GetChildren()) do
-                                        print("[DEBUG] Door child: Name=" .. child.Name .. ", Class=" .. child.ClassName)
-                                    end
-                                    -- 尝试获取门（根据你的路径）
-                                    doors = {
-                                        doorsFolder:GetChildren()[3],
-                                        doorsFolder:FindFirstChild("ModelX"),  -- 使用FindFirstChild以防不存在
-                                        doorsFolder:GetChildren()[2],
-                                        doorsFolder:GetChildren()[4]
-                                    }
-                                    print("[DEBUG] Doors attempted, count:", #doors)
-                                    for i, door in ipairs(doors) do
-                                        print("[DEBUG] Door", i, "Name:", door and door.Name or "nil", "Class:", door and door.ClassName or "nil")
-                                    end
-                                else
-                                    print("[DEBUG] Doors folder not found in Monsters_Room")
+                        end
+                        if targetRoom then
+                            local doorsFolder = targetRoom:FindFirstChild("Doors")
+                            if doorsFolder then
+                                -- 打印所有Doors子对象以调试
+                                print("[DEBUG] Doors folder children:")
+                                for _, child in pairs(doorsFolder:GetChildren()) do
+                                    print("[DEBUG] Door child: Name=" .. child.Name .. ", Class=" .. child.ClassName)
+                                end
+                                -- 尝试获取门（根据你的路径）
+                                doors = {
+                                    doorsFolder:GetChildren()[3],
+                                    doorsFolder:FindFirstChild("ModelX"),  -- 使用FindFirstChild以防不存在
+                                    doorsFolder:GetChildren()[2],
+                                    doorsFolder:GetChildren()[4]
+                                }
+                                print("[DEBUG] Doors attempted, count:", #doors)
+                                for i, door in ipairs(doors) do
+                                    print("[DEBUG] Door", i, "Name:", door and door.Name or "nil", "Class:", door and door.ClassName or "nil")
                                 end
                             else
-                                print("[DEBUG] Monsters_Room not found in dungeon")
+                                print("[DEBUG] Doors folder not found in target room")
                             end
-                            break  -- 找到一个raid后停止
+                        else
+                            print("[DEBUG] Target room not found")
                         end
+                        break  -- 找到一个raid后停止
                     end
-                end)
-            end
+                end
+            end)
 
-            -- 检查门并开门（如果怪物清空且有门）
-            if not hasMonsters and #doors > 0 then
-                print("[DEBUG] Monsters cleared, checking doors in Monsters_Room")
+            -- 检查门并开门
+            if #doors > 0 and ((not initialDoorOpened and initialFarmingDone) or (initialDoorOpened and not hasMonsters)) then
+                print("[DEBUG] Checking doors, initialFarmingDone:", initialFarmingDone, "initialDoorOpened:", initialDoorOpened, "hasMonsters:", hasMonsters)
                 for _, door in ipairs(doors) do
                     local doorPart = nil
                     if door and door:IsA("BasePart") then
@@ -1233,6 +1247,10 @@ local function StartDungeonAutoFarm()
                             task.wait(0.1)
                             game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
                             task.wait(2)  -- 等待开门后继续
+                            if not initialDoorOpened then
+                                initialDoorOpened = true
+                                print("[DEBUG] Initial door opened, set initialDoorOpened to true")
+                            end
                             print("[DEBUG] Door opened")
                             break  -- 开一个门后停止检查
                         else
@@ -1243,7 +1261,7 @@ local function StartDungeonAutoFarm()
                     end
                 end
             else
-                print("[DEBUG] Not opening: HasMonsters =", hasMonsters, "Doors count =", #doors)
+                print("[DEBUG] Not opening: initialFarmingDone =", initialFarmingDone, "initialDoorOpened =", initialDoorOpened, "hasMonsters =", hasMonsters, "Doors count =", #doors)
             end
 
             -- 原有农场逻辑
@@ -1258,6 +1276,11 @@ local function StartDungeonAutoFarm()
                             repeat task.wait(0.05) until not mob.Parent or not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon
                         end
                     end
+                end
+                -- 设置初始farm完成
+                if not initialFarmingDone and not hasMonsters then
+                    initialFarmingDone = true
+                    print("[DEBUG] Initial farming done, set initialFarmingDone to true")
                 end
             end
             task.wait(0.05)
