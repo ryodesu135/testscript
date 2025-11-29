@@ -1159,15 +1159,21 @@ local function StartDungeonAutoFarm()
                         if startingRoom then
                             local doorsFolder = startingRoom:FindFirstChild("Doors")
                             if doorsFolder then
+                                -- 打印所有Doors子对象以调试
+                                print("[DEBUG] Doors folder children:")
+                                for _, child in pairs(doorsFolder:GetChildren()) do
+                                    print("[DEBUG] Door child: Name=" .. child.Name .. ", Class=" .. child.ClassName)
+                                end
+                                -- 尝试获取门（根据你的路径）
                                 doors = {
                                     doorsFolder:GetChildren()[3],
-                                    doorsFolder.ModelX,
+                                    doorsFolder:FindFirstChild("ModelX"),  -- 使用FindFirstChild以防不存在
                                     doorsFolder:GetChildren()[2],
                                     doorsFolder:GetChildren()[4]
                                 }
-                                print("[DEBUG] Doors found, count:", #doors)
+                                print("[DEBUG] Doors attempted, count:", #doors)
                                 for i, door in ipairs(doors) do
-                                    print("[DEBUG] Door", i, "Name:", door and door.Name, "Class:", door and door.ClassName)
+                                    print("[DEBUG] Door", i, "Name:", door and door.Name or "nil", "Class:", door and door.ClassName or "nil")
                                 end
                             else
                                 print("[DEBUG] Doors folder not found in Starting_Room")
