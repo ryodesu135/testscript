@@ -1286,8 +1286,8 @@ local function StartDungeonAutoFarm()
                         end
                         print("[DEBUG] Has Wall:", hasWall)
                         if not hasWall then
-                            -- 可开门：传送到靠近门的位置（门前6单位）
-                            local teleportPos = doorPart.CFrame + Vector3.new(0, 0, -6)
+                            -- 可开门：传送到靠近门的位置（门前10单位）
+                            local teleportPos = doorPart.CFrame + Vector3.new(0, 0, -10)
                             print("[DEBUG] Teleporting near door to:", teleportPos)
                             hrp.CFrame = teleportPos
                             task.wait(0.5)  -- 等待传送
