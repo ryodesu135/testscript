@@ -842,7 +842,7 @@ local RollDropdown = RollTab:Dropdown({
     end,
 })
 
--- Auto Open Star Toggle
+-- Auto Roll Toggle
 RollTab:Toggle({
     Flag = "AutoRoll1",
     Title = "Auto Roll",
@@ -856,8 +856,8 @@ RollTab:Toggle({
                 while getgenv().AutoRoll do
                     pcall(function()
                         print("[DEBUG] Attempting to roll, selectedRolls:", getgenv().selectedRolls)
-                        -- 生成 Name：移除 "[World X] " 前缀，并将空格替换为下划线
-                        local name = string.gsub(getgenv().selectedRolls, "^%[World %d+%] ", ""):gsub(" ", "_")
+                        -- 生成 Name：移除 "[W X] " 前缀，并将空格替换为下划线
+                        local name = string.gsub(getgenv().selectedRolls, "^%[W%d+%] ", ""):gsub(" ", "_")
                         print("[DEBUG] Generated name:", name)
                         game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                             ["Open_Amount"] = 5,
@@ -1136,6 +1136,57 @@ local function StartDungeonAutoFarm()
             if not hrp then task.wait(1) continue end
 
             local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
+            local hasMonsters = monstersFolder and #monstersFolder:GetChildren() > 0
+
+            -- 获取当前raid和门列表
+            local doors = {}
+            pcall(function()
+                for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
+                    if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
+                        local startingRoom = dungeon:FindFirstChild("Starting_Room_ea5b-2513fdad4ce8bb5e2fdf7a704bdf")  -- 假设所有raid的Starting_Room名称相同
+                        if startingRoom then
+                            local doorsFolder = startingRoom:FindFirstChild("Doors")
+                            if doorsFolder then
+                                doors = {
+                                    doorsFolder:GetChildren()[3],
+                                    doorsFolder.ModelX,
+                                    doorsFolder:GetChildren()[2],
+                                    doorsFolder:GetChildren()[4]
+                                }
+                            end
+                        end
+                        break  -- 找到一个raid后停止
+                    end
+                end
+            end)
+
+            -- 检查门并开门（如果怪物清空）
+            if not hasMonsters and #doors > 0 then
+                for _, door in ipairs(doors) do
+                    if door and door:IsA("BasePart") then
+                        local hasWall = false
+                        for _, child in pairs(door:GetChildren()) do
+                            if child.ClassName == "Part" and child.Name == "Wall" then
+                                hasWall = true
+                                break
+                            end
+                        end
+                        if not hasWall then
+                            -- 可开门：传送并按 E
+                            print("[DEBUG] Monsters cleared, opening door at:", door.CFrame)
+                            hrp.CFrame = door.CFrame
+                            task.wait(0.5)  -- 等待传送
+                            game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
+                            task.wait(0.1)
+                            game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
+                            task.wait(2)  -- 等待开门后继续
+                            break  -- 开一个门后停止检查
+                        end
+                    end
+                end
+            end
+
+            -- 原有农场逻辑
             if monstersFolder then
                 for _, mob in pairs(monstersFolder:GetChildren()) do
                     if not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then break end
