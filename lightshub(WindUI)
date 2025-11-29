@@ -1143,7 +1143,14 @@ local function StartDungeonAutoFarm()
             pcall(function()
                 for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
                     if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
-                        local startingRoom = dungeon:FindFirstChild("Starting_Room_ea5b-2513fdad4ce8bb5e2fdf7a704bdf")  -- 假设所有raid的Starting_Room名称相同
+                        -- 动态查找 Starting_Room（名称以 "Starting_Room_" 开头）
+                        local startingRoom = nil
+                        for _, room in pairs(dungeon:GetChildren()) do
+                            if room.Name:find("^Starting_Room_") then
+                                startingRoom = room
+                                break
+                            end
+                        end
                         if startingRoom then
                             local doorsFolder = startingRoom:FindFirstChild("Doors")
                             if doorsFolder then
@@ -1189,7 +1196,7 @@ local function StartDungeonAutoFarm()
             -- 原有农场逻辑
             if monstersFolder then
                 for _, mob in pairs(monstersFolder:GetChildren()) do
-                    if not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then break end
+                    if not getgenv().AutoDungeonFarmRunning or not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then break end
                     if mob:IsA("Model") and mob:GetAttribute("Is_Dungeon") == true then
                         local mobHRP = mob:FindFirstChild("HumanoidRootPart")
                         if mobHRP then
