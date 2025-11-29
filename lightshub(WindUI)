@@ -1175,10 +1175,10 @@ local function StartDungeonAutoFarm()
                         print("[DEBUG] Child: Name=" .. child.Name .. ", Class=" .. child.ClassName)
                     end
                     if not currentRoom then
-                        -- 查找下一个未处理的room（先Starting_Room，然后Monsters_Room）
+                        -- 查找下一个未处理的room（先Starting_Room，然后Treasure_Room，Merchant_Room，最后Monsters_Room）
                         local rooms = {}
                         for _, room in pairs(currentDungeon:GetChildren()) do
-                            if room.Name:find("^Starting_Room_") or room.Name:find("^Monsters_Room_") then
+                            if room.Name:find("^Starting_Room_") or room.Name:find("^Treasure_Room_") or room.Name:find("^Merchant_Room_") or room.Name:find("^Monsters_Room_") then
                                 table.insert(rooms, room)
                             end
                         end
@@ -1186,11 +1186,25 @@ local function StartDungeonAutoFarm()
                         for _, room in ipairs(rooms) do
                             print("[DEBUG] Room: Name=" .. room.Name .. ", Processed=" .. tostring(processedRooms[room.Name] or false))
                         end
-                        -- 排序：Starting_Room优先，然后Monsters_Room按名称
+                        -- 排序：Starting_Room优先，然后Treasure_Room，Merchant_Room，最后Monsters_Room按名称
                         table.sort(rooms, function(a, b)
-                            if a.Name:find("^Starting_Room_") and not b.Name:find("^Starting_Room_") then return true end
-                            if b.Name:find("^Starting_Room_") and not a.Name:find("^Starting_Room_") then return false end
-                            return a.Name < b.Name
+                            local priority = {
+                                ["Starting_Room_"] = 1,
+                                ["Treasure_Room_"] = 2,
+                                ["Merchant_Room_"] = 3,
+                                ["Monsters_Room_"] = 4
+                            }
+                            local aPriority = 5
+                            local bPriority = 5
+                            for prefix, pri in pairs(priority) do
+                                if a.Name:find("^" .. prefix) then aPriority = pri end
+                                if b.Name:find("^" .. prefix) then bPriority = pri end
+                            end
+                            if aPriority ~= bPriority then
+                                return aPriority < bPriority
+                            else
+                                return a.Name < b.Name
+                            end
                         end)
                         for _, room in ipairs(rooms) do
                             if not processedRooms[room.Name] then
@@ -1297,6 +1311,7 @@ local function StartDungeonAutoFarm()
                     processedRooms[currentRoom.Name] = true
                     currentRoom = nil
                     openedDoorsInRoom = {}
+                    print("[DEBUG] All doors in room opened, processed room:", currentRoom.Name, "set currentRoom to nil")
                 end
             else
                 print("[DEBUG] Not opening: hasMonsters =", hasMonsters, "Doors count =", #doors, "currentRoom =", currentRoom and currentRoom.Name or "nil")
