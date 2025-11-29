@@ -1311,7 +1311,6 @@ local function StartDungeonAutoFarm()
                     processedRooms[currentRoom.Name] = true
                     currentRoom = nil
                     openedDoorsInRoom = {}
-                    print("[DEBUG] All doors in room opened, processed room:", currentRoom.Name, "set currentRoom to nil")
                 end
             else
                 print("[DEBUG] Not opening: hasMonsters =", hasMonsters, "Doors count =", #doors, "currentRoom =", currentRoom and currentRoom.Name or "nil")
