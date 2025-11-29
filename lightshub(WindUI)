@@ -1129,25 +1129,30 @@ end
 local function StartDungeonAutoFarm()
     if getgenv().AutoDungeonFarmRunning then return end
     getgenv().AutoDungeonFarmRunning = true
+    print("[DEBUG] AutoDungeonFarm started")
     task.spawn(function()
         while getgenv().AutoDungeonFarmRunning and getgenv().InDungeon do
+            print("[DEBUG] Loop running, InDungeon:", getgenv().InDungeon)
             local char = player.Character
             local hrp = char and char:FindFirstChild("HumanoidRootPart")
-            if not hrp then task.wait(1) continue end
+            if not hrp then print("[DEBUG] No HumanoidRootPart, waiting") task.wait(1) continue end
 
             local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
             local hasMonsters = monstersFolder and #monstersFolder:GetChildren() > 0
+            print("[DEBUG] Monsters folder exists:", monstersFolder ~= nil, "Has monsters:", hasMonsters, "Count:", monstersFolder and #monstersFolder:GetChildren() or 0)
 
             -- 获取当前raid和门列表
             local doors = {}
             pcall(function()
                 for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
                     if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
+                        print("[DEBUG] Found dungeon:", dungeon.Name)
                         -- 动态查找 Starting_Room（名称以 "Starting_Room_" 开头）
                         local startingRoom = nil
                         for _, room in pairs(dungeon:GetChildren()) do
                             if room.Name:find("^Starting_Room_") then
                                 startingRoom = room
+                                print("[DEBUG] Found Starting_Room:", room.Name)
                                 break
                             end
                         end
@@ -1160,7 +1165,15 @@ local function StartDungeonAutoFarm()
                                     doorsFolder:GetChildren()[2],
                                     doorsFolder:GetChildren()[4]
                                 }
+                                print("[DEBUG] Doors found, count:", #doors)
+                                for i, door in ipairs(doors) do
+                                    print("[DEBUG] Door", i, "Name:", door and door.Name, "Class:", door and door.ClassName)
+                                end
+                            else
+                                print("[DEBUG] Doors folder not found in Starting_Room")
                             end
+                        else
+                            print("[DEBUG] Starting_Room not found in dungeon")
                         end
                         break  -- 找到一个raid后停止
                     end
@@ -1169,18 +1182,20 @@ local function StartDungeonAutoFarm()
 
             -- 检查门并开门（如果怪物清空）
             if not hasMonsters and #doors > 0 then
+                print("[DEBUG] Monsters cleared, checking doors")
                 for _, door in ipairs(doors) do
                     if door and door:IsA("BasePart") then
                         local hasWall = false
                         for _, child in pairs(door:GetChildren()) do
                             if child.ClassName == "Part" and child.Name == "Wall" then
                                 hasWall = true
+                                print("[DEBUG] Door has Wall:", child.Name)
                                 break
                             end
                         end
                         if not hasWall then
                             -- 可开门：传送并按 E
-                            print("[DEBUG] Monsters cleared, opening door at:", door.CFrame)
+                            print("[DEBUG] Opening door at:", door.CFrame)
                             hrp.CFrame = door.CFrame
                             task.wait(0.5)  -- 等待传送
                             game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
@@ -1188,18 +1203,25 @@ local function StartDungeonAutoFarm()
                             game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
                             task.wait(2)  -- 等待开门后继续
                             break  -- 开一个门后停止检查
+                        else
+                            print("[DEBUG] Door has Wall, skipping")
                         end
+                    else
+                        print("[DEBUG] Door not BasePart or nil")
                     end
                 end
+            else
+                print("[DEBUG] Not opening: HasMonsters =", hasMonsters, "Doors count =", #doors)
             end
 
             -- 原有农场逻辑
             if monstersFolder then
                 for _, mob in pairs(monstersFolder:GetChildren()) do
-                    if not getgenv().AutoDungeonFarmRunning or not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then break end
+                    if not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then break end
                     if mob:IsA("Model") and mob:GetAttribute("Is_Dungeon") == true then
                         local mobHRP = mob:FindFirstChild("HumanoidRootPart")
                         if mobHRP then
+                            print("[DEBUG] Farming mob:", mob.Name)
                             hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
                             repeat task.wait(0.05) until not mob.Parent or not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon
                         end
@@ -1214,6 +1236,7 @@ end
 -- 停止 Dungeon Auto Farm
 local function StopDungeonAutoFarm()
     getgenv().AutoDungeonFarmRunning = false
+    print("[DEBUG] AutoDungeonFarm stopped")
 end
 
 -- 启动普通 Auto Farm
