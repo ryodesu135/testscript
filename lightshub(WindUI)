@@ -1287,14 +1287,19 @@ local function StartDungeonAutoFarm()
                         end
                         print("[DEBUG] Has Wall:", hasWall)
                         if not hasWall then
-                            -- 可开门：传送到门的枢轴中心前方（使用GetPivot确保正中间）
-                            local doorPivot = doorPart:GetPivot()
-                            local teleportPos = doorPivot.Position + (doorPivot.LookVector * -10)
-                            print("[DEBUG] Teleporting to pivot center front of door:", teleportPos)
+                            -- 可开门：传送到门的中心前方（使用BoundingBox中心如果door是Model）
+                            local doorCenter = doorPart.Position
+                            if door:IsA("Model") then
+                                local cf, size = door:GetBoundingBox()
+                                doorCenter = cf.Position
+                                print("[DEBUG] Using Model bounding box center:", doorCenter)
+                            end
+                            local teleportPos = doorCenter + (doorPart.CFrame.LookVector * -10)
+                            print("[DEBUG] Teleporting to center front of door:", teleportPos)
                             hrp.CFrame = CFrame.new(teleportPos)
-                            -- 设置角色和相机面向门（使用枢轴LookVector）
-                            hrp.CFrame = CFrame.lookAt(hrp.Position, doorPivot.Position)
-                            workspace.CurrentCamera.CFrame = CFrame.lookAt(hrp.Position, doorPivot.Position)
+                            -- 设置角色和相机面向门
+                            hrp.CFrame = CFrame.lookAt(hrp.Position, doorCenter)
+                            workspace.CurrentCamera.CFrame = CFrame.lookAt(hrp.Position, doorCenter)
                             task.wait(0.5)  -- 等待传送和视角调整
                             game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
                             task.wait(0.1)
@@ -1316,6 +1321,7 @@ local function StartDungeonAutoFarm()
                     processedRooms[currentRoom.Name] = true
                     currentRoom = nil
                     openedDoorsInRoom = {}
+                    print("[DEBUG] All doors in room opened, processed room:", currentRoom.Name, "set currentRoom to nil")
                 end
             else
                 print("[DEBUG] Not opening: hasMonsters =", hasMonsters, "Doors count =", #doors, "currentRoom =", currentRoom and currentRoom.Name or "nil")
