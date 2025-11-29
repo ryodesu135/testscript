@@ -1141,54 +1141,56 @@ local function StartDungeonAutoFarm()
             local hasMonsters = monstersFolder and #monstersFolder:GetChildren() > 0
             print("[DEBUG] Monsters folder exists:", monstersFolder ~= nil, "Has monsters:", hasMonsters, "Count:", monstersFolder and #monstersFolder:GetChildren() or 0)
 
-            -- 获取当前raid和门列表
+            -- 获取当前raid和门列表（在怪物清空时查找Monsters_Room的门）
             local doors = {}
-            pcall(function()
-                for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
-                    if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
-                        print("[DEBUG] Found dungeon:", dungeon.Name)
-                        -- 动态查找 Starting_Room（名称以 "Starting_Room_" 开头）
-                        local startingRoom = nil
-                        for _, room in pairs(dungeon:GetChildren()) do
-                            if room.Name:find("^Starting_Room_") then
-                                startingRoom = room
-                                print("[DEBUG] Found Starting_Room:", room.Name)
-                                break
-                            end
-                        end
-                        if startingRoom then
-                            local doorsFolder = startingRoom:FindFirstChild("Doors")
-                            if doorsFolder then
-                                -- 打印所有Doors子对象以调试
-                                print("[DEBUG] Doors folder children:")
-                                for _, child in pairs(doorsFolder:GetChildren()) do
-                                    print("[DEBUG] Door child: Name=" .. child.Name .. ", Class=" .. child.ClassName)
+            if not hasMonsters then
+                pcall(function()
+                    for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
+                        if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
+                            print("[DEBUG] Found dungeon:", dungeon.Name)
+                            -- 动态查找 Monsters_Room（名称以 "Monsters_Room_" 开头）
+                            local monstersRoom = nil
+                            for _, room in pairs(dungeon:GetChildren()) do
+                                if room.Name:find("^Monsters_Room_") then
+                                    monstersRoom = room
+                                    print("[DEBUG] Found Monsters_Room:", room.Name)
+                                    break
                                 end
-                                -- 尝试获取门（根据你的路径）
-                                doors = {
-                                    doorsFolder:GetChildren()[3],
-                                    doorsFolder:FindFirstChild("ModelX"),  -- 使用FindFirstChild以防不存在
-                                    doorsFolder:GetChildren()[2],
-                                    doorsFolder:GetChildren()[4]
-                                }
-                                print("[DEBUG] Doors attempted, count:", #doors)
-                                for i, door in ipairs(doors) do
-                                    print("[DEBUG] Door", i, "Name:", door and door.Name or "nil", "Class:", door and door.ClassName or "nil")
+                            end
+                            if monstersRoom then
+                                local doorsFolder = monstersRoom:FindFirstChild("Doors")
+                                if doorsFolder then
+                                    -- 打印所有Doors子对象以调试
+                                    print("[DEBUG] Doors folder children:")
+                                    for _, child in pairs(doorsFolder:GetChildren()) do
+                                        print("[DEBUG] Door child: Name=" .. child.Name .. ", Class=" .. child.ClassName)
+                                    end
+                                    -- 尝试获取门（根据你的路径）
+                                    doors = {
+                                        doorsFolder:GetChildren()[3],
+                                        doorsFolder:FindFirstChild("ModelX"),  -- 使用FindFirstChild以防不存在
+                                        doorsFolder:GetChildren()[2],
+                                        doorsFolder:GetChildren()[4]
+                                    }
+                                    print("[DEBUG] Doors attempted, count:", #doors)
+                                    for i, door in ipairs(doors) do
+                                        print("[DEBUG] Door", i, "Name:", door and door.Name or "nil", "Class:", door and door.ClassName or "nil")
+                                    end
+                                else
+                                    print("[DEBUG] Doors folder not found in Monsters_Room")
                                 end
                             else
-                                print("[DEBUG] Doors folder not found in Starting_Room")
+                                print("[DEBUG] Monsters_Room not found in dungeon")
                             end
-                        else
-                            print("[DEBUG] Starting_Room not found in dungeon")
+                            break  -- 找到一个raid后停止
                         end
-                        break  -- 找到一个raid后停止
                     end
-                end
-            end)
+                end)
+            end
 
-            -- 检查门并开门（如果怪物清空）
+            -- 检查门并开门（如果怪物清空且有门）
             if not hasMonsters and #doors > 0 then
-                print("[DEBUG] Monsters cleared, checking doors")
+                print("[DEBUG] Monsters cleared, checking doors in Monsters_Room")
                 for _, door in ipairs(doors) do
                     local doorPart = nil
                     if door and door:IsA("BasePart") then
