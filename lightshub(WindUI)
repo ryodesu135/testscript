@@ -1165,14 +1165,18 @@ local function StartDungeonAutoFarm()
                     local openedDoor = false
                     -- 循环workspace.Dungeons的所有raid
                     for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
+                        print("[DEBUG] Checking dungeon:", dungeon.Name, "Is Folder:", dungeon:IsA("Folder"))
                         if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
+                            print("[DEBUG] Dungeon matches, checking rooms")
                             -- 收集room列表，按优先级排序
                             local rooms = {}
                             for _, room in pairs(dungeon:GetChildren()) do
+                                print("[DEBUG] Room:", room.Name, "Is Model:", room:IsA("Model"))
                                 if room:IsA("Model") and (room.Name:find("^Monsters_Room_") or room.Name:find("^Treasure_Room_") or room.Name:find("^Merchant_Room_") or room.Name:find("^End_Room_")) then
                                     table.insert(rooms, room)
                                 end
                             end
+                            print("[DEBUG] Found rooms count:", #rooms)
                             -- 排序：Monsters_Room_、Treasure_Room_、Merchant_Room_优先，End_Room_最后
                             table.sort(rooms, function(a, b)
                                 local priority = {
@@ -1192,11 +1196,15 @@ local function StartDungeonAutoFarm()
                             -- 检查是否有非End_Room_的room有Door，如果有，先开那些
                             local hasNonEndDoors = false
                             for _, room in ipairs(rooms) do
+                                print("[DEBUG] Checking room for non-End doors:", room.Name)
                                 if not room.Name:find("^End_Room_") and room:FindFirstChild("Doors") then
+                                    print("[DEBUG] Doors folder exists in room:", room.Name)
                                     local doorsFolder = room:FindFirstChild("Doors")
                                     for _, door in pairs(doorsFolder:GetChildren()) do
+                                        print("[DEBUG] Door in folder:", door.Name, "Is Model:", door:IsA("Model"))
                                         if door.Name == "ModelX" then
                                             local doorPart = door:FindFirstChild("Door")
+                                            print("[DEBUG] Door part exists:", doorPart ~= nil, "Is BasePart:", doorPart and doorPart:IsA("BasePart"))
                                             if doorPart and doorPart:IsA("BasePart") then
                                                 local hasWall = false
                                                 for _, child in pairs(door:GetChildren()) do
@@ -1205,6 +1213,7 @@ local function StartDungeonAutoFarm()
                                                         break
                                                     end
                                                 end
+                                                print("[DEBUG] Has Wall:", hasWall)
                                                 if not hasWall then
                                                     hasNonEndDoors = true
                                                     break
@@ -1215,15 +1224,20 @@ local function StartDungeonAutoFarm()
                                     if hasNonEndDoors then break end
                                 end
                             end
+                            print("[DEBUG] Has non-End doors:", hasNonEndDoors)
                             -- 如果有非End_Room_的Door，开那些；否则开End_Room_
                             for _, room in ipairs(rooms) do
+                                print("[DEBUG] Checking room for opening:", room.Name)
                                 if (hasNonEndDoors and not room.Name:find("^End_Room_")) or (not hasNonEndDoors and room.Name:find("^End_Room_")) then
                                     if room:FindFirstChild("Doors") then
+                                        print("[DEBUG] Doors folder exists in room:", room.Name)
                                         local doorsFolder = room:FindFirstChild("Doors")
                                         for _, door in pairs(doorsFolder:GetChildren()) do
+                                            print("[DEBUG] Door in folder:", door.Name, "Is Model:", door:IsA("Model"))
                                             if door.Name == "ModelX" then
                                                 print("[DEBUG] Checking door in room:", room.Name)
                                                 local doorPart = door:FindFirstChild("Door")
+                                                print("[DEBUG] Door part exists:", doorPart ~= nil, "Is BasePart:", doorPart and doorPart:IsA("BasePart"))
                                                 if doorPart and doorPart:IsA("BasePart") then
                                                     local hasWall = false
                                                     for _, child in pairs(door:GetChildren()) do
