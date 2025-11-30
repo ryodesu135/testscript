@@ -1306,7 +1306,6 @@ local function StartDungeonAutoFarm()
                             task.delay(1/60, function()
 	                        cam.CameraType = Enum.CameraType.Custom
                             end)
-                            workspace.Camera.CFrame = CFrame.lookAt(capturedPosition, doorCenter)
                             task.wait(0.5)  -- 等待传送和视角调整
                             game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
                             task.wait(0.1)
