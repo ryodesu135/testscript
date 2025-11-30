@@ -1131,10 +1131,7 @@ local function StartDungeonAutoFarm()
     getgenv().AutoDungeonFarmRunning = true
     print("[DEBUG] AutoDungeonFarm started")
     task.wait(0.7)  -- 进入raid后等待0.7秒
-    local processedRooms = {}  -- 跟踪已处理的room
-    local currentRoom = nil  -- 当前正在处理的room
     local currentDungeon = nil  -- 当前raid
-    local openedDoorsInRoom = {}  -- 跟踪当前room内已开的门
     task.spawn(function()
         while getgenv().AutoDungeonFarmRunning and getgenv().InDungeon do
             print("[DEBUG] Loop running, InDungeon:", getgenv().InDungeon)
@@ -1165,189 +1162,103 @@ local function StartDungeonAutoFarm()
                 end)
             end
 
-            -- 获取当前raid和门列表
-            local doors = {}
-            if currentDungeon then
-                pcall(function()
-                    print("[DEBUG] Processing currentDungeon:", currentDungeon.Name)
-                    -- 打印dungeon的所有子对象以调试
-                    print("[DEBUG] Dungeon children:")
-                    for _, child in pairs(currentDungeon:GetChildren()) do
-                        print("[DEBUG] Child: Name=" .. child.Name .. ", Class=" .. child.ClassName)
+            -- 如果raid中有怪物，先清掉
+            if hasMonsters then
+                print("[DEBUG] Monsters present, farming them")
+                if monstersFolder then
+                    for _, mob in pairs(monstersFolder:GetChildren()) do
+                        if not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then break end
+                        if mob:IsA("Model") and mob:GetAttribute("Is_Dungeon") == true then
+                            local mobHRP = mob:FindFirstChild("HumanoidRootPart")
+                            if mobHRP then
+                                print("[DEBUG] Farming mob:", mob.Name)
+                                hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
+                                repeat task.wait(0.05) until not mob.Parent or not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon
+                            end
+                        end
                     end
-                    if not currentRoom then
-                        -- 查找下一个未处理的room（先Starting_Room，然后Treasure_Room，Merchant_Room，最后Monsters_Room）
-                        local rooms = {}
+                end
+            else
+                -- 如果没有怪物，检测raid中的门并开一个
+                print("[DEBUG] No monsters, checking doors in raid")
+                if currentDungeon then
+                    pcall(function()
+                        local openedDoor = false
+                        -- 循环raid的所有子对象，查找Doors文件夹
                         for _, room in pairs(currentDungeon:GetChildren()) do
-                            if room.Name:find("^Starting_Room_") or room.Name:find("^Treasure_Room_") or room.Name:find("^Merchant_Room_") or room.Name:find("^Monsters_Room_") then
-                                table.insert(rooms, room)
-                            end
-                        end
-                        print("[DEBUG] Found rooms count:", #rooms)
-                        for _, room in ipairs(rooms) do
-                            print("[DEBUG] Room: Name=" .. room.Name .. ", Processed=" .. tostring(processedRooms[room.Name] or false))
-                        end
-                        -- 排序：Starting_Room优先，然后Treasure_Room，Merchant_Room，最后Monsters_Room按名称
-                        table.sort(rooms, function(a, b)
-                            local priority = {
-                                ["Starting_Room_"] = 1,
-                                ["Treasure_Room_"] = 2,
-                                ["Merchant_Room_"] = 3,
-                                ["Monsters_Room_"] = 4
-                            }
-                            local aPriority = 5
-                            local bPriority = 5
-                            for prefix, pri in pairs(priority) do
-                                if a.Name:find("^" .. prefix) then aPriority = pri end
-                                if b.Name:find("^" .. prefix) then bPriority = pri end
-                            end
-                            if aPriority ~= bPriority then
-                                return aPriority < bPriority
-                            else
-                                return a.Name < b.Name
-                            end
-                        end)
-                        for _, room in ipairs(rooms) do
-                            if not processedRooms[room.Name] then
-                                currentRoom = room
-                                openedDoorsInRoom = {}  -- 重置room内门跟踪
-                                print("[DEBUG] Set currentRoom to:", room.Name)
-                                break
-                            end
-                        end
-                    end
-                    if currentRoom then
-                        local doorsFolder = currentRoom:FindFirstChild("Doors")
-                        if doorsFolder then
-                            -- 打印所有Doors子对象以调试
-                            print("[DEBUG] Doors folder children:")
-                            for _, child in pairs(doorsFolder:GetChildren()) do
-                                print("[DEBUG] Door child: Name=" .. child.Name .. ", Class=" .. child.ClassName)
-                            end
-                            -- 尝试获取门（根据你的路径）
-                            doors = {
-                                doorsFolder:GetChildren()[3],
-                                doorsFolder:FindFirstChild("ModelX"),  -- 使用FindFirstChild以防不存在
-                                doorsFolder:GetChildren()[2],
-                                doorsFolder:GetChildren()[4]
-                            }
-                            print("[DEBUG] Doors attempted, count:", #doors)
-                            for i, door in ipairs(doors) do
-                                print("[DEBUG] Door", i, "Name:", door and door.Name or "nil", "Class:", door and door.ClassName or "nil")
-                            end
-                        else
-                            print("[DEBUG] Doors folder not found in currentRoom")
-                        end
-                    else
-                        print("[DEBUG] No currentRoom set")
-                    end
-                end)
-            else
-                print("[DEBUG] No currentDungeon set")
-            end
-
-            -- 检查门并开门（如果怪物清空且有currentRoom，且room内还有未开的门）
-            print("[DEBUG] Checking door opening: hasMonsters =", hasMonsters, "doors count =", #doors, "currentRoom =", currentRoom and currentRoom.Name or "nil")
-            if not hasMonsters and #doors > 0 and currentRoom then
-                print("[DEBUG] Monsters cleared, checking doors for currentRoom:", currentRoom.Name)
-                local openedDoor = false
-                for _, door in ipairs(doors) do
-                    if openedDoorsInRoom[door and door.Name] then
-                        print("[DEBUG] Door already opened in room, skipping:", door.Name)
-                        continue
-                    end
-                    print("[DEBUG] Checking door:", door and door.Name or "nil")
-                    local doorPart = nil
-                    if door and door:IsA("BasePart") then
-                        doorPart = door
-                    elseif door and door:IsA("Model") then
-                        -- 如果是Model，使用PrimaryPart或第一个BasePart子对象
-                        doorPart = door.PrimaryPart
-                        if not doorPart then
-                            for _, child in pairs(door:GetChildren()) do
-                                if child:IsA("BasePart") then
-                                    doorPart = child
-                                    break
+                            if room:IsA("Folder") and room:FindFirstChild("Doors") then
+                                local doorsFolder = room:FindFirstChild("Doors")
+                                for _, door in pairs(doorsFolder:GetChildren()) do
+                                    print("[DEBUG] Checking door:", door.Name)
+                                    local doorPart = nil
+                                    if door and door:IsA("BasePart") then
+                                        doorPart = door
+                                    elseif door and door:IsA("Model") then
+                                        -- 如果是Model，使用PrimaryPart或第一个BasePart子对象
+                                        doorPart = door.PrimaryPart
+                                        if not doorPart then
+                                            for _, child in pairs(door:GetChildren()) do
+                                                if child:IsA("BasePart") then
+                                                    doorPart = child
+                                                    break
+                                                end
+                                            end
+                                        end
+                                        print("[DEBUG] Using door part from Model:", doorPart and doorPart.Name or "nil")
+                                    end
+                                    if doorPart and doorPart:IsA("BasePart") then
+                                        -- 检查是否有Wall
+                                        local hasWall = false
+                                        for _, child in pairs(door:GetChildren()) do
+                                            if child.ClassName == "Part" and child.Name == "Wall" then
+                                                hasWall = true
+                                                print("[DEBUG] Found Wall:", child.Name)
+                                                break
+                                            end
+                                        end
+                                        if not hasWall then
+                                            print("[DEBUG] No wall, attempting to teleport to door")
+                                            -- 传送过去Door然后开启
+                                            local doorCenter = doorPart.Position
+                                            if door:IsA("Model") then
+                                                local cf, size = door:GetBoundingBox()
+                                                doorCenter = cf.Position
+                                                print("[DEBUG] Using Model bounding box center:", doorCenter)
+                                            end
+                                            local teleportPos = doorCenter + (doorPart.CFrame.LookVector * -30)  -- 更远距离
+                                            print("[DEBUG] Teleporting to center front of door:", teleportPos)
+                                            hrp.CFrame = CFrame.new(teleportPos)
+                                            -- 设置角色面向门
+                                            hrp.CFrame = CFrame.lookAt(hrp.Position, doorCenter)
+                                            -- 传送后capture位置并调整相机面向门
+                                            local capturedPosition = hrp.Position
+                                            local cam = workspace.CurrentCamera
+                                            repeat cam.CameraType = Enum.CameraType.Scriptable until cam.CameraType == Enum.CameraType.Scriptable
+                                            cam.CFrame = CFrame.lookAt(capturedPosition, doorCenter)
+                                            task.delay(1/60, function()
+	                                        cam.CameraType = Enum.CameraType.Custom
+                                            end)
+                                            task.wait(0.5)  -- 等待传送和视角调整
+                                            game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
+                                            task.wait(0.5)
+                                            game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
+                                            task.wait(0.5)  -- 等待开门后继续
+                                            openedDoor = true
+                                            print("[DEBUG] Door opened in raid:", door.Name)
+                                            break  -- 开一个门后停止
+                                        else
+                                            print("[DEBUG] Door has Wall, skipping")
+                                        end
+                                    else
+                                        print("[DEBUG] Door part not BasePart or nil")
+                                    end
                                 end
+                                if openedDoor then break end  -- 如果开了门，停止检查其他room
                             end
                         end
-                        print("[DEBUG] Using door part from Model:", doorPart and doorPart.Name or "nil")
-                    end
-                    if doorPart and doorPart:IsA("BasePart") then
-                        -- 打印门子对象以调试（检查整个door Model的子对象）
-                        print("[DEBUG] Door Model children for", door.Name .. ":")
-                        for _, child in pairs(door:GetChildren()) do
-                            print("[DEBUG] Child: Name=" .. child.Name .. ", Class=" .. child.ClassName)
-                        end
-                        local hasWall = false
-                        for _, child in pairs(door:GetChildren()) do  -- 检查整个Model的子对象
-                            if child.ClassName == "Part" and child.Name == "Wall" then
-                                hasWall = true
-                                print("[DEBUG] Found Wall:", child.Name)
-                                break
-                            end
-                        end
-                        print("[DEBUG] Has Wall:", hasWall)
-                        if not hasWall then
-                            print("[DEBUG] No wall, attempting to teleport to door")
-                            -- 可开门：传送到门的中心前方（使用BoundingBox中心如果door是Model，更远距离避免卡进门）
-                            local doorCenter = doorPart.Position
-                            if door:IsA("Model") then
-                                local cf, size = door:GetBoundingBox()
-                                doorCenter = cf.Position
-                                print("[DEBUG] Using Model bounding box center:", doorCenter)
-                            end
-                            local teleportPos = doorCenter + (doorPart.CFrame.LookVector * -45)  -- 更远距离
-                            print("[DEBUG] Teleporting to center front of door:", teleportPos)
-                            hrp.CFrame = CFrame.new(teleportPos)
-                            -- 设置角色面向门
-                            hrp.CFrame = CFrame.lookAt(hrp.Position, doorCenter)
-                            -- 传送后capture位置并调整相机面向门
-                            local capturedPosition = hrp.Position
-                            local cam = workspace.CurrentCamera
-                            repeat cam.CameraType = Enum.CameraType.Scriptable until cam.CameraType == Enum.CameraType.Scriptable
-                            cam.CFrame = CFrame.lookAt(capturedPosition, doorCenter)
-                            task.delay(1/60, function()
-	                        cam.CameraType = Enum.CameraType.Custom
-                            end)
-                            task.wait(0.5)  -- 等待传送和视角调整
-                            game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
-                            task.wait(0.5)
-                            game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
-                            task.wait(0.5)  -- 等待开门后继续
-                            openedDoorsInRoom[door.Name] = true
-                            openedDoor = true
-                            print("[DEBUG] Door opened in room:", door.Name)
-                            break  -- 开一个门后停止检查
-                        else
-                            print("[DEBUG] Door has Wall, skipping")
-                        end
-                    else
-                        print("[DEBUG] Door part not BasePart or nil")
-                    end
-                end
-                -- 如果room内所有门都开过，清除room
-                if not openedDoor then
-                    processedRooms[currentRoom.Name] = true
-                    currentRoom = nil
-                    openedDoorsInRoom = {}
-                end
-            else
-                print("[DEBUG] Not opening: hasMonsters =", hasMonsters, "Doors count =", #doors, "currentRoom =", currentRoom and currentRoom.Name or "nil")
-            end
-
-            -- 原有农场逻辑
-            if monstersFolder then
-                for _, mob in pairs(monstersFolder:GetChildren()) do
-                    if not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then break end
-                    if mob:IsA("Model") and mob:GetAttribute("Is_Dungeon") == true then
-                        local mobHRP = mob:FindFirstChild("HumanoidRootPart")
-                        if mobHRP then
-                            print("[DEBUG] Farming mob:", mob.Name)
-                            hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
-                            repeat task.wait(0.05) until not mob.Parent or not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon
-                        end
-                    end
+                    end)
+                else
+                    print("[DEBUG] No currentDungeon set")
                 end
             end
             task.wait(0.05)
@@ -1360,7 +1271,6 @@ local function StopDungeonAutoFarm()
     getgenv().AutoDungeonFarmRunning = false
     print("[DEBUG] AutoDungeonFarm stopped")
 end
-
 -- 启动普通 Auto Farm
 local function StartNormalAutoFarm()
     if getgenv().AutoFarmRunning then return end
