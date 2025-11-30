@@ -1130,13 +1130,13 @@ local function StartDungeonAutoFarm()
     if getgenv().AutoDungeonFarmRunning then return end
     getgenv().AutoDungeonFarmRunning = true
     print("[DEBUG] AutoDungeonFarm started")
-    task.wait(0.7)  -- 进入raid后等待0.7秒
+    task.wait(1)  -- 进入raid后等待1秒
     task.spawn(function()
         while getgenv().AutoDungeonFarmRunning and getgenv().InDungeon do
             print("[DEBUG] Loop running, InDungeon:", getgenv().InDungeon)
             local char = player.Character
             local hrp = char and char:FindFirstChild("HumanoidRootPart")
-            if not hrp then print("[DEBUG] No HumanoidRootPart, waiting") task.wait(0.5) continue end
+            if not hrp then print("[DEBUG] No HumanoidRootPart, waiting") task.wait(1) continue end
 
             local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
             local hasMonsters = monstersFolder and #monstersFolder:GetChildren() > 0
@@ -1284,7 +1284,7 @@ local function StartDungeonAutoFarm()
                                     game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
                                     task.wait(0.5)
                                     game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
-                                    task.wait(0.5)  -- 等待开门后继续
+                                    task.wait(0.2)  -- 等待开门后继续
                                     openedDoor = true
                                     print("[DEBUG] Door opened")
                                     -- 开门后清怪物
