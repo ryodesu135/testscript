@@ -1032,7 +1032,11 @@ local SpeedRaids = {
     ["Cursed Raid"] = true,
     ["Progression Raid"] = true,
     ["Progression Raid 2"] = true,
-    ["Restaurant Raid"] = true
+    ["Restaurant Raid"] = true,
+    ["Dungeon Labyrinth"] = true,
+    ["Maze Level 1"] = true,
+    ["Maze Level 2"] = true,
+    ["Maze Level 3"] = true
 }
 
 local RaidSpeedOptions = {"1x Speed", "2x Speed", "3x Speed"}
