@@ -1297,7 +1297,7 @@ local function StartDungeonAutoFarm()
                                 doorCenter = cf.Position
                                 print("[DEBUG] Using Model bounding box center:", doorCenter)
                             end
-                            local teleportPos = doorCenter + (doorPart.CFrame.LookVector * -25)  -- 更远距离
+                            local teleportPos = doorCenter + (doorPart.CFrame.LookVector * -30)  -- 更远距离
                             print("[DEBUG] Teleporting to center front of door:", teleportPos)
                             hrp.CFrame = CFrame.new(teleportPos)
                             -- 设置角色面向门
