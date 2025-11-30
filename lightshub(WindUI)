@@ -1159,7 +1159,7 @@ local function StartDungeonAutoFarm()
                     end
                 end
             else
-                -- 如果没有怪物，检测Door并按优先级开（Monster_Room -> Treasure_Room -> Merchant_Room -> End_Room）
+                -- 如果没有怪物，检测Door并按优先级开（Monster_Room直接开 -> Treasure_Room -> Merchant_Room -> End_Room）
                 print("[DEBUG] No monsters, checking for doors")
                 pcall(function()
                     local openedDoor = false
@@ -1168,8 +1168,7 @@ local function StartDungeonAutoFarm()
                         print("[DEBUG] Checking dungeon:", dungeon.Name, "Is Folder:", dungeon:IsA("Folder"))
                         if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
                             print("[DEBUG] Dungeon matches, collecting doors")
-                            -- 保存Door位置，按类型分组
-                            local Monster_Room_Doors = {}
+                            -- 保存Door位置，按类型分组（只保存Treasure_Room、Merchant_Room、End_Room）
                             local Treasure_Room_Doors = {}
                             local Merchant_Room_Doors = {}
                             local End_Room_Doors = {}
@@ -1192,14 +1191,55 @@ local function StartDungeonAutoFarm()
                                                 end
                                                 print("[DEBUG] Has Wall:", hasWall)
                                                 if not hasWall then
-                                                    if room.Name:find("^Monsters_Room_") then
-                                                        table.insert(Monster_Room_Doors, doorPart)
-                                                    elseif room.Name:find("^Treasure_Room_") then
+                                                    if room.Name:find("^Treasure_Room_") then
                                                         table.insert(Treasure_Room_Doors, doorPart)
                                                     elseif room.Name:find("^Merchant_Room_") then
                                                         table.insert(Merchant_Room_Doors, doorPart)
                                                     elseif room.Name:find("^End_Room_") then
                                                         table.insert(End_Room_Doors, doorPart)
+                                                    elseif room.Name:find("^Monsters_Room_") then
+                                                        -- Monster_Room直接开，不保存
+                                                        print("[DEBUG] Opening Monster_Room door directly")
+                                                        -- 传送过去Door的CFrame位置（更近-5确保Interact）
+                                                        local teleportPos = doorPart.Position + (doorPart.CFrame.LookVector * -5)
+                                                        print("[DEBUG] Teleporting to door position:", teleportPos)
+                                                        hrp.CFrame = CFrame.new(teleportPos)
+                                                        -- 设置角色面向门
+                                                        hrp.CFrame = CFrame.lookAt(hrp.Position, doorPart.Position)
+                                                        -- 传送后capture位置并调整相机面向门
+                                                        local capturedPosition = hrp.Position
+                                                        local cam = workspace.CurrentCamera
+                                                        repeat cam.CameraType = Enum.CameraType.Scriptable until cam.CameraType == Enum.CameraType.Scriptable
+                                                        cam.CFrame = CFrame.lookAt(capturedPosition, doorPart.Position)
+                                                        task.delay(1/60, function()
+	                                                    cam.CameraType = Enum.CameraType.Custom
+                                                        end)
+                                                        task.wait(0.5)  -- 等待传送和视角调整
+                                                        game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
+                                                        task.wait(0.5)
+                                                        game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
+                                                        task.wait(0.5)  -- 等待开门后继续
+                                                        openedDoor = true
+                                                        print("[DEBUG] Monster_Room Door opened")
+                                                        -- 开门后清怪物
+                                                        local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
+                                                        local hasMonsters = monstersFolder and #monstersFolder:GetChildren() > 0
+                                                        if hasMonsters then
+                                                            print("[DEBUG] Monsters present after opening door, farming them")
+                                                            if monstersFolder then
+                                                                for _, mob in pairs(monstersFolder:GetChildren()) do
+                                                                    if not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then break end
+                                                                    if mob:IsA("Model") and mob:GetAttribute("Is_Dungeon") == true then
+                                                                        local mobHRP = mob:FindFirstChild("HumanoidRootPart")
+                                                                        if mobHRP then
+                                                                            print("[DEBUG] Farming mob:", mob.Name)
+                                                                            hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
+                                                                            repeat task.wait(0.05) until not mob.Parent or not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon
+                                                                        end
+                                                                    end
+                                                                end
+                                                            end
+                                                        end
                                                     end
                                                 end
                                             end
@@ -1207,12 +1247,11 @@ local function StartDungeonAutoFarm()
                                     end
                                 end
                             end
-                            print("[DEBUG] Monster_Room_Doors count:", #Monster_Room_Doors)
                             print("[DEBUG] Treasure_Room_Doors count:", #Treasure_Room_Doors)
                             print("[DEBUG] Merchant_Room_Doors count:", #Merchant_Room_Doors)
                             print("[DEBUG] End_Room_Doors count:", #End_Room_Doors)
-                            -- 按优先级开Door：Monster -> Treasure -> Merchant -> End
-                            local doorGroups = {Monster_Room_Doors, Treasure_Room_Doors, Merchant_Room_Doors, End_Room_Doors}
+                            -- 按优先级开保存的Door：Treasure -> Merchant -> End
+                            local doorGroups = {Treasure_Room_Doors, Merchant_Room_Doors, End_Room_Doors}
                             for groupIndex, doorGroup in ipairs(doorGroups) do
                                 for _, doorPart in ipairs(doorGroup) do
                                     print("[DEBUG] Opening door in group:", groupIndex)
