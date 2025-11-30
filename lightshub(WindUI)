@@ -1140,7 +1140,7 @@ local function StartDungeonAutoFarm()
             print("[DEBUG] Loop running, InDungeon:", getgenv().InDungeon)
             local char = player.Character
             local hrp = char and char:FindFirstChild("HumanoidRootPart")
-            if not hrp then print("[DEBUG] No HumanoidRootPart, waiting") task.wait(1) continue end
+            if not hrp then print("[DEBUG] No HumanoidRootPart, waiting") task.wait(0.2) continue end
 
             local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
             local hasMonsters = monstersFolder and #monstersFolder:GetChildren() > 0
@@ -1234,9 +1234,9 @@ local function StartDungeonAutoFarm()
                                     task.delay(1/60, function()
 	                                cam.CameraType = Enum.CameraType.Custom
                                     end)
-                                    task.wait(0.5)  -- 等待传送和视角调整
+                                    task.wait(0.35)  -- 等待传送和视角调整
                                     game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
-                                    task.wait(0.5)
+                                    task.wait(0.35)
                                     game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
                                     task.wait(0.2)  -- 等待开门后继续
                                     openedDoor = true
@@ -1284,9 +1284,9 @@ local function StartDungeonAutoFarm()
                                     task.delay(1/60, function()
 	                                cam.CameraType = Enum.CameraType.Custom
                                     end)
-                                    task.wait(0.5)  -- 等待传送和视角调整
+                                    task.wait(0.35)  -- 等待传送和视角调整
                                     game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
-                                    task.wait(0.5)
+                                    task.wait(0.35)
                                     game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
                                     task.wait(0.2)  -- 等待开门后继续
                                     openedDoor = true
@@ -1317,7 +1317,7 @@ local function StartDungeonAutoFarm()
                     end
                 end)
             end
-            task.wait(1)
+            task.wait(0.5)
         end
     end)
 end
