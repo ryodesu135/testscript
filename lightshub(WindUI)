@@ -1135,16 +1135,6 @@ local function StartDungeonAutoFarm()
     local currentRoom = nil  -- 当前正在处理的room
     local currentDungeon = nil  -- 当前raid
     local openedDoorsInRoom = {}  -- 跟踪当前room内已开的门
-    local RS = game:GetService("RunService")
-
-    -- 添加你的LookWithCamera函数
-    local function LookWithCamera(camera, pos)
-        local CameraLook = RS.RenderStepped:Connect(function()
-            camera.CFrame = CFrame.new(camera.CFrame.Position, pos)
-        end)
-        return CameraLook
-    end
-
     task.spawn(function()
         while getgenv().AutoDungeonFarmRunning and getgenv().InDungeon do
             print("[DEBUG] Loop running, InDungeon:", getgenv().InDungeon)
@@ -1159,13 +1149,10 @@ local function StartDungeonAutoFarm()
             -- 检测当前raid（查找有Starting_Room的raid）
             if not currentDungeon then
                 pcall(function()
-                    print("[DEBUG] Checking dungeons:")
                     for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
-                        print("[DEBUG] Dungeon name:", dungeon.Name, "Class:", dungeon.ClassName)
                         if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
                             -- 检查raid是否有Starting_Room（假设只有一个活跃raid）
                             for _, room in pairs(dungeon:GetChildren()) do
-                                print("[DEBUG] Room in dungeon:", room.Name, "Class:", room.ClassName)
                                 if room.Name:find("^Starting_Room_") then
                                     currentDungeon = dungeon
                                     print("[DEBUG] Set currentDungeon to:", dungeon.Name)
@@ -1192,7 +1179,6 @@ local function StartDungeonAutoFarm()
                         -- 查找下一个未处理的room（先Starting_Room，然后Treasure_Room，Merchant_Room，最后Monsters_Room）
                         local rooms = {}
                         for _, room in pairs(currentDungeon:GetChildren()) do
-                            print("[DEBUG] Checking room:", room.Name)
                             if room.Name:find("^Starting_Room_") or room.Name:find("^Treasure_Room_") or room.Name:find("^Merchant_Room_") or room.Name:find("^Monsters_Room_") then
                                 table.insert(rooms, room)
                             end
@@ -1285,7 +1271,7 @@ local function StartDungeonAutoFarm()
                         end
                         print("[DEBUG] Using door part from Model:", doorPart and doorPart.Name or "nil")
                     end
-                    if doorPart and door:IsA("BasePart") then
+                    if doorPart and doorPart:IsA("BasePart") then
                         -- 打印门子对象以调试（检查整个door Model的子对象）
                         print("[DEBUG] Door Model children for", door.Name .. ":")
                         for _, child in pairs(door:GetChildren()) do
@@ -1313,16 +1299,17 @@ local function StartDungeonAutoFarm()
                             hrp.CFrame = CFrame.new(teleportPos)
                             -- 设置角色面向门
                             hrp.CFrame = CFrame.lookAt(hrp.Position, doorCenter)
-                            -- 传送后调用LookWithCamera让相机持续面向门
+                            -- 传送后capture位置并调整相机面向门
+                            local capturedPosition = hrp.Position
+                            workspace.Camera.CFrame = CFrame.lookAt(capturedPosition, doorCenter)
                             task.wait(0.5)  -- 等待传送和视角调整
                             game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
                             task.wait(0.1)
                             game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
                             task.wait(2)  -- 等待开门后继续
-                            -- 开门后断开相机连接
-                            CameraLook:Disconnect()
                             openedDoorsInRoom[door.Name] = true
                             openedDoor = true
+                            print("[DEBUG] Door opened in room:", door.Name)
                             break  -- 开一个门后停止检查
                         else
                             print("[DEBUG] Door has Wall, skipping")
