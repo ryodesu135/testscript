@@ -1135,6 +1135,7 @@ local function StartDungeonAutoFarm()
     getgenv().AutoDungeonFarmRunning = true
     print("[DEBUG] AutoDungeonFarm started")
     task.wait(1)  -- 进入raid后等待1秒
+    local LeaveTimerStarted = false  -- 防止重复启动离开timer
     task.spawn(function()
         while getgenv().AutoDungeonFarmRunning and getgenv().InDungeon do
             print("[DEBUG] Loop running, InDungeon:", getgenv().InDungeon)
@@ -1163,6 +1164,21 @@ local function StartDungeonAutoFarm()
                     end
                 end
             else
+                -- 如果没有怪物，启动离开timer（如果未启动）
+                if not LeaveTimerStarted then
+                    LeaveTimerStarted = true
+                    task.delay(5, function()
+                        if not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then return end
+                        local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
+                        local hasMonsters = monstersFolder and #monstersFolder:GetChildren() > 0
+                        if not hasMonsters then
+                            print("[DEBUG] No monsters after 5 seconds, leaving dungeon")
+                            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                ["Action"] = "Dungeon_Leave",
+                            })
+                        end
+                    end)
+                end
                 -- 如果没有怪物，检测Door并按优先级开（Monster_Room保存并开 -> Treasure_Room -> Merchant_Room -> End_Room）
                 print("[DEBUG] No monsters, checking for doors")
                 pcall(function()
