@@ -1131,7 +1131,6 @@ local function StartDungeonAutoFarm()
     getgenv().AutoDungeonFarmRunning = true
     print("[DEBUG] AutoDungeonFarm started")
     task.wait(0.7)  -- 进入raid后等待0.7秒
-    local currentDungeon = nil  -- 当前raid
     task.spawn(function()
         while getgenv().AutoDungeonFarmRunning and getgenv().InDungeon do
             print("[DEBUG] Loop running, InDungeon:", getgenv().InDungeon)
@@ -1142,25 +1141,6 @@ local function StartDungeonAutoFarm()
             local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
             local hasMonsters = monstersFolder and #monstersFolder:GetChildren() > 0
             print("[DEBUG] Monsters folder exists:", monstersFolder ~= nil, "Has monsters:", hasMonsters, "Count:", monstersFolder and #monstersFolder:GetChildren() or 0)
-
-            -- 检测当前raid（查找有Starting_Room的raid）
-            if not currentDungeon then
-                pcall(function()
-                    for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
-                        if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
-                            -- 检查raid是否有Starting_Room（假设只有一个活跃raid）
-                            for _, room in pairs(dungeon:GetChildren()) do
-                                if room.Name:find("^Starting_Room_") then
-                                    currentDungeon = dungeon
-                                    print("[DEBUG] Set currentDungeon to:", dungeon.Name)
-                                    break
-                                end
-                            end
-                            if currentDungeon then break end
-                        end
-                    end
-                end)
-            end
 
             -- 如果raid中有怪物，先清掉
             if hasMonsters then
@@ -1179,45 +1159,36 @@ local function StartDungeonAutoFarm()
                     end
                 end
             else
-                -- 如果没有怪物，检测raid中的门并开一个
-                print("[DEBUG] No monsters, checking doors in raid")
-                if currentDungeon then
-                    pcall(function()
-                        local openedDoor = false
-                        -- 循环raid的所有子对象，查找Doors文件夹
-                        for _, room in pairs(currentDungeon:GetChildren()) do
-                            if room:IsA("Folder") and room:FindFirstChild("Doors") then
-                                local doorsFolder = room:FindFirstChild("Doors")
-                                for _, door in pairs(doorsFolder:GetChildren()) do
-                                    print("[DEBUG] Checking door:", door.Name)
-                                    local doorPart = nil
-                                    if door and door:IsA("BasePart") then
-                                        doorPart = door
-                                    elseif door and door:IsA("Model") then
-                                        -- 如果是Model，使用PrimaryPart或第一个BasePart子对象
-                                        doorPart = door.PrimaryPart
-                                        if not doorPart then
-                                            for _, child in pairs(door:GetChildren()) do
-                                                if child:IsA("BasePart") then
-                                                    doorPart = child
-                                                    break
+                -- 如果没有怪物，检测是否有Door并开一个
+                print("[DEBUG] No monsters, checking for doors")
+                pcall(function()
+                    local openedDoor = false
+                    -- 循环workspace.Dungeons的所有raid，查找Doors文件夹中的门
+                    for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
+                        if dungeon:IsA("Folder") then
+                            for _, room in pairs(dungeon:GetChildren()) do
+                                if room:IsA("Folder") and room:FindFirstChild("Doors") then
+                                    local doorsFolder = room:FindFirstChild("Doors")
+                                    for _, door in pairs(doorsFolder:GetChildren()) do
+                                        print("[DEBUG] Checking door:", door.Name)
+                                        local doorPart = nil
+                                        if door and door:IsA("BasePart") then
+                                            doorPart = door
+                                        elseif door and door:IsA("Model") then
+                                            -- 如果是Model，使用PrimaryPart或第一个BasePart子对象
+                                            doorPart = door.PrimaryPart
+                                            if not doorPart then
+                                                for _, child in pairs(door:GetChildren()) do
+                                                    if child:IsA("BasePart") then
+                                                        doorPart = child
+                                                        break
+                                                    end
                                                 end
                                             end
+                                            print("[DEBUG] Using door part from Model:", doorPart and doorPart.Name or "nil")
                                         end
-                                        print("[DEBUG] Using door part from Model:", doorPart and doorPart.Name or "nil")
-                                    end
-                                    if doorPart and doorPart:IsA("BasePart") then
-                                        -- 检查是否有Wall
-                                        local hasWall = false
-                                        for _, child in pairs(door:GetChildren()) do
-                                            if child.ClassName == "Part" and child.Name == "Wall" then
-                                                hasWall = true
-                                                print("[DEBUG] Found Wall:", child.Name)
-                                                break
-                                            end
-                                        end
-                                        if not hasWall then
-                                            print("[DEBUG] No wall, attempting to teleport to door")
+                                        if doorPart and doorPart:IsA("BasePart") then
+                                            print("[DEBUG] Attempting to teleport to door")
                                             -- 传送过去Door然后开启
                                             local doorCenter = doorPart.Position
                                             if door:IsA("Model") then
@@ -1244,22 +1215,19 @@ local function StartDungeonAutoFarm()
                                             game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
                                             task.wait(0.5)  -- 等待开门后继续
                                             openedDoor = true
-                                            print("[DEBUG] Door opened in raid:", door.Name)
+                                            print("[DEBUG] Door opened:", door.Name)
                                             break  -- 开一个门后停止
                                         else
-                                            print("[DEBUG] Door has Wall, skipping")
+                                            print("[DEBUG] Door part not BasePart or nil")
                                         end
-                                    else
-                                        print("[DEBUG] Door part not BasePart or nil")
                                     end
+                                    if openedDoor then break end  -- 如果开了门，停止检查其他room
                                 end
-                                if openedDoor then break end  -- 如果开了门，停止检查其他room
                             end
+                            if openedDoor then break end  -- 如果开了门，停止检查其他raid
                         end
-                    end)
-                else
-                    print("[DEBUG] No currentDungeon set")
-                end
+                    end
+                end)
             end
             task.wait(0.05)
         end
@@ -1271,6 +1239,7 @@ local function StopDungeonAutoFarm()
     getgenv().AutoDungeonFarmRunning = false
     print("[DEBUG] AutoDungeonFarm stopped")
 end
+
 -- 启动普通 Auto Farm
 local function StartNormalAutoFarm()
     if getgenv().AutoFarmRunning then return end
