@@ -1165,11 +1165,11 @@ local function StartDungeonAutoFarm()
                     local openedDoor = false
                     -- 循环workspace.Dungeons的所有raid
                     for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
-                        if dungeon:IsA("Folder") and dungeon.Name:find("Dungeon_Labyrinth") then
+                        if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
                             -- 收集room列表，按优先级排序
                             local rooms = {}
                             for _, room in pairs(dungeon:GetChildren()) do
-                                if room:IsA("Folder") and (room.Name:find("^Monsters_Room_") or room.Name:find("^Treasure_Room_") or room.Name:find("^Merchant_Room_") or room.Name:find("^End_Room_")) then
+                                if room:IsA("Model") and (room.Name:find("^Monsters_Room_") or room.Name:find("^Treasure_Room_") or room.Name:find("^Merchant_Room_") or room.Name:find("^End_Room_")) then
                                     table.insert(rooms, room)
                                 end
                             end
