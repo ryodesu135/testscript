@@ -1159,7 +1159,7 @@ local function StartDungeonAutoFarm()
                     end
                 end
             else
-                -- 如果没有怪物，检测是否有Door并开一个（优先Monsters_Room_、Treasure_Room_、Merchant_Room_，最后End_Room_）
+                -- 如果没有怪物，检测Door并按优先级开（Monster_Room -> Treasure_Room -> Merchant_Room -> End_Room）
                 print("[DEBUG] No monsters, checking for doors")
                 pcall(function()
                     local openedDoor = false
@@ -1167,38 +1167,15 @@ local function StartDungeonAutoFarm()
                     for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
                         print("[DEBUG] Checking dungeon:", dungeon.Name, "Is Folder:", dungeon:IsA("Folder"))
                         if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
-                            print("[DEBUG] Dungeon matches, checking rooms")
-                            -- 收集room列表，按优先级排序
-                            local rooms = {}
+                            print("[DEBUG] Dungeon matches, collecting doors")
+                            -- 保存Door位置，按类型分组
+                            local Monster_Room_Doors = {}
+                            local Treasure_Room_Doors = {}
+                            local Merchant_Room_Doors = {}
+                            local End_Room_Doors = {}
                             for _, room in pairs(dungeon:GetChildren()) do
                                 print("[DEBUG] Room:", room.Name, "Is Model:", room:IsA("Model"))
-                                if room:IsA("Model") and (room.Name:find("^Monsters_Room_") or room.Name:find("^Treasure_Room_") or room.Name:find("^Merchant_Room_") or room.Name:find("^End_Room_")) then
-                                    table.insert(rooms, room)
-                                end
-                            end
-                            print("[DEBUG] Found rooms count:", #rooms)
-                            -- 排序：Monsters_Room_、Treasure_Room_、Merchant_Room_优先，End_Room_最后
-                            table.sort(rooms, function(a, b)
-                                local priority = {
-                                    ["Monsters_Room_"] = 1,
-                                    ["Treasure_Room_"] = 2,
-                                    ["Merchant_Room_"] = 3,
-                                    ["End_Room_"] = 4
-                                }
-                                local aPriority = 5
-                                local bPriority = 5
-                                for prefix, pri in pairs(priority) do
-                                    if a.Name:find("^" .. prefix) then aPriority = pri end
-                                    if b.Name:find("^" .. prefix) then bPriority = pri end
-                                end
-                                return aPriority < bPriority
-                            end)
-                            -- 检查是否有非End_Room_的room有Door，如果有，先开那些
-                            local hasNonEndDoors = false
-                            for _, room in ipairs(rooms) do
-                                print("[DEBUG] Checking room for non-End doors:", room.Name)
-                                if not room.Name:find("^End_Room_") and room:FindFirstChild("Doors") then
-                                    print("[DEBUG] Doors folder exists in room:", room.Name)
+                                if room:IsA("Model") and room:FindFirstChild("Doors") then
                                     local doorsFolder = room:FindFirstChild("Doors")
                                     for _, door in pairs(doorsFolder:GetChildren()) do
                                         print("[DEBUG] Door in folder:", door.Name, "Is Model:", door:IsA("Model"))
@@ -1215,74 +1192,52 @@ local function StartDungeonAutoFarm()
                                                 end
                                                 print("[DEBUG] Has Wall:", hasWall)
                                                 if not hasWall then
-                                                    hasNonEndDoors = true
-                                                    break
+                                                    if room.Name:find("^Monsters_Room_") then
+                                                        table.insert(Monster_Room_Doors, doorPart)
+                                                    elseif room.Name:find("^Treasure_Room_") then
+                                                        table.insert(Treasure_Room_Doors, doorPart)
+                                                    elseif room.Name:find("^Merchant_Room_") then
+                                                        table.insert(Merchant_Room_Doors, doorPart)
+                                                    elseif room.Name:find("^End_Room_") then
+                                                        table.insert(End_Room_Doors, doorPart)
+                                                    end
                                                 end
                                             end
                                         end
                                     end
-                                    if hasNonEndDoors then break end
                                 end
                             end
-                            print("[DEBUG] Has non-End doors:", hasNonEndDoors)
-                            -- 如果有非End_Room_的Door，开那些；否则开End_Room_
-                            for _, room in ipairs(rooms) do
-                                print("[DEBUG] Checking room for opening:", room.Name)
-                                if (hasNonEndDoors and not room.Name:find("^End_Room_")) or (not hasNonEndDoors and room.Name:find("^End_Room_")) then
-                                    if room:FindFirstChild("Doors") then
-                                        print("[DEBUG] Doors folder exists in room:", room.Name)
-                                        local doorsFolder = room:FindFirstChild("Doors")
-                                        for _, door in pairs(doorsFolder:GetChildren()) do
-                                            print("[DEBUG] Door in folder:", door.Name, "Is Model:", door:IsA("Model"))
-                                            if door.Name == "ModelX" then
-                                                print("[DEBUG] Checking door in room:", room.Name)
-                                                local doorPart = door:FindFirstChild("Door")
-                                                print("[DEBUG] Door part exists:", doorPart ~= nil, "Is BasePart:", doorPart and doorPart:IsA("BasePart"))
-                                                if doorPart and doorPart:IsA("BasePart") then
-                                                    local hasWall = false
-                                                    for _, child in pairs(door:GetChildren()) do
-                                                        if child.ClassName == "Part" and child.Name == "Wall" then
-                                                            hasWall = true
-                                                            print("[DEBUG] Found Wall in door")
-                                                            break
-                                                        end
-                                                    end
-                                                    if not hasWall then
-                                                        print("[DEBUG] No wall, attempting to teleport to door")
-                                                        -- 传送过去Door的CFrame位置（前方-30避免卡住）
-                                                        local teleportPos = doorPart.Position + (doorPart.CFrame.LookVector * -30)
-                                                        print("[DEBUG] Teleporting to door position:", teleportPos)
-                                                        hrp.CFrame = CFrame.new(teleportPos)
-                                                        -- 设置角色面向门
-                                                        hrp.CFrame = CFrame.lookAt(hrp.Position, doorPart.Position)
-                                                        -- 传送后capture位置并调整相机面向门
-                                                        local capturedPosition = hrp.Position
-                                                        local cam = workspace.CurrentCamera
-                                                        repeat cam.CameraType = Enum.CameraType.Scriptable until cam.CameraType == Enum.CameraType.Scriptable
-                                                        cam.CFrame = CFrame.lookAt(capturedPosition, doorPart.Position)
-                                                        task.delay(1/60, function()
-	                                                    cam.CameraType = Enum.CameraType.Custom
-                                                        end)
-                                                        task.wait(0.5)  -- 等待传送和视角调整
-                                                        game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
-                                                        task.wait(0.5)
-                                                        game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
-                                                        task.wait(0.5)  -- 等待开门后继续
-                                                        openedDoor = true
-                                                        print("[DEBUG] Door opened in room:", room.Name)
-                                                        break  -- 开一个门后停止
-                                                    else
-                                                        print("[DEBUG] Door has Wall, skipping")
-                                                    end
-                                                else
-                                                    print("[DEBUG] Door part not BasePart or nil")
-                                                end
-                                            end
-                                        end
-                                        if openedDoor then break end  -- 如果开了门，停止检查其他door
-                                    end
+                            print("[DEBUG] Monster_Room_Doors count:", #Monster_Room_Doors)
+                            print("[DEBUG] Treasure_Room_Doors count:", #Treasure_Room_Doors)
+                            print("[DEBUG] Merchant_Room_Doors count:", #Merchant_Room_Doors)
+                            print("[DEBUG] End_Room_Doors count:", #End_Room_Doors)
+                            -- 按优先级开Door：Monster -> Treasure -> Merchant -> End
+                            local doorGroups = {Monster_Room_Doors, Treasure_Room_Doors, Merchant_Room_Doors, End_Room_Doors}
+                            for groupIndex, doorGroup in ipairs(doorGroups) do
+                                for _, doorPart in ipairs(doorGroup) do
+                                    print("[DEBUG] Opening door in group:", groupIndex)
+                                    -- 传送过去Door的CFrame位置（更近-5确保Interact）
+                                    local teleportPos = doorPart.Position + (doorPart.CFrame.LookVector * -5)
+                                    print("[DEBUG] Teleporting to door position:", teleportPos)
+                                    hrp.CFrame = CFrame.new(teleportPos)
+                                    -- 设置角色面向门
+                                    hrp.CFrame = CFrame.lookAt(hrp.Position, doorPart.Position)
+                                    -- 传送后capture位置并调整相机面向门
+                                    local capturedPosition = hrp.Position
+                                    local cam = workspace.CurrentCamera
+                                    repeat cam.CameraType = Enum.CameraType.Scriptable until cam.CameraType == Enum.CameraType.Scriptable
+                                    cam.CFrame = CFrame.lookAt(capturedPosition, doorPart.Position)
+                                    task.delay(1/60, function()
+	                                cam.CameraType = Enum.CameraType.Custom
+                                    end)
+                                    task.wait(0.5)  -- 等待传送和视角调整
+                                    game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
+                                    task.wait(0.5)
+                                    game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
+                                    task.wait(0.5)  -- 等待开门后继续
+                                    openedDoor = true
+                                    print("[DEBUG] Door opened")
                                 end
-                                if openedDoor then break end  -- 如果开了门，停止检查其他room
                             end
                             if openedDoor then break end  -- 如果开了门，停止检查其他raid
                         end
