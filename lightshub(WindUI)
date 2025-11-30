@@ -1168,7 +1168,7 @@ local function StartDungeonAutoFarm()
                         print("[DEBUG] Checking dungeon:", dungeon.Name, "Is Folder:", dungeon:IsA("Folder"))
                         if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
                             print("[DEBUG] Dungeon matches, collecting doors")
-                            -- 保存Door位置，按类型分组
+                            -- 保存Door位置，按类型分组（raid结束后local变量清除）
                             local Monster_Room_Doors = {}
                             local Treasure_Room_Doors = {}
                             local Merchant_Room_Doors = {}
@@ -1321,7 +1321,7 @@ end
 -- 停止 Dungeon Auto Farm
 local function StopDungeonAutoFarm()
     getgenv().AutoDungeonFarmRunning = false
-    print("[DEBUG] AutoDungeonFarm stopped")
+    print("[DEBUG] AutoDungeonFarm stopped - Door positions cleared (local variables)")
 end
 
 -- 启动普通 Auto Farm
