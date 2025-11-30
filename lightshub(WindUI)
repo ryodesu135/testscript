@@ -1237,6 +1237,25 @@ local function StartDungeonAutoFarm()
                                     task.wait(0.5)  -- 等待开门后继续
                                     openedDoor = true
                                     print("[DEBUG] Door opened")
+                                    -- 开门后清怪物
+                                    local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
+                                    local hasMonsters = monstersFolder and #monstersFolder:GetChildren() > 0
+                                    if hasMonsters then
+                                        print("[DEBUG] Monsters present after opening door, farming them")
+                                        if monstersFolder then
+                                            for _, mob in pairs(monstersFolder:GetChildren()) do
+                                                if not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then break end
+                                                if mob:IsA("Model") and mob:GetAttribute("Is_Dungeon") == true then
+                                                    local mobHRP = mob:FindFirstChild("HumanoidRootPart")
+                                                    if mobHRP then
+                                                        print("[DEBUG] Farming mob:", mob.Name)
+                                                        hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
+                                                        repeat task.wait(0.05) until not mob.Parent or not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
                                 end
                             end
                             if openedDoor then break end  -- 如果开了门，停止检查其他raid
