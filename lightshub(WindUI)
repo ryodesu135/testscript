@@ -1247,6 +1247,7 @@ local function StartDungeonAutoFarm()
             end
 
             -- 检查门并开门（如果怪物清空且有currentRoom，且room内还有未开的门）
+            print("[DEBUG] Checking door opening: hasMonsters =", hasMonsters, "doors count =", #doors, "currentRoom =", currentRoom and currentRoom.Name or "nil")
             if not hasMonsters and #doors > 0 and currentRoom then
                 print("[DEBUG] Monsters cleared, checking doors for currentRoom:", currentRoom.Name)
                 local openedDoor = false
@@ -1255,6 +1256,7 @@ local function StartDungeonAutoFarm()
                         print("[DEBUG] Door already opened in room, skipping:", door.Name)
                         continue
                     end
+                    print("[DEBUG] Checking door:", door and door.Name or "nil")
                     local doorPart = nil
                     if door and door:IsA("BasePart") then
                         doorPart = door
@@ -1287,6 +1289,7 @@ local function StartDungeonAutoFarm()
                         end
                         print("[DEBUG] Has Wall:", hasWall)
                         if not hasWall then
+                            print("[DEBUG] No wall, attempting to teleport to door")
                             -- 可开门：传送到门的中心前方（使用BoundingBox中心如果door是Model，更远距离避免卡进门）
                             local doorCenter = doorPart.Position
                             if door:IsA("Model") then
