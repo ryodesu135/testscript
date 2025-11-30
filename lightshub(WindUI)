@@ -1301,6 +1301,11 @@ local function StartDungeonAutoFarm()
                             hrp.CFrame = CFrame.lookAt(hrp.Position, doorCenter)
                             -- 传送后capture位置并调整相机面向门
                             local capturedPosition = hrp.Position
+                            repeat cam.CameraType = Enum.CameraType.Scriptable until cam.CameraType == Enum.CameraType.Scriptable
+                            cam.CFrame = CFrame.lookAt(capturedPosition, doorCenter)
+                            task.delay(1/60, function()
+	                        cam.CameraType = Enum.CameraType.Custom
+                            end)
                             workspace.Camera.CFrame = CFrame.lookAt(capturedPosition, doorCenter)
                             task.wait(0.5)  -- 等待传送和视角调整
                             game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
