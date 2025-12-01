@@ -313,7 +313,7 @@ CodesTab:Button({
     "Update25", "740KFav", "745KFav", "240MVisits", "StoneCode",
     "Update25P2", "750KFav", "395KLikes", "245MVisits", "Labyrinth", "Update25DelayP2", "ImGreenOnUpdate25", "Update25P2Restart1",
     "Update26", "755KFav", "Update26Code", "ThanksgivingOnPart2?", "Update26Code2", "Update26Restart1",
-    "Update26P2", "250MVisits", "Update26P2Code", "SorryNoTurkey", "PowerOfFriendship"
+    "Update26P2", "250MVisits", "Update26P2Code", "SorryNoTurkey", "PowerOfFriendship",
     "Update27", "400KLikes", "760KFav", "Update27Code", "NoThanksgivingCode" , "Update27Delay", "Update27Restart", "Update27HeroKey"
 
 }
