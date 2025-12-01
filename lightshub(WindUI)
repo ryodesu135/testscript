@@ -314,7 +314,7 @@ CodesTab:Button({
     "Update25P2", "750KFav", "395KLikes", "245MVisits", "Labyrinth", "Update25DelayP2", "ImGreenOnUpdate25", "Update25P2Restart1",
     "Update26", "755KFav", "Update26Code", "ThanksgivingOnPart2?", "Update26Code2", "Update26Restart1",
     "Update26P2", "250MVisits", "Update26P2Code", "SorryNoTurkey", "PowerOfFriendship",
-    "Update27", "400KLikes", "760KFav", "Update27Code", "NoThanksgivingCode" , "Update27Delay", "Update27Restart", "Update27HeroKey"
+    "Update27", "400KLikes", "760KFav", "Update27Code", "NoThanksgivingCode" , "Update27Delay", "Update27Restart", "Update27HeroKey", "SorryNoTurkey2", "SorryNoTurkey3", "SorryNoTurkey4"
 
 }
     for _, code in ipairs(codes) do
@@ -879,79 +879,134 @@ RollTab:Toggle({
     end,
 })
 
-local UpgradeTab = Window:Tab({
-        Title = "Upgrade",
+local ProgressionTab = Window:Tab({
+        Title = "Progression",
         Icon = "chevrons-up",
     })
 
---Auto Upgrade
-local UpgradeDropdown = UpgradeTab:Dropdown({
-    Flag = "UpgradeDropdown",
-   Title = "Upgrade List",
+--Auto Progression Upgrade
+local ProgressionDropdown = ProgressionTab:Dropdown({
+    Flag = "ProgressionDropdown",
+   Title = "Progression List",
    Values = {"[W2] Haki Upgrade",
     "[W3] Spiritual Pressure",
-    "[W9] Spiritual Upgrade",
-    "[W12] Sins Upgrades (Energy)","[W12] Sins Upgrades (Coins)","[W12] Sins Upgrades (Star_Luck)","[W12] Sins Upgrades (Damage)",
+    "[W4] Cursed Progression",
+    "[W6] ReAwakening Progression","[W6] Monarch Progression",
+    "[W7] Water Spirit Progression","[W7] Fire Spirit Progression","[W7] Wind Spirit Progression",
+    "[W8] Chakra Progression",
+    "[W9] Spiritual Upgrade","[W9] Lucky Spirit",
+    "[W10] Ten Progression","[W10] Contract of Greed",
+    "[W12] Sins Upgrades (Energy)","[W12] Sins Upgrades (Coins)","[W12] Sins Upgrades (Star_Luck)","[W12] Sins Upgrades (Damage)","[W12] Energy Progression",
+    "[W13] Fortitude Level", "[W13] Kaiju Energy",
+    "[W14] Demon Lord Energy", "[W14] Demon Lord Damage","[W14] Demon Lord Luck","[W14] Demon Lord Coins",
+    "[W15] Swordsman Energy","[W15] Swordsman Damage",
+    "[W16] Ripple Energy",
+    "[W17] Damange Cells",
+    "[W18] Akuma Damage","[W18] Akuma Energy",
+    "[W20] Dragon Energy","[W20] Dragon Damage",
+    "[W22] Eminence Energy","[W22] Eminence Damage","[W22] Eminence Luck","[W22] Eminence Coins",
+    "[W23] Punch Power Leveling",
+    "[W24] Mana Growth","[W24] Ultimate Cast",
     "[W26] Assassin Energy","[W26] Assassin Damage","[W26] Assassin Critical Energy","[W26] Assassin Critical Damage",
     "[W29] Science Materials Upgrade","[W29] Science Upgrades (Energy)","[W29] Science Upgrades (Damage)"
 },
     Value = "[W2] Haki Upgrade",
     Callback = function(option)
-        getgenv().selectedUpgrade = option
-        print("[DEBUG] Upgrade Option changed:", option)
+        getgenv().selectedProgression = option
+        print("[DEBUG] Progression Option changed:", option)
     end,
 })
 
-local UpgradeMap = {
-    ["[W2] Haki Upgrade"] = {"Haki_Upgrade", "Haki_Upgrade"},
-    ["[W3] Spiritual Pressure"] = {"Spiritual_Pressure", "Spiritual_Pressure"},
-    ["[W9] Spiritual Upgrade"] = {"Spiritual_Upgrade", "Spiritual_Upgrade"},
-    ["[W26] Assassin Energy"] = {"Assassin_Energy", "Assassin_Energy"},
-    ["[W26] Assassin Damage"] = {"Assassin_Damage", "Assassin_Damage"},
-    ["[W26] Assassin Critical Energy"] = {"Assassin_Critical_Energy", "Assassin_Critical_Energy"},
-    ["[W26] Assassin Critical Damage"] = {"Assassin_Critical_Damage", "Assassin_Critical_Damage"},
-    ["[W29] Science Materials Upgrade"] = {"Science_Materials_Upgrade", "Science_Materials_Upgrade"},
-    ["[W12] Sins Upgrades (Energy)"] = {"Energy", "Sin_Upgrades"},
-    ["[W12] Sins Upgrades (Coins)"] = {"Coins", "Sin_Upgrades"},
-    ["[W12] Sins Upgrades (Star_Luck)"] = {"Star_Luck", "Sin_Upgrades"},
-    ["[W12] Sins Upgrades (Damage)"] = {"Damage", "Sin_Upgrades"},
-    ["[W29] Science Upgrades (Energy)"] = {"Energy", "Science_Upgrades"},
-    ["[W29] Science Upgrades (Damage)"] = {"Damage", "Science_Upgrades"},
+local ProgressionMap = {
+    ["[W2] Haki Upgrade"] = {"Haki_Upgrade", "Haki_Upgrade", "_Upgrades"},
+    ["[W3] Spiritual Pressure"] = {"Spiritual_Pressure", "Spiritual_Pressure", "_Upgrades"},
+    ["[W4] Cursed Progression"] = {"Curse", "Cursed_Progression", "_Upgrades"},
+    ["[W6] ReAwakening Progression"] = {"ReAwakening", "ReAwakening_Progression", "_Upgrades"},
+    ["[W6] Monarch Progression"] = {"Monarch", "Monarch_Progression", "_Upgrades"},
+    ["[W7] Water Spirit Progression"] = {"Water_Spirit", "Water_Spirit_Progression", "_Upgrades"},
+    ["[W7] Fire Spirit Progression"] = {"Fire_Spirit", "Fire_Spirit_Progression", "_Upgrades"},
+    ["[W7] Wind Spirit Progression"] = {"Wind_Spirit", "Wind_Spirit_Progression", "_Upgrades"},
+    ["[W8] Chakra Progression"] = {"Chakra", "Chakra_Progression", "_Upgrades"},
+    ["[W9] Spiritual Upgrade"] = {"Spiritual_Upgrade", "Spiritual_Upgrade", "_Upgrades"},
+    ["[W9] Lucky Spirit"] = {"Luck", "Lucky_Spirit", "_Progression"},
+    ["[W10] Ten Progression"] = {"Ten", "Ten_Progression", "_Upgrades"},
+    ["[W10] Contract of Greed"] = {"Coins", "Contract_of_Greed", "_Progression"},
+    ["[W12] Sins Upgrades (Energy)"] = {"Energy", "Sin_Upgrades", "_Upgrades"},
+    ["[W12] Sins Upgrades (Coins)"] = {"Coins", "Sin_Upgrades", "_Upgrades"},
+    ["[W12] Sins Upgrades (Star_Luck)"] = {"Star_Luck", "Sin_Upgrades", "_Upgrades"},
+    ["[W12] Sins Upgrades (Damage)"] = {"Damage", "Sin_Upgrades", "_Upgrades"},
+    ["[W12] Energy Progression"] = {"Strenght", "Energy_Progression", "_Progression"},
+    ["[W13] Fortitude Level"] = {"Strenght", "Fortitude_Level", "_Progression"},
+    ["[W13] Kaiju Energy"] = {"Energy", "Kaiju_Energy", "_Progression"},
+    ["[W14] Demon Lord Energy"] = {"Energy", "Demon_Lord_Energy", "_Progression"},
+    ["[W14] Demon Lord Damage"] = {"Damage", "Demon_Lord_Damage", "_Progression"},
+    ["[W14] Demon Lord Luck"] = {"Luck", "Demon_Lord_Luck", "_Progression"},
+    ["[W14] Demon Lord Coins"] = {"Coins", "Demon_Lord_Coins", "_Progression"},
+    ["[W15] Swordsman Energy"] = {"Energy", "Swordsman_Energy", "_Progression"},
+    ["[W15] Swordsman Damage"] = {"Damage", "Swordsman_Damage", "_Progression"},
+    ["[W16] Ripple Energy"] = {"Energy", "Ripple_Energy", "_Progression"},
+    ["[W17] Damange Cells"] = {"Damage", "Damage_Cells", "_Progression"},
+    ["[W18] Akuma Damage"] = {"Damage", "Akuma_Damage", "_Progression"},
+    ["[W18] Akuma Energy"] = {"Energy", "Akuma_Energy", "_Progression"},
+    ["[W20] Dragon Energy"] = {"Energy", "Dragon_Energy", "_Progression"},
+    ["[W20] Dragon Damage"] = {"Damage", "Dragon_Damage", "_Progression"},
+    ["[W22] Eminence Energy"] = {"Energy", "Eminence_Energy", "_Progression"},
+    ["[W22] Eminence Damage"] = {"Damage", "Eminence_Damage", "_Progression"},
+    ["[W22] Eminence Luck"] = {"Luck", "Eminence_Luck", "_Progression"},
+    ["[W22] Eminence Coins"] = {"Coins", "Eminence_Coins", "_Progression"},
+    ["[W23] Punch Power Leveling"] = {"Damage", "Hide_n_Punch_Progression", "_Progression"},
+    ["[W24] Mana Growth"] = {"Energy", "Mana_Growth", "_Progression"},
+    ["[W24] Ultimate Cast"] = {"Damage", "Ultimate_Cast", "_Progression"},
+    ["[W26] Assassin Energy"] = {"Energy", "Assassin_Energy", "_Progression"},
+    ["[W26] Assassin Damage"] = {"Damage", "Assassin_Damage", "_Progression"},
+    ["[W26] Assassin Critical Energy"] = {"Critical_Energy", "Assassin_Critical_Energy", "_Progression"},
+    ["[W26] Assassin Critical Damage"] = {"Critical_Damage", "Assassin_Critical_Damage", "_Progression"},
+    ["[W29] Science Materials Upgrade"] = {"Science_Materials", "Science_Materials_Upgrade", "_Progression"},
+    ["[W29] Science Upgrades (Energy)"] = {"Energy", "Science_Upgrades", "_Upgrades"},
+    ["[W29] Science Upgrades (Damage)"] = {"Damage", "Science_Upgrades", "_Upgrades"},
 }
 
--- Auto Upgrade Toggle
-UpgradeTab:Toggle({
-    Flag = "AutoUpgrade1",
-    Title = "Auto Upgrade",
-    Desc = "Automatically Upgrade Selected Upgrade",
+-- Auto Progression Toggle
+ProgressionTab:Toggle({
+    Flag = "AutoProgression1",
+    Title = "Auto Progression",
+    Desc = "Automatically Upgrade Selected Progression",
     Default = false,
     Callback = function(state)
         if state then
-            getgenv().AutoUpgrade = true
-            print("[DEBUG] AutoUpgrade enabled")
+            getgenv().AutoProgression = true
+            print("[DEBUG] AutoProgression enabled")
             task.spawn(function()
-                while getgenv().AutoUpgrade do
+                while getgenv().AutoProgression do
                     pcall(function()
-                        print("[DEBUG] Attempting to upgrade, selectedUpgrade:", getgenv().selectedUpgrade)
-                        local upgradeData = UpgradeMap[getgenv().selectedUpgrade]
-                        if upgradeData then
-                            local upgradingName, upgradeName = upgradeData[1], upgradeData[2]
-                            print("[DEBUG] Upgrading_Name:", upgradingName, "Upgrade_Name:", upgradeName)
-                            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-                                ["Upgrading_Name"] = upgradingName,
-                                ["Action"] = "_Upgrades",
-                                ["Upgrade_Name"] = upgradeName,
-                            })
+                        print("[DEBUG] Attempting to upgrade, selectedProgression:", getgenv().selectedProgression)
+                        local progressionData = ProgressionMap[getgenv().selectedProgression]
+                        if progressionData then
+                            local upgradingName, upgradeName, action = progressionData[1], progressionData[2], progressionData[3]
+                            print("[DEBUG] Upgrading_Name:", upgradingName, "Upgrade_Name:", upgradeName, "Action:", action)
+                            if action == "_Progression" then
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Upgrade_Name"] = upgradingName,
+                                    ["Action"] = "_Progression",
+                                    ["Bench_Name"] = upgradeName,
+                                })
+                            else
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Upgrading_Name"] = upgradingName,
+                                    ["Action"] = "_Upgrades",
+                                    ["Upgrade_Name"] = upgradeName,
+                                })
+                            end
                         else
-                            print("[DEBUG] No mapping found for:", getgenv().selectedUpgrade)
+                            print("[DEBUG] No mapping found for:", getgenv().selectedProgression)
                         end
                         task.wait(0.05)
                     end)
                 end
             end)
         else
-            getgenv().AutoUpgrade = false
-            print("[DEBUG] AutoUpgrade disabled")
+            getgenv().AutoProgression = false
+            print("[DEBUG] AutoProgression disabled")
         end
     end,
 })
