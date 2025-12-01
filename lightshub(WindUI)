@@ -314,6 +314,7 @@ CodesTab:Button({
     "Update25P2", "750KFav", "395KLikes", "245MVisits", "Labyrinth", "Update25DelayP2", "ImGreenOnUpdate25", "Update25P2Restart1",
     "Update26", "755KFav", "Update26Code", "ThanksgivingOnPart2?", "Update26Code2", "Update26Restart1",
     "Update26P2", "250MVisits", "Update26P2Code", "SorryNoTurkey", "PowerOfFriendship"
+    "Update27", "400KLikes", "760KFav", "Update27Code", "NoThanksgivingCode" , "Update27Delay", "Update27Restart", "Update27HeroKey"
 
 }
     for _, code in ipairs(codes) do
@@ -754,7 +755,9 @@ local StarDropdown = StarTab:Dropdown({
 
     "[W21] Hollow World","[W22] Shadow Academy","[W23] Z City","[W24] Great Tomb","[W25] Thriller Park",
 
-    "[W26] Amusement Park","[W27] Re:Manor","[W28] Asfordo Academy","[W29] Science Village","[W30] Sand Village"
+    "[W26] Amusement Park","[W27] Re:Manor","[W28] Asfordo Academy","[W29] Science Village","[W30] Sand Village",
+
+    "[W31] Night Raid Base"
 },
     Value = "[W1] Earth City",
     Callback = function(option)
@@ -833,7 +836,8 @@ local RollDropdown = RollTab:Dropdown({
     "[W27] Spirit Pact","[W27] Witch Factor","[W27] Re:Spirit Pact","[W27] Re:Witch Factor","[W27] Witch Authority",
     "[W28] Geass Potential","[W28] Knightmare Frames",
     "[W29] IQ","[W29] Scientific Weapons",
-    "[W30] Shinobi Clan","[W30] Kekkei Genkai","[W30] Power Eyes 2"
+    "[W30] Shinobi Clan","[W30] Kekkei Genkai","[W30] Power Eyes 2",
+    "[W31] Energy Teigu","[W31] Damage Teigu"
 },
     Value = "[W1] Dragon Race",
     Callback = function(option)
@@ -1025,7 +1029,7 @@ local RaidOptions = {
     "Sin Raid","Kaiju Dungeon","Dragon Room Raid","Gleam Raid","Progression Raid 2",
     "Ghoul Raid","Chainsaw Defense","Netherworld Defense","Green Planet Raid",
     "Hollow Raid","Tomb Arena Raid","Halloween Raid","Graveyard Raid",
-    "Dungeon Suffering","Dungeon Adventure","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3","Dungeon Labyrinth"
+    "Dungeon Suffering","Dungeon Adventure","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3","Dungeon Labyrinth","Crimson Canyon"
 }
 
 local SpeedRaids = {
@@ -1044,7 +1048,8 @@ local RaidSpeedOptions = {"1x Speed", "2x Speed", "3x Speed"}
 -- 需要 Auto Farm 的 Dungeon 和 Maze（来自 DungeonOptions 和 RaidOptions）
 local AutoFarmDungeons = {
     "Dungeon Easy", "Dungeon Medium", "Dungeon Hard", "Dungeon Insane", "Dungeon Crazy", "Dungeon Nightmare",
-    "Kaiju Dungeon", "Dungeon Suffering", "Dungeon Adventure", "Dungeon Torment", "Maze Level 1", "Maze Level 2", "Maze Level 3", "Dungeon Labyrinth"
+    "Kaiju Dungeon", "Dungeon Suffering", "Dungeon Adventure", "Dungeon Torment", "Maze Level 1", "Maze Level 2", "Maze Level 3", "Dungeon Labyrinth",
+    "Crimson Canyon"
 }
 
 -- Dungeon 名称映射到信号中的 Name（例如 Dungeon Easy -> Dungeon_Easy）
@@ -1082,7 +1087,8 @@ local RaidNameMap = {
     ["Maze Level 1"] = "Maze_Level_1",
     ["Maze Level 2"] = "Maze_Level_2",
     ["Maze Level 3"] = "Maze_Level_3",
-    ["Dungeon Labyrinth"] = "Dungeon_Labyrinth"
+    ["Dungeon Labyrinth"] = "Dungeon_Labyrinth",
+    ["Crimson Canyon"] = "Crimson_Canyon"
 }
 
 -------------------------------------------------
@@ -1135,7 +1141,6 @@ local function StartDungeonAutoFarm()
     getgenv().AutoDungeonFarmRunning = true
     print("[DEBUG] AutoDungeonFarm started")
     task.wait(1)  -- 进入raid后等待1秒
-    local LeaveTimerStarted = false  -- 防止重复启动离开timer
     task.spawn(function()
         while getgenv().AutoDungeonFarmRunning and getgenv().InDungeon do
             print("[DEBUG] Loop running, InDungeon:", getgenv().InDungeon)
@@ -1164,21 +1169,6 @@ local function StartDungeonAutoFarm()
                     end
                 end
             else
-                -- 如果没有怪物，启动离开timer（如果未启动）
-                if not LeaveTimerStarted then
-                    LeaveTimerStarted = true
-                    task.delay(5, function()
-                        if not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then return end
-                        local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
-                        local hasMonsters = monstersFolder and #monstersFolder:GetChildren() > 0
-                        if not hasMonsters then
-                            print("[DEBUG] No monsters after 5 seconds, leaving dungeon")
-                            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-                                ["Action"] = "Dungeon_Leave",
-                            })
-                        end
-                    end)
-                end
                 -- 如果没有怪物，检测Door并按优先级开（Monster_Room保存并开 -> Treasure_Room -> Merchant_Room -> End_Room）
                 print("[DEBUG] No monsters, checking for doors")
                 pcall(function()
