@@ -879,6 +879,83 @@ RollTab:Toggle({
     end,
 })
 
+local UpgradeTab = Window:Tab({
+        Title = "Upgrade",
+        Icon = "chevrons-up",
+    })
+
+--Auto Upgrade
+local UpgradeDropdown = UpgradeTab:Dropdown({
+    Flag = "UpgradeDropdown",
+   Title = "Upgrade List",
+   Values = {"[W2] Haki Upgrade",
+    "[W3] Spiritual Pressure",
+    "[W9] Spiritual Upgrade",
+    "[W12] Sins Upgrades (Energy)","[W12] Sins Upgrades (Coins)","[W12] Sins Upgrades (Star_Luck)","[W12] Sins Upgrades (Damage)",
+    "[W26] Assassin Energy","[W26] Assassin Damage","[W26] Assassin Critical Energy","[W26] Assassin Critical Damage",
+    "[W29] Science Materials Upgrade","[W29] Science Upgrades (Energy)","[W29] Science Upgrades (Damage)"
+},
+    Value = "[W2] Haki Upgrade",
+    Callback = function(option)
+        getgenv().selectedUpgrade = option
+        print("[DEBUG] Upgrade Option changed:", option)
+    end,
+})
+
+local UpgradeMap = {
+    ["[W2] Haki Upgrade"] = {"Haki_Upgrade", "Haki_Upgrade"},
+    ["[W3] Spiritual Pressure"] = {"Spiritual_Pressure", "Spiritual_Pressure"},
+    ["[W9] Spiritual Upgrade"] = {"Spiritual_Upgrade", "Spiritual_Upgrade"},
+    ["[W26] Assassin Energy"] = {"Assassin_Energy", "Assassin_Energy"},
+    ["[W26] Assassin Damage"] = {"Assassin_Damage", "Assassin_Damage"},
+    ["[W26] Assassin Critical Energy"] = {"Assassin_Critical_Energy", "Assassin_Critical_Energy"},
+    ["[W26] Assassin Critical Damage"] = {"Assassin_Critical_Damage", "Assassin_Critical_Damage"},
+    ["[W29] Science Materials Upgrade"] = {"Science_Materials_Upgrade", "Science_Materials_Upgrade"},
+    ["[W12] Sins Upgrades (Energy)"] = {"Energy", "Sin_Upgrades"},
+    ["[W12] Sins Upgrades (Coins)"] = {"Coins", "Sin_Upgrades"},
+    ["[W12] Sins Upgrades (Star_Luck)"] = {"Star_Luck", "Sin_Upgrades"},
+    ["[W12] Sins Upgrades (Damage)"] = {"Damage", "Sin_Upgrades"},
+    ["[W29] Science Upgrades (Energy)"] = {"Energy", "Science_Upgrades"},
+    ["[W29] Science Upgrades (Damage)"] = {"Damage", "Science_Upgrades"},
+}
+
+-- Auto Upgrade Toggle
+UpgradeTab:Toggle({
+    Flag = "AutoUpgrade1",
+    Title = "Auto Upgrade",
+    Desc = "Automatically Upgrade Selected Upgrade",
+    Default = false,
+    Callback = function(state)
+        if state then
+            getgenv().AutoUpgrade = true
+            print("[DEBUG] AutoUpgrade enabled")
+            task.spawn(function()
+                while getgenv().AutoUpgrade do
+                    pcall(function()
+                        print("[DEBUG] Attempting to upgrade, selectedUpgrade:", getgenv().selectedUpgrade)
+                        local upgradeData = UpgradeMap[getgenv().selectedUpgrade]
+                        if upgradeData then
+                            local upgradingName, upgradeName = upgradeData[1], upgradeData[2]
+                            print("[DEBUG] Upgrading_Name:", upgradingName, "Upgrade_Name:", upgradeName)
+                            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                ["Upgrading_Name"] = upgradingName,
+                                ["Action"] = "_Upgrades",
+                                ["Upgrade_Name"] = upgradeName,
+                            })
+                        else
+                            print("[DEBUG] No mapping found for:", getgenv().selectedUpgrade)
+                        end
+                        task.wait(0.05)
+                    end)
+                end
+            end)
+        else
+            getgenv().AutoUpgrade = false
+            print("[DEBUG] AutoUpgrade disabled")
+        end
+    end,
+})
+
 -------------------------------------------------
 --🌾 Farm Tab
 -------------------------------------------------
