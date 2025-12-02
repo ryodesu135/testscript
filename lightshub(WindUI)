@@ -1289,6 +1289,7 @@ local function StartDungeonAutoFarm()
 
             -- 如果raid中有怪物，先清掉
             if hasMonsters then
+                print("[DEBUG] hasMonsters: true, LeaveTimer: ", LeaveTimer ~= nil, "isSpecificRaid: ", isSpecificRaid)
                 if monstersFolder then
                     for _, mob in pairs(monstersFolder:GetChildren()) do
                         if not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then break end
