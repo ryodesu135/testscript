@@ -319,7 +319,8 @@ CodesTab:Button({
 }
     for _, code in ipairs(codes) do
          game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-            ["Action"] = "_Redeem_Code", ["Text"] = code
+            ["Action"] = "_Redeem_Code", 
+			["Text"] = code,
          })
                 task.wait(0.20)
             end
