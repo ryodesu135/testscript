@@ -317,14 +317,28 @@ CodesTab:Button({
     "Update27", "400KLikes", "760KFav", "Update27Code", "NoThanksgivingCode" , "Update27Delay", "Update27Restart", "Update27HeroKey", "SorryNoTurkey2", "SorryNoTurkey3", "SorryNoTurkey4"
 
 }
-    for _, code in ipairs(codes) do
-         game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-            ["Action"] = "_Redeem_Code", 
-			["Text"] = code,
-         })
-                task.wait(0.20)
+    for i, code in ipairs(codes) do
+            local success, err = pcall(function()
+                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                    ["Action"] = "_Redeem_Code", 
+                    ["Text"] = code,
+                })
+            end)
+            
+            if success then
+                -- 新增调试：成功兑换
+                print("[DEBUG] Successfully fired event for code: " .. code)
+            else
+                -- 新增调试：失败时打印错误
+                print("[DEBUG] Failed to redeem code: " .. code .. " | Error: " .. tostring(err))
             end
-   end,
+            
+            task.wait(0.20)  -- 保持原延迟
+        end
+        
+        -- 新增调试：打印兑换完成
+        print("[DEBUG] Finished redeeming all codes.")
+    end,
 })
 
 -------------------------------------------------
