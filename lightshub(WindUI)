@@ -1266,6 +1266,9 @@ local function IsAutoFarmDungeon(dungeonName)
     return false
 end
 
+lua
+
+Copy code
 -- 启动 Dungeon Auto Farm
 local function StartDungeonAutoFarm()
     if getgenv().AutoDungeonFarmRunning then return end
@@ -1284,7 +1287,7 @@ local function StartDungeonAutoFarm()
             local hasMonsters = monstersFolder and #monstersFolder:GetChildren() > 0
 
             -- 检查是否是特定raid（Maze Level 1,2,3, Dungeon Labyrinth）
-            local isSpecificRaid = getgenv().CurrentDungeonName and (getgenv().CurrentDungeonName == "Maze Level 1" or getgenv().CurrentDungeonName == "Maze Level 2" or getgenv().CurrentDungeonName == "Maze Level 3" or getgenv().CurrentDungeonName == "Dungeon Labyrinth")
+            local isSpecificRaid = getgenv().CurrentRaidName and (getgenv().CurrentRaidName == "Maze Level 1" or getgenv().CurrentRaidName == "Maze Level 2" or getgenv().CurrentRaidName == "Maze Level 3" or getgenv().CurrentRaidName == "Dungeon Labyrinth")
 
             -- 如果raid中有怪物，先清掉
             if hasMonsters then
