@@ -296,9 +296,9 @@ RankingTab:Toggle({
 })
 
 local CodesTab = Window:Tab({
-        Title = "Codes",
-        Icon = "ticket",
-    })
+    Title = "Codes",
+    Icon = "ticket",
+})
 
 -- ✅ Redeem Codes Button
 CodesTab:Button({
@@ -307,17 +307,24 @@ CodesTab:Button({
     Desc = "Redeem all codes automatically.",
     Locked = false,
     Callback = function()
-    local codes = {"SlashX", "Derp", "Heyyyo", 
-    "Update24P2", "720KFav", "725KFav", "230MVisits", "Update24Part2Code",
-    "Update24P3", "730KFav", "735KFav", "390KLikes", "235MVisits",
-    "Update25", "740KFav", "745KFav", "240MVisits", "StoneCode",
-    "Update25P2", "750KFav", "395KLikes", "245MVisits", "Labyrinth", "Update25DelayP2", "ImGreenOnUpdate25", "Update25P2Restart1",
-    "Update26", "755KFav", "Update26Code", "ThanksgivingOnPart2?", "Update26Code2", "Update26Restart1",
-    "Update26P2", "250MVisits", "Update26P2Code", "SorryNoTurkey", "PowerOfFriendship",
-    "Update27", "400KLikes", "760KFav", "Update27Code", "NoThanksgivingCode" , "Update27Delay", "Update27Restart", "Update27HeroKey", "SorryNoTurkey2", "SorryNoTurkey3", "SorryNoTurkey4"
-
-}
-    for i, code in ipairs(codes) do
+        local codes = {"SlashX", "Derp", "Heyyyo", 
+        "Update24P2", "720KFav", "725KFav", "230MVisits", "Update24Part2Code",
+        "Update24P3", "730KFav", "735KFav", "390KLikes", "235MVisits",
+        "Update25", "740KFav", "745KFav", "240MVisits", "StoneCode",
+        "Update25P2", "750KFav", "395KLikes", "245MVisits", "Labyrinth", "Update25DelayP2", "ImGreenOnUpdate25", "Update25P2Restart1",
+        "Update26", "755KFav", "Update26Code", "ThanksgivingOnPart2?", "Update26Code2", "Update26Restart1",
+        "Update26P2", "250MVisits", "Update26P2Code", "SorryNoTurkey", "PowerOfFriendship",
+        "Update27", "400KLikes", "760KFav", "Update27Code", "NoThanksgivingCode" , "Update27Delay", "Update27Restart", "Update27HeroKey", "SorryNoTurkey2", "SorryNoTurkey3", "SorryNoTurkey4"
+        }
+        
+        -- 新增调试：打印开始兑换
+        print("[DEBUG] Starting to redeem all codes. Total codes: " .. #codes)
+        
+        for i, code in ipairs(codes) do
+            -- 新增调试：打印当前兑换的代码和索引
+            print("[DEBUG] Redeeming code " .. i .. ": " .. code)
+            
+            -- 可选：用pcall包裹以捕获错误
             local success, err = pcall(function()
                 game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                     ["Action"] = "_Redeem_Code", 
