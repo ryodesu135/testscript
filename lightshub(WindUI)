@@ -1274,6 +1274,7 @@ local function StartDungeonAutoFarm()
     task.wait(1)  -- 进入raid后等待1秒
     local LeaveTimerStarted = false  -- 防止重复启动离开timer
     local LeaveTimer = nil  -- timer对象
+
     task.spawn(function()
         while getgenv().AutoDungeonFarmRunning and getgenv().InDungeon do
             print("[DEBUG] Loop running, InDungeon:", getgenv().InDungeon)
@@ -1284,6 +1285,9 @@ local function StartDungeonAutoFarm()
             local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
             local hasMonsters = monstersFolder and #monstersFolder:GetChildren() > 0
             print("[DEBUG] Monsters folder exists:", monstersFolder ~= nil, "Has monsters:", hasMonsters, "Count:", monstersFolder and #monstersFolder:GetChildren() or 0)
+
+            -- 检查是否是特定raid（Maze Level 1,2,3, Dungeon Labyrinth）
+            local isSpecificRaid = getgenv().CurrentDungeonName and (getgenv().CurrentDungeonName == "Maze Level 1" or getgenv().CurrentDungeonName == "Maze Level 2" or getgenv().CurrentDungeonName == "Maze Level 3" or getgenv().CurrentDungeonName == "Dungeon Labyrinth")
 
             -- 如果raid中有怪物，先清掉
             if hasMonsters then
@@ -1310,7 +1314,7 @@ local function StartDungeonAutoFarm()
                 end
             else
                 -- 如果没有怪物，且是特定raid，启动离开timer（如果未启动）
-                if getgenv().CurrentDungeonName and (getgenv().CurrentDungeonName == "Maze Level 1" or getgenv().CurrentDungeonName == "Maze Level 2" or getgenv().CurrentDungeonName == "Maze Level 3" or getgenv().CurrentDungeonName == "Dungeon Labyrinth") and not LeaveTimerStarted then
+                if isSpecificRaid and not LeaveTimerStarted then
                     LeaveTimerStarted = true
                     LeaveTimer = task.delay(10, function()
                         if not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then return end
