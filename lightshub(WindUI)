@@ -1241,6 +1241,7 @@ getgenv().AutoRaidFarmRunning = false
 getgenv().IsCurrentKeyDungeon = false
 getgenv().CurrentRaidIndex = 1  -- 用于循环 Raid
 getgenv().CurrentRaidName = nil
+getgenv().IsEnteringRaid = false
 
 -- 普通 AutoFarm 暂停恢复控制
 getgenv().AutoFarmRunning = false
@@ -1532,8 +1533,10 @@ end
 
 -- 进入 Raid
 local function EnterRaid(raidName)
+    if getgenv().IsEnteringRaid then return end
+    getgenv().IsEnteringRaid = true
     local name = RaidNameMap[raidName]
-    if not name then return end
+    if not name then getgenv().IsEnteringRaid = false return end
 
     local data = { ["Action"] = "_Enter_Dungeon", ["Name"] = name }
 
@@ -1549,11 +1552,19 @@ local function EnterRaid(raidName)
     getgenv().CurrentRaidName = raidName
     ToServer:FireServer(data)
     print("[DEBUG] Entering Raid:", raidName, "with data:", data)
+
+    -- Timeout: 如果5秒后仍没有进入raid，重置flag
+    task.delay(5, function()
+        if not getgenv().InRaid then
+            getgenv().IsEnteringRaid = false
+            print("[DEBUG] Raid entry failed, resetting flag")
+        end
+    end)
 end
 
 -- 循环进入下一个 Raid
 local function EnterNextRaid()
-    if #getgenv().SelectedRaids == 0 then return end
+    if #getgenv().SelectedRaids == 0 or getgenv().IsEnteringRaid then return end
     local raidName = getgenv().SelectedRaids[getgenv().CurrentRaidIndex]
     EnterRaid(raidName)
     getgenv().CurrentRaidIndex = getgenv().CurrentRaidIndex % #getgenv().SelectedRaids + 1
@@ -1611,6 +1622,7 @@ Remote.OnClientEvent:Connect(function(data)
             StopDungeonAutoFarm()
             getgenv().CurrentDungeonName = nil
             getgenv().CurrentRaidName = nil
+            getgenv().IsEnteringRaid = false  -- 重置flag
             ResumeAutoFarm()  -- 总是尝试恢复普通 Auto Farm
             if getgenv().AutoRaidEnabled then
                 EnterNextRaid()
@@ -1623,7 +1635,7 @@ end)
 -- 循环 Raid 进入（如果启用）
 task.spawn(function()
     while true do
-        if getgenv().AutoRaidEnabled and not getgenv().InRaid and #getgenv().SelectedRaids > 0 then
+        if getgenv().AutoRaidEnabled and not getgenv().InRaid and #getgenv().SelectedRaids > 0 and not getgenv().IsEnteringRaid then
             EnterNextRaid()
         end
         task.wait(1)  -- 检查间隔
