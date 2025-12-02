@@ -1266,9 +1266,6 @@ local function IsAutoFarmDungeon(dungeonName)
     return false
 end
 
-lua
-
-Copy code
 -- 启动 Dungeon Auto Farm
 local function StartDungeonAutoFarm()
     if getgenv().AutoDungeonFarmRunning then return end
