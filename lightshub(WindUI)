@@ -1275,13 +1275,25 @@ local function StartDungeonAutoFarm()
     local LeaveTimerStarted = false  -- 防止重复启动离开timer
     local LeaveTimer = nil  -- timer对象
 
+    -- 添加事件监听器：当怪物添加时，如果是Is_Dungeon且timer存在，立即取消timer
+    local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
+    if monstersFolder then
+        monstersFolder.ChildAdded:Connect(function(child)
+            if child:IsA("Model") and child:GetAttribute("Is_Dungeon") == true and LeaveTimer then
+                task.cancel(LeaveTimer)
+                LeaveTimer = nil
+                LeaveTimerStarted = false
+                print("[DEBUG] Monsters detected via ChildAdded, cleared leave timer")
+            end
+        end)
+    end
+
     task.spawn(function()
         while getgenv().AutoDungeonFarmRunning and getgenv().InDungeon do
             local char = player.Character
             local hrp = char and char:FindFirstChild("HumanoidRootPart")
             if not hrp then task.wait(0.2) continue end
 
-            local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
             -- 检测逻辑：检查是否有 ClassName = Model 且 Attributes: Is_Dungeon = true 的怪物
             local hasMonsters = false
             if monstersFolder then
