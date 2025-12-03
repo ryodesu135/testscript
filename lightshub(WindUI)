@@ -1287,6 +1287,14 @@ local function StartDungeonAutoFarm()
             -- 检查是否是特定raid（Maze Level 1,2,3, Dungeon Labyrinth）
             local isSpecificRaid = getgenv().CurrentRaidName and (getgenv().CurrentRaidName == "Maze Level 1" or getgenv().CurrentRaidName == "Maze Level 2" or getgenv().CurrentRaidName == "Maze Level 3" or getgenv().CurrentRaidName == "Dungeon Labyrinth")
 
+            -- 如果有怪物且timer存在，立即取消timer（无论当前分支）
+            if hasMonsters and LeaveTimer then
+                task.cancel(LeaveTimer)
+                LeaveTimer = nil
+                LeaveTimerStarted = false
+                print("[DEBUG] Monsters detected, cleared leave timer")
+            end
+
             -- 如果raid中有怪物，先清掉
             if hasMonsters then
                 print("[DEBUG] hasMonsters: true, LeaveTimer: ", LeaveTimer ~= nil, "isSpecificRaid: ", isSpecificRaid)
@@ -1301,12 +1309,6 @@ local function StartDungeonAutoFarm()
                             end
                         end
                     end
-                end
-                -- 如果有怪物，清除timer
-                if LeaveTimer then
-                    task.cancel(LeaveTimer)
-                    LeaveTimerStarted = false
-                    print("[DEBUG] Monsters detected, cleared leave timer")
                 end
             else
                 -- 如果没有怪物，且是特定raid，启动离开timer（如果未启动）
