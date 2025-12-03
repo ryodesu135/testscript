@@ -1282,16 +1282,19 @@ local function StartDungeonAutoFarm()
             if not hrp then task.wait(0.2) continue end
 
             local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
-            -- 修改 hasMonsters 的检测逻辑：只检查是否有 ClassName = Model 且 Attributes: In_Dungeon = true 的怪物
+            -- 检测逻辑：检查是否有 ClassName = Model 且 Attributes: Is_Dungeon = true 的怪物
             local hasMonsters = false
             if monstersFolder then
                 for _, mob in pairs(monstersFolder:GetChildren()) do
-                    if mob:IsA("Model") and mob:GetAttribute("In_Dungeon") == true then
+                    if mob:IsA("Model") and mob:GetAttribute("Is_Dungeon") == true then
                         hasMonsters = true
                         break
                     end
                 end
             end
+
+            -- 调试打印：每次循环打印hasMonsters和LeaveTimer状态
+            print("[DEBUG] Loop check - hasMonsters:", hasMonsters, "LeaveTimer exists:", LeaveTimer ~= nil)
 
             -- 检查是否是特定raid（Maze Level 1,2,3, Dungeon Labyrinth）
             local isSpecificRaid = getgenv().CurrentRaidName and (getgenv().CurrentRaidName == "Maze Level 1" or getgenv().CurrentRaidName == "Maze Level 2" or getgenv().CurrentRaidName == "Maze Level 3" or getgenv().CurrentRaidName == "Dungeon Labyrinth")
@@ -1310,7 +1313,7 @@ local function StartDungeonAutoFarm()
                 if monstersFolder then
                     for _, mob in pairs(monstersFolder:GetChildren()) do
                         if not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then break end
-                        if mob:IsA("Model") and mob:GetAttribute("In_Dungeon") == true then
+                        if mob:IsA("Model") and mob:GetAttribute("Is_Dungeon") == true then
                             local mobHRP = mob:FindFirstChild("HumanoidRootPart")
                             if mobHRP then
                                 hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
@@ -1330,7 +1333,7 @@ local function StartDungeonAutoFarm()
                         local hasMonsters = false
                         if monstersFolder then
                             for _, mob in pairs(monstersFolder:GetChildren()) do
-                                if mob:IsA("Model") and mob:GetAttribute("In_Dungeon") == true then
+                                if mob:IsA("Model") and mob:GetAttribute("Is_Dungeon") == true then
                                     hasMonsters = true
                                     break
                                 end
@@ -1418,7 +1421,7 @@ local function StartDungeonAutoFarm()
                                     local hasMonsters = false
                                     if monstersFolder then
                                         for _, mob in pairs(monstersFolder:GetChildren()) do
-                                            if mob:IsA("Model") and mob:GetAttribute("In_Dungeon") == true then
+                                            if mob:IsA("Model") and mob:GetAttribute("Is_Dungeon") == true then
                                                 hasMonsters = true
                                                 break
                                             end
@@ -1428,7 +1431,7 @@ local function StartDungeonAutoFarm()
                                         if monstersFolder then
                                             for _, mob in pairs(monstersFolder:GetChildren()) do
                                                 if not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then break end
-                                                if mob:IsA("Model") and mob:GetAttribute("In_Dungeon") == true then
+                                                if mob:IsA("Model") and mob:GetAttribute("Is_Dungeon") == true then
                                                     local mobHRP = mob:FindFirstChild("HumanoidRootPart")
                                                     if mobHRP then
                                                         hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
@@ -1469,7 +1472,7 @@ local function StartDungeonAutoFarm()
                                     local hasMonsters = false
                                     if monstersFolder then
                                         for _, mob in pairs(monstersFolder:GetChildren()) do
-                                            if mob:IsA("Model") and mob:GetAttribute("In_Dungeon") == true then
+                                            if mob:IsA("Model") and mob:GetAttribute("Is_Dungeon") == true then
                                                 hasMonsters = true
                                                 break
                                             end
@@ -1479,7 +1482,7 @@ local function StartDungeonAutoFarm()
                                         if monstersFolder then
                                             for _, mob in pairs(monstersFolder:GetChildren()) do
                                                 if not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then break end
-                                                if mob:IsA("Model") and mob:GetAttribute("In_Dungeon") == true then
+                                                if mob:IsA("Model") and mob:GetAttribute("Is_Dungeon") == true then
                                                     local mobHRP = mob:FindFirstChild("HumanoidRootPart")
                                                     if mobHRP then
                                                         hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
