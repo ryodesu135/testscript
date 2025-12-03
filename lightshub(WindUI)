@@ -1305,7 +1305,6 @@ local function StartDungeonAutoFarm()
                 -- 如果有怪物，清除timer
                 if LeaveTimer then
                     task.cancel(LeaveTimer)
-                    LeaveTimer = nil
                     LeaveTimerStarted = false
                     print("[DEBUG] Monsters detected, cleared leave timer")
                 end
