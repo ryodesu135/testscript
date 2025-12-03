@@ -113,6 +113,8 @@ PlayerTab:Slider({
     end,
 })
 
+PlayerTab:Divider()
+
 -------------------------------------------------
 -- 🛡️ Anti AFK
 -------------------------------------------------
@@ -374,6 +376,8 @@ CollectTab:Toggle({
     end,
 })
 
+CollectTab:Divider()
+
 --Auto Claim Group Chest
 CollectTab:Toggle({
     Flag = "ClaimGroupChest1",
@@ -521,6 +525,8 @@ QuestTab:Toggle({
    end
 end,
 })
+
+QuestTab:Divider()
 
 --Auto Find & Collect Punching Machine
 QuestTab:Toggle({
@@ -874,6 +880,76 @@ RollTab:Toggle({
         else
             getgenv().AutoRoll = false
             print("[DEBUG] AutoRoll disabled")
+        end
+    end,
+})
+
+
+local EvolveTab = Window:Tab({
+        Title = "Evolve",
+        Icon = "dna",
+    })
+
+local WeaponsDropdown = EvolveTab:Dropdown({
+    Flag = "WeaponsDropdown1",
+    Title = "Select Weapons to Evolve",
+    Values = {},  -- 初始为空
+    Value = {},
+    Multi = true,
+    AllowNone = true,
+    Callback = function(option)
+        getgenv().SelectedWeapons = option
+        print("[DEBUG] Selected Weapon:", table.concat(option, ", "))
+    end,
+})
+
+local WeaponRefreshButton = EvolveTab:Button({
+    Flag = "RefreshButton2",
+    Title = "Refresh Weapons List",
+    Callback = function()
+        -- 类似Mob刷新逻辑：重新扫描并刷新dropdown
+        local weaponList = {}
+        local player = game:GetService("Players").LocalPlayer
+        local playerGui = player:FindFirstChild("PlayerGui")
+        if playerGui and playerGui:IsA("PlayerGui") then
+            local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+            if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                local hub = inventoryGui:FindFirstChild("Hub")
+                if hub and hub:IsA("Frame") then
+                    local weapons = hub:FindFirstChild("Weapons")
+                    if weapons and weapons:IsA("Frame") then
+                        local listFrame = weapons:FindFirstChild("List_Frame")
+                        if listFrame and listFrame:IsA("Frame") then
+                            local list = listFrame:FindFirstChild("List")
+                            if list and list:IsA("ScrollingFrame") then
+                                for _, weaponButton in pairs(list:GetChildren()) do
+                                    if weaponButton:IsA("ImageButton") and weaponButton:FindFirstChild("Inside") then
+                                        local inside = weaponButton.Inside
+                                        if inside:IsA("Frame") and inside:FindFirstChild("Title") then
+                                            local title = inside.Title
+                                            if title:IsA("TextLabel") then
+                                                local weaponName = title.Text  -- 直接获取Text属性
+                                                if weaponName and weaponName ~= "" then
+                                                    table.insert(weaponList, weaponName)
+                                                    print("[DEBUG] Found weapon:", weaponName)  -- 添加调试打印
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        print("[DEBUG] Total weapons found:", #weaponList)  -- 添加调试打印
+
+        if #weaponList == 0 then
+            WeaponsDropdown:Refresh({"None"})
+        else
+            WeaponsDropdown:Refresh(weaponList)
         end
     end,
 })
