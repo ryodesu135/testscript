@@ -894,6 +894,10 @@ local WeaponsTab = Window:Tab({
         Icon = "sword",
     })
 
+local specialWeapons = {
+    "Venomleaf", "Cryoscythe", "Toxinfang", "Crimson Thorn", "Bonehowl", "Ashfang", "Phantom Requiem", "Stormreaver"
+}
+
 local WeaponsEvolveToggle = WeaponsTab:Toggle({
     Flag = "WeaponsEvolve1",
     Title = "Auto Evolve Weapons",
@@ -982,42 +986,50 @@ local WeaponsEvolveToggle = WeaponsTab:Toggle({
                     end
 
                     -- 发送Evolve信号
-                    -- Tier 0: Weapon_Evolve, 5 weapons
+                    -- Tier 0: Weapon_Evolve or Scythe_Evolve, 5 or 2 weapons
                     for weaponName, weaponList in pairs(tier0Groups) do
-                        if #weaponList >= 5 then
+                        local isSpecial = table.find(specialWeapons, weaponName) ~= nil
+                        local requiredCount = isSpecial and 2 or 5
+                        local benchName = isSpecial and "Scythe_Evolve" or "Weapon_Evolve"
+                        if #weaponList >= requiredCount then
                             local selected = {}
-                            for i = 1, 5 do
+                            for i = 1, requiredCount do
                                 selected[i] = weaponList[i]
                             end
                             game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                 ["Selected"] = selected,
                                 ["Action"] = "Evolve",
-                                ["Bench_Name"] = "Weapon_Evolve",
+                                ["Bench_Name"] = benchName,
                             })
-                            print("[DEBUG] Sent Evolve signal for Tier 0", weaponName, "weapons:", table.concat(selected, ", "))
+                            print("[DEBUG] Sent", benchName, "signal for Tier 0", weaponName, "weapons:", table.concat(selected, ", "))
                             break  -- 只处理第一个符合的组
                         end
                     end
 
-                    -- Tier 1: Weapon_Evolve_2, 4 weapons
+                    -- Tier 1: Weapon_Evolve_2 or Scythe_Evolve_2, 4 or 2 weapons
                     for weaponName, weaponList in pairs(tier1Groups) do
-                        if #weaponList >= 4 then
+                        local isSpecial = table.find(specialWeapons, weaponName) ~= nil
+                        local requiredCount = isSpecial and 2 or 4
+                        local benchName = isSpecial and "Scythe_Evolve_2" or "Weapon_Evolve_2"
+                        if #weaponList >= requiredCount then
                             local selected = {}
-                            for i = 1, 4 do
+                            for i = 1, requiredCount do
                                 selected[i] = weaponList[i]
                             end
                             game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                 ["Selected"] = selected,
                                 ["Action"] = "Evolve",
-                                ["Bench_Name"] = "Weapon_Evolve_2",
+                                ["Bench_Name"] = benchName,
                             })
-                            print("[DEBUG] Sent Evolve_2 signal for Tier 1", weaponName, "weapons:", table.concat(selected, ", "))
+                            print("[DEBUG] Sent", benchName, "signal for Tier 1", weaponName, "weapons:", table.concat(selected, ", "))
                             break  -- 只处理第一个符合的组
                         end
                     end
 
-                    -- Tier 2: Weapon_Evolve_3, 2 weapons
+                    -- Tier 2: Weapon_Evolve_3 or Scythe_Evolve_3, 2 weapons
                     for weaponName, weaponList in pairs(tier2Groups) do
+                        local isSpecial = table.find(specialWeapons, weaponName) ~= nil
+                        local benchName = isSpecial and "Scythe_Evolve_3" or "Weapon_Evolve_3"
                         if #weaponList >= 2 then
                             local selected = {}
                             for i = 1, 2 do
@@ -1026,9 +1038,9 @@ local WeaponsEvolveToggle = WeaponsTab:Toggle({
                             game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                 ["Selected"] = selected,
                                 ["Action"] = "Evolve",
-                                ["Bench_Name"] = "Weapon_Evolve_3",
+                                ["Bench_Name"] = benchName,
                             })
-                            print("[DEBUG] Sent Evolve_3 signal for Tier 2", weaponName, "weapons:", table.concat(selected, ", "))
+                            print("[DEBUG] Sent", benchName, "signal for Tier 2", weaponName, "weapons:", table.concat(selected, ", "))
                             break  -- 只处理第一个符合的组
                         end
                     end
