@@ -310,12 +310,11 @@ CodesTab:Button({
     Locked = false,
     Callback = function()
     local codes = {"SlashX", "Derp", "Heyyyo", 
-    "Update25", "740KFav", "745KFav", "240MVisits", "StoneCode",
-    "Update25P2", "750KFav", "395KLikes", "245MVisits", "Labyrinth", "Update25DelayP2", "ImGreenOnUpdate25", "Update25P2Restart1",
     "Update26", "755KFav", "Update26Code", "ThanksgivingOnPart2?", "Update26Code2", "Update26Restart1",
     "Update26P2", "250MVisits", "Update26P2Code", "SorryNoTurkey", "PowerOfFriendship",
     "Update27", "400KLikes", "760KFav", "Update27Code", "NoThanksgivingCode" , "Update27Delay", "Update27Restart", "Update27HeroKey", "SorryNoTurkey2", "SorryNoTurkey3", "SorryNoTurkey4",
-    "Update27P2", "765KFav", "770KFav", "Update27P2Code", "255MVisits", "NothanksgivingCode2"
+    "Update27P2", "765KFav", "770KFav", "Update27P2Code", "255MVisits", "NothanksgivingCode2",
+    "Update28", "Update28Code", "775KFav", "260MVisits", "Update28Code2"
 
 }
     for _, code in ipairs(codes) do
@@ -763,7 +762,7 @@ local StarDropdown = StarTab:Dropdown({
 
     "[W26] Amusement Park","[W27] Re:Manor","[W28] Asfordo Academy","[W29] Science Village","[W30] Sand Village",
 
-    "[W31] Night Raid Base"
+    "[W31] Night Raid Base","[W32] Salty School"
 },
     Value = "[W1] Earth City",
     Callback = function(option)
@@ -843,7 +842,8 @@ local RollDropdown = RollTab:Dropdown({
     "[W28] Geass Potential","[W28] Knightmare Frames",
     "[W29] IQ","[W29] Scientific Weapons",
     "[W30] Shinobi Clan","[W30] Kekkei Genkai","[W30] Power Eyes 2",
-    "[W31] Energy Teigu","[W31] Damage Teigu"
+    "[W31] Energy Teigu","[W31] Damage Teigu",
+    "[W32] Psycho Flow","[W32] Psycho Destruction"
 },
     Value = "[W1] Dragon Race",
     Callback = function(option)
