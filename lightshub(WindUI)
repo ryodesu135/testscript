@@ -942,7 +942,6 @@ local specialWeapons = {
 local WeaponsEvolveToggle = WeaponsTab:Toggle({
     Flag = "WeaponsEvolve1",
     Title = "Auto Evolve Weapons",
-    Desc = "Automatically Evolve weapons of the same name based on Tier every 0.5 seconds",
     Default = false,
     Callback = function(state)
         getgenv().AutoEvolveRunning = state
