@@ -1059,6 +1059,43 @@ local WeaponsEvolveToggle = WeaponsTab:Toggle({
     end,
 })
 
+WeaponsTab:Divider()
+
+-- 辅助函数：根据weaponName获取UniqueId（button Name）
+local function getWeaponUniqueId(weaponName)
+    local player = game:GetService("Players").LocalPlayer
+    local playerGui = player:FindFirstChild("PlayerGui")
+    if playerGui and playerGui:IsA("PlayerGui") then
+        local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+        if inventoryGui and inventoryGui:IsA("ScreenGui") then
+            local hub = inventoryGui:FindFirstChild("Hub")
+            if hub and hub:IsA("Frame") then
+                local weapons = hub:FindFirstChild("Weapons")
+                if weapons and weapons:IsA("Frame") then
+                    local listFrame = weapons:FindFirstChild("List_Frame")
+                    if listFrame and listFrame:IsA("Frame") then
+                        local list = listFrame:FindFirstChild("List")
+                        if list and list:IsA("ScrollingFrame") then
+                            for _, weaponButton in pairs(list:GetChildren()) do
+                                if weaponButton:IsA("ImageButton") and weaponButton:FindFirstChild("Inside") then
+                                    local inside = weaponButton.Inside
+                                    if inside:IsA("Frame") and inside:FindFirstChild("Title") then
+                                        local title = inside.Title
+                                        if title:IsA("TextLabel") and title.Text == weaponName then
+                                            return weaponButton.Name  -- 返回button的Name作为UniqueId
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return nil
+end
+
 local WeaponsDropdown = WeaponsTab:Dropdown({
     Flag = "WeaponsDropdown1",
     Title = "Select Weapons to Evolve",
@@ -1119,6 +1156,151 @@ local WeaponRefreshButton = WeaponsTab:Button({
             WeaponsDropdown:Refresh({"None"})
         else
             WeaponsDropdown:Refresh(weaponList)
+        end
+    end,
+})
+
+-- 全局控制变量
+getgenv().AutoBreathingsRunning = false
+getgenv().AutoBankaiRunning = false
+getgenv().AutoChakraRunning = false
+getgenv().AutoScytheRunning = false
+
+WeaponsTab:Toggle({
+    Flag = "AutoBreathings1",
+    Title = "Auto Roll Breathings",
+    Desc = "Automatically Roll Breathings Using Selected Weapon",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoBreathingsRunning = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoBreathingsRunning do
+                    if getgenv().SelectedWeapons and #getgenv().SelectedWeapons > 0 then
+                        for _, weaponName in ipairs(getgenv().SelectedWeapons) do
+                            -- 获取weapon的UniqueId（button Name）
+                            local uniqueId = getWeaponUniqueId(weaponName)
+                            if uniqueId then
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["UniqueId"] = uniqueId,
+                                    ["Type"] = "Enchant",
+                                    ["Action"] = "Enchantment",
+                                    ["Enchantment_Name"] = "Breathings",
+                                })
+                                print("[DEBUG] Sent Breathings signal for weapon:", weaponName, "UniqueId:", uniqueId)
+                            else
+                                print("[DEBUG] UniqueId not found for weapon:", weaponName)
+                            end
+                        end
+                    end
+                    task.wait(0.2)
+                end
+            end)
+        else
+            print("[DEBUG] Auto Roll Breathings stopped")
+        end
+    end,
+})
+
+WeaponsTab:Toggle({
+    Flag = "AutoBankai1",
+    Title = "Auto Roll Bankai",
+    Desc = "Automatically Roll Bankai Using Selected Weapon",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoBankaiRunning = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoBankaiRunning do
+                    if getgenv().SelectedWeapons and #getgenv().SelectedWeapons > 0 then
+                        for _, weaponName in ipairs(getgenv().SelectedWeapons) do
+                            local uniqueId = getWeaponUniqueId(weaponName)
+                            if uniqueId then
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Type"] = "Enchant",
+                                    ["UniqueId"] = uniqueId,
+                                    ["Action"] = "Enchantment",
+                                    ["Enchantment_Name"] = "Bankai",
+                                })
+                                print("[DEBUG] Sent Bankai signal for weapon:", weaponName, "UniqueId:", uniqueId)
+                            else
+                                print("[DEBUG] UniqueId not found for weapon:", weaponName)
+                            end
+                        end
+                    end
+                    task.wait(0.2)
+                end
+            end)
+        else
+            print("[DEBUG] Auto Roll Bankai stopped")
+        end
+    end,
+})
+
+WeaponsTab:Toggle({
+    Flag = "AutoChakra1",
+    Title = "Auto Roll Chakra Infusion",
+    Desc = "Automatically Roll Chakra Infusion Using Selected Weapon",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoChakraRunning = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoChakraRunning do
+                    if getgenv().SelectedWeapons and #getgenv().SelectedWeapons > 0 then
+                        for _, weaponName in ipairs(getgenv().SelectedWeapons) do
+                            local uniqueId = getWeaponUniqueId(weaponName)
+                            if uniqueId then
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Type"] = "Enchant",
+                                    ["UniqueId"] = uniqueId,
+                                    ["Action"] = "Enchantment",
+                                    ["Enchantment_Name"] = "Chakra_Infusion",
+                                })
+                                print("[DEBUG] Sent Chakra Infusion signal for weapon:", weaponName, "UniqueId:", uniqueId)
+                            else
+                                print("[DEBUG] UniqueId not found for weapon:", weaponName)
+                            end
+                        end
+                    end
+                    task.wait(0.2)
+                end
+            end)
+        else
+            print("[DEBUG] Auto Roll Chakra Infusion stopped")
+        end
+    end,
+})
+
+WeaponsTab:Toggle({
+    Flag = "AutoScythe1",
+    Title = "Auto Upgrade Scythe Leveling",
+    Desc = "Automatically Upgrade Scythe Leveling Using Selected Weapon",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoScytheRunning = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoScytheRunning do
+                    if getgenv().SelectedWeapons and #getgenv().SelectedWeapons > 0 then
+                        for _, weaponName in ipairs(getgenv().SelectedWeapons) do
+                            local uniqueId = getWeaponUniqueId(weaponName)
+                            if uniqueId then
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Upgrade_Name"] = "Level",
+                                    ["UniqueId"] = uniqueId,
+                                    ["Action"] = "Prog_Lv_Items",
+                                    ["Bench_Name"] = "Scythe_Leveling",
+                                })
+                                print("[DEBUG] Sent Scythe Leveling signal for weapon:", weaponName, "UniqueId:", uniqueId)
+                            end
+                        end
+                    end
+                    task.wait(0.2)
+                end
+            end)
+        else
+            print("[DEBUG] Auto Upgrade Scythe Leveling stopped")
         end
     end,
 })
@@ -1251,6 +1433,124 @@ ProgressionTab:Toggle({
         else
             getgenv().AutoProgression = false
             print("[DEBUG] AutoProgression disabled")
+        end
+    end,
+})
+
+
+local UpgradesTab = Window:Tab({
+        Title = "Upgrades",
+        Icon = "square-plus",
+    })
+
+local UpgradeOptions = {
+    "Star Luck","Damage","Energy","Coins",
+    "Drops","Avatar Souls Drop","Movement Speed","Fast Roll","Star Speed",
+    "Critical Energy","Energy Critical Chance","Exp","Champions Inventory Slots",
+    "Accessories Inventory Slots","Weapons Inventory Slots","Titans Inventory Slots","Stands Inventory Slots",
+    "Jewelry Inventory Slots","Attack Range","Attack Range 2"
+}
+
+local upgradeMap = {
+    ["Star Luck"] = {Upgrading_Name = "Star_Luck", Upgrade_Name = "Upgrades"},
+    ["Damage"] = {Upgrading_Name = "Damage", Upgrade_Name = "Upgrades"},
+    ["Energy"] = {Upgrading_Name = "Energy", Upgrade_Name = "Upgrades"},
+    ["Coins"] = {Upgrading_Name = "Coins", Upgrade_Name = "Upgrades"},
+    ["Drops"] = {Upgrading_Name = "Drops", Upgrade_Name = "Upgrades"},
+    ["Avatar Souls Drop"] = {Upgrading_Name = "Avatar_Souls_Drop", Upgrade_Name = "Upgrades"},
+    ["Movement Speed"] = {Upgrading_Name = "Movement_Speed", Upgrade_Name = "Upgrades"},
+    ["Fast Roll"] = {Upgrading_Name = "Fast_Roll", Upgrade_Name = "Upgrades"},
+    ["Star Speed"] = {Upgrading_Name = "Star_Speed", Upgrade_Name = "Upgrades"},
+    ["Critical Energy"] = {Upgrading_Name = "Critical_Energy", Upgrade_Name = "Upgrades"},
+    ["Energy Critical Chance"] = {Upgrading_Name = "Energy_Critical_Chance", Upgrade_Name = "Upgrades"},
+    ["Exp"] = {Upgrading_Name = "Exp", Upgrade_Name = "Upgrades"},
+    ["Champions Inventory Slots"] = {Upgrading_Name = "Champions_Inventory_Slots", Upgrade_Name = "Upgrades"},
+    ["Accessories Inventory Slots"] = {Upgrading_Name = "Accessories_Inventory_Slots", Upgrade_Name = "Upgrades"},
+    ["Weapons Inventory Slots"] = {Upgrading_Name = "Weapons_Inventory_Slots", Upgrade_Name = "Upgrades"},
+    ["Titans Inventory Slots"] = {Upgrading_Name = "Titans_Inventory_Slots", Upgrade_Name = "Upgrades"},
+    ["Stands Inventory Slots"] = {Upgrading_Name = "Stands_Inventory_Slots", Upgrade_Name = "Upgrades"},
+    ["Jewelry Inventory Slots"] = {Upgrading_Name = "Jewelry_Inventory_Slots", Upgrade_Name = "Upgrades"},
+    ["Attack Range"] = {Upgrading_Name = "Attack_Range", Upgrade_Name = "Attack_Range"},
+    ["Attack Range 2"] = {Upgrading_Name = "Attack_Range", Upgrade_Name = "Attack_Range_2"},
+}
+
+local AutoUpgradeDropdown = UpgradesTab:Dropdown({
+    Flag = "UpgradeSelect1",
+    Title = "Select Upgrades",
+    Values = UpgradeOptions,
+    Value = {},
+    Multi = true,
+    Callback = function(option)
+        getgenv().selectedUpgrades = option
+        print("[DEBUG] Upgrade Option changed:", table.concat(option, ", "))
+    end,
+})
+
+-- 全局控制变量
+getgenv().AutoUpgradeRunning = false
+
+UpgradesTab:Toggle({
+    Flag = "AutoUpgrades1",
+    Title = "Auto Upgrades",
+    Desc = "Automatically Upgrade Selected Dungeon Upgrades",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoUpgradeRunning = state
+        if state then
+            -- 启动循环：每0.5秒发送每个选择的upgrade信号
+            task.spawn(function()
+                while getgenv().AutoUpgradeRunning do
+                    if getgenv().selectedUpgrades and #getgenv().selectedUpgrades > 0 then
+                        for _, upgradeName in ipairs(getgenv().selectedUpgrades) do
+                            local upgradeData = upgradeMap[upgradeName]
+                            if upgradeData then
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Upgrading_Name"] = upgradeData.Upgrading_Name,
+                                    ["Action"] = "_Upgrades",
+                                    ["Upgrade_Name"] = upgradeData.Upgrade_Name,
+                                })
+                                print("[DEBUG] Sent upgrade signal for:", upgradeName, "Upgrading_Name:", upgradeData.Upgrading_Name, "Upgrade_Name:", upgradeData.Upgrade_Name)
+                            end
+                        end
+                    end
+                    task.wait(0.5)  -- 每0.5秒发送一次所有选择的upgrades
+                end
+            end)
+        else
+            -- Toggle关闭时，设置全局变量为false，循环停止
+            print("[DEBUG] Auto Upgrades stopped")
+        end
+    end,
+})
+UpgradesTab:Divider()
+UpgradesTab:Toggle({
+    Flag = "AutpupgradeAll1",
+    Title = "Auto Upgrades ALL",
+    Desc = "Automatically Upgrade ALL Dungeon Upgrades",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoUpgradeAllRunning = state
+        if state then
+            -- 启动循环：每0.5秒发送所有upgrade信号
+            task.spawn(function()
+                while getgenv().AutoUpgradeAllRunning do
+                    for _, upgradeName in ipairs(UpgradeOptions) do
+                        local upgradeData = upgradeMap[upgradeName]
+                        if upgradeData then
+                            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                ["Upgrading_Name"] = upgradeData.Upgrading_Name,
+                                ["Action"] = "_Upgrades",
+                                ["Upgrade_Name"] = upgradeData.Upgrade_Name,
+                            })
+                            print("[DEBUG] Sent upgrade signal for:", upgradeName, "Upgrading_Name:", upgradeData.Upgrading_Name, "Upgrade_Name:", upgradeData.Upgrade_Name)
+                        end
+                    end
+                    task.wait(0.5)  -- 每0.5秒发送一次所有upgrades
+                end
+            end)
+        else
+            -- Toggle关闭时，设置全局变量为false，循环停止
+            print("[DEBUG] Auto Upgrades ALL stopped")
         end
     end,
 })
@@ -1404,7 +1704,7 @@ local RaidOptions = {
     "Restaurant Raid","Cursed Raid","Progression Raid","Titan Defense",
     "Sin Raid","Kaiju Dungeon","Dragon Room Raid","Gleam Raid","Progression Raid 2",
     "Ghoul Raid","Chainsaw Defense","Netherworld Defense","Green Planet Raid",
-    "Hollow Raid","Tomb Arena Raid","Halloween Raid","Graveyard Raid",
+    "Hollow Raid","One Hero Raid","Tomb Arena Raid","Halloween Raid","Graveyard Raid",
     "Dungeon Suffering","Dungeon Adventure","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3","Dungeon Labyrinth","Crimson Canyon"
 }
 
@@ -1416,7 +1716,8 @@ local SpeedRaids = {
     ["Dungeon Labyrinth"] = true,
     ["Maze Level 1"] = true,
     ["Maze Level 2"] = true,
-    ["Maze Level 3"] = true
+    ["Maze Level 3"] = true,
+    ["One Hero Raid"] = true
 }
 
 local RaidSpeedOptions = {"1x Speed", "2x Speed", "3x Speed"}
@@ -1464,7 +1765,8 @@ local RaidNameMap = {
     ["Maze Level 2"] = "Maze_Level_2",
     ["Maze Level 3"] = "Maze_Level_3",
     ["Dungeon Labyrinth"] = "Dungeon_Labyrinth",
-    ["Crimson Canyon"] = "Crimson_Canyon"
+    ["Crimson Canyon"] = "Crimson_Canyon",
+    ["One Hero Raid"] = "One_Hero_Raid"
 }
 
 -------------------------------------------------
