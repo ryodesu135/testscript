@@ -531,7 +531,7 @@ QuestTab:Divider()
 --Auto Find & Collect Punching Machine
 QuestTab:Toggle({
     Flag = "Quest2301",
-   Title = "Auto Get Punching Machine Quest & Collect",
+   Title = "Auto Complete Punching Machine Quest",
    Desc = "Automatically accept and complete Punching Machine quest",
    Default = false,
    Callback = function(state)
@@ -575,7 +575,7 @@ end,
 --Auto Demon Fruit Quest
 QuestTab:Toggle({
     Flag = "Quest2302",
-   Title = "Auto Get Demon Fruit Quest & Collect",
+   Title = "Auto Complete Demon Fruit Quest",
    Desc = "Automatically accept and complete Demon Fruit quest",
    Default = false,
    Callback = function(state)
@@ -617,7 +617,7 @@ end,
 --Auto Complete Briefcase Quest
 QuestTab:Toggle({
     Flag = "Quest2601",
-   Title = "Auto Get Briefcase Quest & Collect",
+   Title = "Auto Complete Briefcase Quest",
    Desc = "Automatically accept and complete Briefcase quest",
    Default = false,
    Callback = function(state)
@@ -659,7 +659,7 @@ end,
 --Auto Complete Assassin Knife Quest
 QuestTab:Toggle({
     Flag = "Quest2609",
-   Title = "Auto Get Assassin Knife Quest & Collect",
+   Title = "Auto Complete Assassin Knife Quest",
    Desc = "Automatically accept and complete Assassin Knife quest",
    Default = false,
    Callback = function(state)
@@ -701,7 +701,7 @@ end,
 --Auto Complete Assassin Pistol Quest
 QuestTab:Toggle({
     Flag = "Quest2610",
-   Title = "Auto Get Assassin Pistol Quest & Collect",
+   Title = "Auto Complete Assassin Pistol Quest",
    Desc = "Automatically accept and complete Assassin Pistol quest",
    Default = false,
    Callback = function(state)
@@ -740,6 +740,47 @@ QuestTab:Toggle({
 end,
 })
 
+--Auto Complete Exorcise Humans Quest
+QuestTab:Toggle({
+    Flag = "Quest2303",
+   Title = "Auto Complete Exorcise Humans Quest",
+   Desc = "Automatically accept and complete Exorcise Humans quest",
+   Default = false,
+   Callback = function(state)
+   if state then
+    getgenv().AutoExorciseHumansQuestRunning = true
+    task.spawn(function()
+        while getgenv().AutoExorciseHumansQuestRunning do
+            pcall(function()
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Id"] = "2303",
+                        ["Type"] = "Accept",
+                        ["Action"] = "_Quest",
+                    })
+                    task.wait(1.5)
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Type"] = "Find_Found",
+                        ["Action"] = "_Quest",
+                        ["Target"] = "Exorcisms",
+                        ["Object_Index"] = 1,
+                        ["Id"] = "2303",
+                    })
+                    task.wait(1.5)
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Id"] = "2303",
+                        ["Type"] = "Complete",
+                        ["Action"] = "_Quest",
+                    })
+            end)
+            task.wait(1)
+
+        end
+    end)
+   else
+    getgenv().AutoExorciseHumansQuestRunning = false
+   end
+end,
+})
 
 local StarTab = Window:Tab({
         Title = "Star",
