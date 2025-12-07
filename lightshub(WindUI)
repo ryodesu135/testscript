@@ -783,6 +783,48 @@ QuestTab:Toggle({
 end,
 })
 
+--Auto Complete Evil Spirit Quest
+QuestTab:Toggle({
+    Flag = "Quest2304",
+   Title = "Auto Complete Evil Spirit Quest",
+   Desc = "Automatically accept and complete Evil Spirit quest",
+   Default = false,
+   Callback = function(state)
+   if state then
+    getgenv().AutoEvilSpiritQuestRunning = true
+    task.spawn(function()
+        while getgenv().AutoEvilSpiritQuestRunning do
+            pcall(function()
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Id"] = "2304",
+                        ["Type"] = "Accept",
+                        ["Action"] = "_Quest",
+                    })
+                    task.wait(1.5)
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Type"] = "Find_Found",
+                        ["Action"] = "_Quest",
+                        ["Target"] = "Evil_Spirits",
+                        ["Object_Index"] = 1,
+                        ["Id"] = "2304",
+                    })
+                    task.wait(1.5)
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Id"] = "2304",
+                        ["Type"] = "Complete",
+                        ["Action"] = "_Quest",
+                    })
+            end)
+            task.wait(1)
+
+        end
+    end)
+   else
+    getgenv().AutoExorciseHumansQuestRunning = false
+   end
+end,
+})
+
 local StarTab = Window:Tab({
         Title = "Star",
         Icon = "star",
