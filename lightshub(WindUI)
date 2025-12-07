@@ -314,7 +314,8 @@ CodesTab:Button({
     "Update26P2", "250MVisits", "Update26P2Code", "SorryNoTurkey", "PowerOfFriendship",
     "Update27", "400KLikes", "760KFav", "Update27Code", "NoThanksgivingCode" , "Update27Delay", "Update27Restart", "Update27HeroKey", "SorryNoTurkey2", "SorryNoTurkey3", "SorryNoTurkey4",
     "Update27P2", "765KFav", "770KFav", "Update27P2Code", "255MVisits", "NothanksgivingCode2",
-    "Update28", "Update28Code", "775KFav", "260MVisits", "Update28Code2"
+    "Update28", "Update28Code", "775KFav", "260MVisits", "Update28Code2",
+    "Update28P2", "Update28P2Code", "405KLikes", "265MVisits", "Update28P2Code2"
 
 }
     for _, code in ipairs(codes) do
@@ -1745,7 +1746,9 @@ local RaidOptions = {
     "Sin Raid","Kaiju Dungeon","Dragon Room Raid","Gleam Raid","Progression Raid 2",
     "Ghoul Raid","Chainsaw Defense","Netherworld Defense","Green Planet Raid",
     "Hollow Raid","One Hero Raid","Tomb Arena Raid","Halloween Raid","Graveyard Raid",
-    "Dungeon Suffering","Dungeon Adventure","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3","Dungeon Labyrinth","Crimson Canyon"
+    "Dungeon Suffering","Dungeon Adventure","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3","Maze Level 4","Dungeon Labyrinth","Crimson Canyon",
+    "Body Improvement Challenge"
+
 }
 
 local SpeedRaids = {
@@ -1757,6 +1760,7 @@ local SpeedRaids = {
     ["Maze Level 1"] = true,
     ["Maze Level 2"] = true,
     ["Maze Level 3"] = true,
+    ["Maze Level 4"] = true,
     ["One Hero Raid"] = true
 }
 
@@ -1765,8 +1769,9 @@ local RaidSpeedOptions = {"1x Speed", "2x Speed", "3x Speed"}
 -- 需要 Auto Farm 的 Dungeon 和 Maze（来自 DungeonOptions 和 RaidOptions）
 local AutoFarmDungeons = {
     "Dungeon Easy", "Dungeon Medium", "Dungeon Hard", "Dungeon Insane", "Dungeon Crazy", "Dungeon Nightmare",
-    "Kaiju Dungeon", "Dungeon Suffering", "Dungeon Adventure", "Dungeon Torment", "Maze Level 1", "Maze Level 2", "Maze Level 3", "Dungeon Labyrinth",
-    "Crimson Canyon"
+    "Kaiju Dungeon", "Dungeon Suffering", "Dungeon Adventure", "Dungeon Torment", "Dungeon Labyrinth", "Crimson Canyon", "Maze Level 1", "Maze Level 2", "Maze Level 3", "Maze Level 4",
+    "Body Improvement Challenge"
+
 }
 
 -- Dungeon 名称映射到信号中的 Name（例如 Dungeon Easy -> Dungeon_Easy）
@@ -1804,9 +1809,12 @@ local RaidNameMap = {
     ["Maze Level 1"] = "Maze_Level_1",
     ["Maze Level 2"] = "Maze_Level_2",
     ["Maze Level 3"] = "Maze_Level_3",
+    ["Maze Level 4"] = "Maze_Level_4",
     ["Dungeon Labyrinth"] = "Dungeon_Labyrinth",
     ["Crimson Canyon"] = "Crimson_Canyon",
-    ["One Hero Raid"] = "One_Hero_Raid"
+    ["One Hero Raid"] = "One_Hero_Raid",
+    ["Body Improvement Challenge"] = "Body_Improvement_Challenge"
+
 }
 
 -------------------------------------------------
