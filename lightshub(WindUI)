@@ -1946,7 +1946,7 @@ local function StartDungeonAutoFarm()
             print("[DEBUG] Loop check - hasMonsters:", hasMonsters, "LeaveTimer exists:", LeaveTimer ~= nil)
 
             -- 检查是否是特定raid（Maze Level 1,2,3, Dungeon Labyrinth）
-            local isSpecificRaid = getgenv().CurrentRaidName and (getgenv().CurrentRaidName == "Maze Level 1" or getgenv().CurrentRaidName == "Maze Level 2" or getgenv().CurrentRaidName == "Maze Level 3" or getgenv().CurrentRaidName == "Dungeon Labyrinth")
+            local isSpecificRaid = getgenv().CurrentRaidName and (getgenv().CurrentRaidName == "Maze Level 1" or getgenv().CurrentRaidName == "Maze Level 2" or getgenv().CurrentRaidName == "Maze Level 3" or getgenv().CurrentRaidName == "Dungeon Labyrinth" or getgenv().CurrentRaidName == "Maze Level 4")
 
             -- 如果有怪物且timer存在，立即取消timer（无论当前分支）
             if hasMonsters and LeaveTimer then
@@ -2004,7 +2004,7 @@ local function StartDungeonAutoFarm()
                     local openedDoor = false
                     -- 循环workspace.Dungeons的所有raid
                     for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
-                        if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3")) then
+                        if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3") or dungeon.Name:find("Maze_Level_4")) then
                             -- 保存Door位置，按类型分组（raid结束后local变量清除）
                             local Monster_Room_Doors = {}
                             local Treasure_Room_Doors = {}
