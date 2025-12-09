@@ -1034,7 +1034,7 @@ local ExchangeShopW1ProductsMap = {
 
 local ExchangeShopW2Options = {
     "Exchange Coin","Frost Demon Token","Grand Elder Token","Saiyan Lvl Token","Dragon Race Lvl Token","Eternal Dragon Token","Dragon Blessing Token","Scythe Token","Baikai Token","Espada Token","Reiatsu Lvl Token","Zanpakuto Lvl Token","Shadow Garden Token","Shadow Arts Token","Garden Lvl Token","Arts Lvl Token","Threat Level Token","Punch Token","Threat Lvl Token","Punch Lvl Token","Adventurer Token","Magic Tier Token","Mana Growth Token","Ultimate Cast Token","Adventurer Lvl Token","Magic Tier Lvl Token","Thriller Zombie Token","Nightmare Evo Token","Special Zombie Token","Zombie Booster Token",
-    "Assassin Grade Token","Assassin Skill Token","Assassin Energy Token","Assassin Damage Token","Spirit Pact Token","Witch Factor Token","Artificial Spirit Token","Gospel Cursed Token","Geass Potential Token","Geass Perception Token","Geass Soul Token","Geass Creation Token","Geass Precognition Token","Geass Time Token","Geass Telepathic Token","Geass Manipulation Token","Geass Obedience Token","Knightmare Token","IQ Token","Scientific Token","Eye Token 2","Shinobi Clan Token","Genkai Token","Chakra Infusion Token","Energy Teigu Token","Damage Teigu Token" --"Psycho Flow Token","Psycho Destruction Token",
+    "Assassin Grade Token","Assassin Skill Token","Assassin Energy Token","Assassin Damage Token","Spirit Pact Token","Witch Factor Token","Artificial Spirit Token","Gospel Cursed Token","Geass Potential Token","Geass Perception Token","Geass Soul Token","Geass Creation Token","Geass Precognition Token","Geass Time Token","Geass Telepathic Token","Geass Manipulation Token","Knightmare Token","IQ Token","Scientific Token","Eye Token 2","Shinobi Clan Token","Genkai Token","Chakra Infusion Token","Energy Teigu Token","Damage Teigu Token" --"Psycho Flow Token","Psycho Destruction Token",
 }
 
 local ExchangeShopW2Map = {
@@ -1087,18 +1087,17 @@ local ExchangeShopW2Map = {
     ["Geass Time Token"] = {Product_Id = "14", Bench_Name = "Exchange_Shop_World_26_to_30"},
     ["Geass Telepathic Token"] = {Product_Id = "15", Bench_Name = "Exchange_Shop_World_26_to_30"},
     ["Geass Manipulation Token"] = {Product_Id = "16", Bench_Name = "Exchange_Shop_World_26_to_30"},
-    ["Geass Obedience Token"] = {Product_Id = "17", Bench_Name = "Exchange_Shop_World_26_to_30"},
-    ["Knightmare Token"] = {Product_Id = "18", Bench_Name = "Exchange_Shop_World_26_to_30"},
-    ["IQ Token"] = {Product_Id = "19", Bench_Name = "Exchange_Shop_World_26_to_30"},
-    ["Scientific Token"] = {Product_Id = "20", Bench_Name = "Exchange_Shop_World_26_to_30"},
-    ["Eye Token 2"] = {Product_Id = "21", Bench_Name = "Exchange_Shop_World_26_to_30"},
-    ["Shinobi Clan Token"] = {Product_Id = "22", Bench_Name = "Exchange_Shop_World_26_to_30"},
-    ["Genkai Token"] = {Product_Id = "23", Bench_Name = "Exchange_Shop_World_26_to_30"},
-    ["Chakra Infusion Token"] = {Product_Id = "24", Bench_Name = "Exchange_Shop_World_26_to_30"},
-    ["Energy Teigu Token"] = {Product_Id = "25", Bench_Name = "Exchange_Shop_World_26_to_30"},
-    ["Damage Teigu Token"] = {Product_Id = "26", Bench_Name = "Exchange_Shop_World_26_to_30"},
-    --["Psycho Flow Token"] = {Product_Id = "27", Bench_Name = "Exchange_Shop_World_26_to_30"},
-    --["Psycho Destruction Token"] = {Product_Id = "28", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["Knightmare Token"] = {Product_Id = "17", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["IQ Token"] = {Product_Id = "18", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["Scientific Token"] = {Product_Id = "19", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["Eye Token 2"] = {Product_Id = "20", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["Shinobi Clan Token"] = {Product_Id = "21", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["Genkai Token"] = {Product_Id = "22", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["Chakra Infusion Token"] = {Product_Id = "23", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["Energy Teigu Token"] = {Product_Id = "24", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["Damage Teigu Token"] = {Product_Id = "25", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    --["Psycho Flow Token"] = {Product_Id = "26", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    --["Psycho Destruction Token"] = {Product_Id = "27", Bench_Name = "Exchange_Shop_World_26_to_30"},
 }
 
 local ExchangeShopW2KeysOptions = {
