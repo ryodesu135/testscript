@@ -490,6 +490,395 @@ CollectTab:Toggle({
     end,
 })
 
+
+local ExchangeTab = Window:Tab({
+        Title = "Exchange",
+        Icon = "repeat",
+    })
+
+getgenv().AutoExchangeW1Running = false
+getgenv().AutoExchangeW2Running = false
+getgenv().AutoExchangeCoinsRunning = false
+getgenv().AutoExchangeMaterialsRunning = false
+
+local ExchangeW1Options = {
+    "Green Upgrade Token","Dragon Race Token","Saiyan Token","Sword Token","Pirate Crew Token","Demon Fruit Token","Haki Token","Reiatsu Token","Zanpakuto Token","Pressure Token","Cursed Token","Cursed Finger","Breathing Token","Demon Arts Token",
+    "Gold Ball Token","Lucky Spirit Token","Energy TCG Token","Damage TCG Token","Ten Token","Greedy Token",
+    "Families Token","Titan Token","Spinal Fluid Token","Sins Token","Commandments Token","Fortitude Token","Kaiju Token","Kaiju Energy Token","Ultimate Skill Token","Species Token","Demon Energy Token","Demon Damage Token","Demon Luck Token","Demon Coins Token","Energy Rune Token","Weapon Rune Token","Swordsman Energy Token","Swordsman Damage Token","Sin Upgrade Token",
+    "Stand Token","Ripple Token","Onomatopoeia Token","Requiem Token","CCG Token","Kagune Token","Kakuhou Token","Debiru Token","Akuma Token","Akuma Damange Token","Flesh Token","Akuma Energy Token","Pokita Token","Mushi Token","Infernal Token","Flare Token","Ignition Token","Hellfire Token","Adolla Token","Fire Company Token","Adolla Blessing Token"
+}
+
+local ExchangeW1Map = {
+    --W1 TO W5
+    ["Green Upgrade Token"] = {Product_Id = "1", Bench_Name = "Token_Exchange_World_1_to_5"},
+    ["Dragon Race Token"] = {Product_Id = "2", Bench_Name = "Token_Exchange_World_1_to_5"},
+    ["Saiyan Token"] = {Product_Id = "3", Bench_Name = "Token_Exchange_World_1_to_5"},
+    ["Sword Token"] = {Product_Id = "4", Bench_Name = "Token_Exchange_World_1_to_5"},
+    ["Pirate Crew Token"] = {Product_Id = "5", Bench_Name = "Token_Exchange_World_1_to_5"},
+    ["Demon Fruit Token"] = {Product_Id = "6", Bench_Name = "Token_Exchange_World_1_to_5"},
+    ["Haki Token"] = {Product_Id = "7", Bench_Name = "Token_Exchange_World_1_to_5"},
+    ["Reiatsu Token"] = {Product_Id = "8", Bench_Name = "Token_Exchange_World_1_to_5"},
+    ["Zanpakuto Token"] = {Product_Id = "9", Bench_Name = "Token_Exchange_World_1_to_5"},
+    ["Pressure Token"] = {Product_Id = "10", Bench_Name = "Token_Exchange_World_1_to_5"},
+    ["Cursed Token"] = {Product_Id = "11", Bench_Name = "Token_Exchange_World_1_to_5"},
+    ["Cursed Finger"] = {Product_Id = "12", Bench_Name = "Token_Exchange_World_1_to_5"},
+    ["Breathing Token"] = {Product_Id = "13", Bench_Name = "Token_Exchange_World_1_to_5"},
+    ["Demon Arts Token"] = {Product_Id = "14", Bench_Name = "Token_Exchange_World_1_to_5"},
+
+    --W6 TO W10
+    ["Gold Ball Token"] = {Product_Id = "1", Bench_Name = "Token_Exchange_World_6_to_10"},
+    ["Lucky Spirit Token"] = {Product_Id = "2", Bench_Name = "Token_Exchange_World_6_to_10"},
+    ["Energy TCG Token"] = {Product_Id = "3", Bench_Name = "Token_Exchange_World_6_to_10"},
+    ["Damage TCG Token"] = {Product_Id = "4", Bench_Name = "Token_Exchange_World_6_to_10"},
+    ["Ten Token"] = {Product_Id = "5", Bench_Name = "Token_Exchange_World_6_to_10"},
+    ["Greedy Token"] = {Product_Id = "6", Bench_Name = "Token_Exchange_World_6_to_10"},
+
+    --W11 TO W15
+    ["Families Token"] = {Product_Id = "1", Bench_Name = "Token_Exchange_World_11_to_15"},
+    ["Titan Token"] = {Product_Id = "2", Bench_Name = "Token_Exchange_World_11_to_15"},
+    ["Spinal Fluid Token"] = {Product_Id = "3", Bench_Name = "Token_Exchange_World_11_to_15"},
+    ["Sins Token"] = {Product_Id = "4", Bench_Name = "Token_Exchange_World_11_to_15"},
+    ["Commandments Token"] = {Product_Id = "5", Bench_Name = "Token_Exchange_World_11_to_15"},
+    ["Fortitude Token"] = {Product_Id = "6", Bench_Name = "Token_Exchange_World_11_to_15"},
+    ["Kaiju Token"] = {Product_Id = "7", Bench_Name = "Token_Exchange_World_11_to_15"},
+    ["Kaiju Energy Token"] = {Product_Id = "8", Bench_Name = "Token_Exchange_World_11_to_15"},
+    ["Ultimate Skill Token"] = {Product_Id = "9", Bench_Name = "Token_Exchange_World_11_to_15"},
+    ["Species Token"] = {Product_Id = "10", Bench_Name = "Token_Exchange_World_11_to_15"},
+    ["Demon Energy Token"] = {Product_Id = "11", Bench_Name = "Token_Exchange_World_11_to_15"},
+    ["Demon Damage Token"] = {Product_Id = "12", Bench_Name = "Token_Exchange_World_11_to_15"},
+    ["Demon Luck Token"] = {Product_Id = "13", Bench_Name = "Token_Exchange_World_11_to_15"},
+    ["Demon Coins Token"] = {Product_Id = "14", Bench_Name = "Token_Exchange_World_11_to_15"},
+    ["Energy Rune Token"] = {Product_Id = "15", Bench_Name = "Token_Exchange_World_11_to_15"},
+    ["Weapon Rune Token"] = {Product_Id = "16", Bench_Name = "Token_Exchange_World_11_to_15"},
+    ["Swordsman Energy Token"] = {Product_Id = "17", Bench_Name = "Token_Exchange_World_11_to_15"},
+    ["Swordsman Damage Token"] = {Product_Id = "18", Bench_Name = "Token_Exchange_World_11_to_15"},
+    ["Sin Upgrade Token"] = {Product_Id = "19", Bench_Name = "Token_Exchange_World_11_to_15"},
+
+    --W16 TO W19
+    ["Stand Token"] = {Product_Id = "1", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Ripple Token"] = {Product_Id = "2", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Onomatopoeia Token"] = {Product_Id = "3", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Requiem Token"] = {Product_Id = "4", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["CCG Token"] = {Product_Id = "5", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Kagune Token"] = {Product_Id = "6", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Kakuhou Token"] = {Product_Id = "7", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Debiru Token"] = {Product_Id = "8", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Akuma Token"] = {Product_Id = "9", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Akuma Damange Token"] = {Product_Id = "10", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Flesh Token"] = {Product_Id = "11", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Akuma Energy Token"] = {Product_Id = "12", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Pokita Token"] = {Product_Id = "13", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Mushi Token"] = {Product_Id = "14", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Infernal Token"] = {Product_Id = "15", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Flare Token"] = {Product_Id = "16", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Ignition Token"] = {Product_Id = "17", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Hellfire Token"] = {Product_Id = "18", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Adolla Token"] = {Product_Id = "19", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Fire Company Token"] = {Product_Id = "20", Bench_Name = "Token_Exchange_World_16_to_19"},
+    ["Adolla Blessing Token"] = {Product_Id = "21", Bench_Name = "Token_Exchange_World_16_to_19"},
+}
+
+local ExchangeW2Options = {
+    "Frost Demon Token","Grand Elder Token","Saiyan Lvl Token","Dragon Race Lvl Token","Eternal Dragon Token","Dragon Blessing Token","Scythe Token","Baikai Token","Espada Token","Reiatsu Lvl Token","Zanpakuto Lvl Token","Shadow Garden Token","Shadow Arts Token","Garden Lvl Token","Arts Lvl Token","Threat Level Token","Punch Token","Threat Lvl Token","Punch Lvl Token","Adventurer Token","Magic Tier Token","Mana Growth Token","Ultimate Cast Token","Adventurer Lvl Token","Magic Tier Lvl Token","Thriller Zombie Token","Nightmare Evo Token","Special Zombie Token","Zombie Booster Token",
+    "Assassin Grade Token","Assassin Skill Token","Assassin Energy Token","Assassin Damage Token","Spirit Pact Token","Witch Factor Token","Artificial Spirit Token","Gospel Cursed Token","Geass Potential Token","Geass Perception Token","Geass Soul Token","Geass Creation Token","Geass Precognition Token","Geass Time Token","Geass Telepathic Token","Geass Manipulation Token","Geass Obedience Token","Knightmare Token","IQ Token","Scientific Token","Eye Token 2","Shinobi Clan Token","Genkai Token","Chakra Infusion Token","Energy Teigu Token","Damage Teigu Token","Psycho Flow Token","Psycho Destruction Token",
+    "Eminence Coin","Assassin Flow Coin","Lethal Coin","Scythe Coin",
+    "Zombie Glue","Zombie Saw","Tome of Wisdom","Wood","Sap","Plant Fiber","Bones","Fur","Tusk","Stone","Coal","Iron Ore","Shells","Salt","Pearls","Acid","Legendary Beast Essence","Mythical Beast Essence","Phantom Beast Essence","Supreme Beast Essence"
+}
+
+local ExchangeW2Map = {
+    --W20 TO W25
+    ["Frost Demon Token"] = {Product_Id = "1", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Grand Elder Token"] = {Product_Id = "2", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Saiyan Lvl Token"] = {Product_Id = "3", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Dragon Race Lvl Token"] = {Product_Id = "4", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Eternal Dragon Token"] = {Product_Id = "5", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Dragon Blessing Token"] = {Product_Id = "6", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Scythe Token"] = {Product_Id = "7", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Baikai Token"] = {Product_Id = "8", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Espada Token"] = {Product_Id = "9", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Reiatsu Lvl Token"] = {Product_Id = "10", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Zanpakuto Lvl Token"] = {Product_Id = "11", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Shadow Garden Token"] = {Product_Id = "12", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Shadow Arts Token"] = {Product_Id = "13", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Garden Lvl Token"] = {Product_Id = "14", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Arts Lvl Token"] = {Product_Id = "15", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Threat Level Token"] = {Product_Id = "16", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Punch Token"] = {Product_Id = "17", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Threat Lvl Token"] = {Product_Id = "18", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Punch Lvl Token"] = {Product_Id = "19", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Adventurer Token"] = {Product_Id = "20", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Magic Tier Token"] = {Product_Id = "21", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Mana Growth Token"] = {Product_Id = "22", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Ultimate Cast Token"] = {Product_Id = "23", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Adventurer Lvl Token"] = {Product_Id = "24", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Magic Tier Lvl Token"] = {Product_Id = "25", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Thriller Zombie Token"] = {Product_Id = "26", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Nightmare Evo Token"] = {Product_Id = "27", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Special Zombie Token"] = {Product_Id = "28", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Frost Demon Token"] = {Product_Id = "29", Bench_Name = "Token_Exchange_World_20_to_25"},
+    ["Zombie Booster Token"] = {Product_Id = "30", Bench_Name = "Token_Exchange_World_20_to_25"},
+
+    --W26 TO W30
+    ["Assassin Grade Token"] = {Product_Id = "1", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Assassin Skill Token"] = {Product_Id = "2", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Assassin Energy Token"] = {Product_Id = "3", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Assassin Damage Token"] = {Product_Id = "4", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Spirit Pact Token"] = {Product_Id = "5", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Witch Factor Token"] = {Product_Id = "6", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Artificial Spirit Token"] = {Product_Id = "7", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Gospel Cursed Token"] = {Product_Id = "8", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Geass Potential Token"] = {Product_Id = "9", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Geass Perception Token"] = {Product_Id = "10", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Geass Soul Token"] = {Product_Id = "11", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Geass Creation Token"] = {Product_Id = "12", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Geass Precognition Token"] = {Product_Id = "13", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Geass Time Token"] = {Product_Id = "14", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Geass Telepathic Token"] = {Product_Id = "15", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Geass Manipulation Token"] = {Product_Id = "16", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Geass Obedience Token"] = {Product_Id = "17", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Knightmare Token"] = {Product_Id = "18", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["IQ Token"] = {Product_Id = "19", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Scientific Token"] = {Product_Id = "20", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Eye Token 2"] = {Product_Id = "21", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Shinobi Clan Token"] = {Product_Id = "22", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Genkai Token"] = {Product_Id = "23", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Chakra Infusion Token"] = {Product_Id = "24", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Energy Teigu Token"] = {Product_Id = "25", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Damage Teigu Token"] = {Product_Id = "26", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Psycho Flow Token"] = {Product_Id = "27", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Psycho Destruction Token"] = {Product_Id = "28", Bench_Name = "Token_Exchange_World_26_to_30"},
+}
+
+local ExchangeCoinsOptions = {
+    "Eminence Coin","Assassin Flow Coin","Lethal Coin","Scythe Coin"
+}
+
+local ExchangeCoinsMap = {
+    --Exchange Coins
+    ["Eminence Coin"] = {Product_Id = "1", Bench_Name = "Coins_Exchange"},
+    ["Assassin Flow Coin"] = {Product_Id = "2", Bench_Name = "Coins_Exchange"},
+    ["Lethal Coin"] = {Product_Id = "3", Bench_Name = "Coins_Exchange"},
+    ["Scythe Coin"] = {Product_Id = "4", Bench_Name = "Coins_Exchange"},
+}
+
+local ExchangeMaterialsOptions = {
+    "Zombie Glue","Zombie Saw","Tome of Wisdom","Wood","Sap","Plant Fiber","Bones","Fur","Tusk","Stone","Coal","Iron Ore","Shells","Salt","Pearls","Acid","Legendary Beast Essence","Mythical Beast Essence","Phantom Beast Essence","Supreme Beast Essence"
+}
+
+local ExchangeMaterialsMap = {
+    --Exchange Materials
+    ["Zombie Glue"] = {Product_Id = "1", Bench_Name = "Materials_Exchange"},
+    ["Zombie Saw"] = {Product_Id = "2", Bench_Name = "Materials_Exchange"},
+    ["Tome of Wisdom"] = {Product_Id = "3", Bench_Name = "Materials_Exchange"},
+    ["Wood"] = {Product_Id = "4", Bench_Name = "Materials_Exchange"},
+    ["Sap"] = {Product_Id = "5", Bench_Name = "Materials_Exchange"},
+    ["Plant Fiber"] = {Product_Id = "6", Bench_Name = "Materials_Exchange"},
+    ["Bones"] = {Product_Id = "7", Bench_Name = "Materials_Exchange"},
+    ["Fur"] = {Product_Id = "8", Bench_Name = "Materials_Exchange"},
+    ["Tusk"] = {Product_Id = "9", Bench_Name = "Materials_Exchange"},
+    ["Stone"] = {Product_Id = "10", Bench_Name = "Materials_Exchange"},
+    ["Coal"] = {Product_Id = "11", Bench_Name = "Materials_Exchange"},
+    ["Iron Ore"] = {Product_Id = "12", Bench_Name = "Materials_Exchange"},
+    ["Shells"] = {Product_Id = "13", Bench_Name = "Materials_Exchange"},
+    ["Salt"] = {Product_Id = "14", Bench_Name = "Materials_Exchange"},
+    ["Pearls"] = {Product_Id = "15", Bench_Name = "Materials_Exchange"},
+    ["Acid"] = {Product_Id = "16", Bench_Name = "Materials_Exchange"},
+    ["Legendary Beast Essence"] = {Product_Id = "17", Bench_Name = "Materials_Exchange"},
+    ["Mythical Beast Essence"] = {Product_Id = "18", Bench_Name = "Materials_Exchange"},
+    ["Phantom Beast Essence"] = {Product_Id = "19", Bench_Name = "Materials_Exchange"},
+    ["Supreme Beast Essence"] = {Product_Id = "20", Bench_Name = "Materials_Exchange"},
+}
+
+local ExchangeW1Dropdown = ExchangeTab:Dropdown({
+    Flag = "ExchangeW1Dropdown",
+    Title = "Select W1 TO W19 Token",
+    Values = ExchangeW1Options,
+    Value = {},
+    Multi = true,
+    AllowNone = true,
+    Callback = function(option)
+        getgenv().SelectedTokenW1 = option
+        print("[DEBUG] Selected Token:", table.concat(option, ", "))
+    end,
+})
+
+local ExchangeW1Toggle = ExchangeTab:Toggle({
+    Flag = "AutoExchangeW1Toggle",
+    Title = "Auto Exchange Token to Exchange Coin",
+    Desc = "Automatically Exchange Selected Token to Exchange Coin",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoExchangeW1Running = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoExchangeW1Running do
+                    if getgenv().SelectedTokenW1 and #getgenv().SelectedTokenW1 > 0 then
+                        for _, tokenName in ipairs(getgenv().SelectedTokenW1) do
+                            local tokenData = ExchangeW1Map[tokenName]
+                            if tokenData then
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Bench_Name"] = tokenData.Bench_Name,
+                                    ["Product_Id"] = tonumber(tokenData.Product_Id),
+                                    ["Action"] = "Merchant_Purchase",
+                                    ["Amount"] = 100,
+                                })
+                                print("[DEBUG] Sent Merchant_Purchase signal for W1 Token:", tokenName, "Amount: 100, Product_Id:", tokenData.Product_Id, "Bench_Name:", tokenData.Bench_Name)
+                                task.wait(0.1)  -- 等待0.1秒后发送下一个
+                            end
+                        end
+                    end
+                end
+            end)
+        else
+            print("[DEBUG] Auto Exchange W1 stopped")
+        end
+    end,
+})
+
+ExchangeTab:Divider()
+
+local ExchangeW2Dropdown = ExchangeTab:Dropdown({
+    Flag = "ExchangeW2Dropdown",
+    Title = "Select W20 TO W30 Token",
+    Values = ExchangeW2Options,
+    Value = {},
+    Multi = true,
+    AllowNone = true,
+    Callback = function(option)
+        getgenv().SelectedTokenW2 = option
+        print("[DEBUG] Selected Token:", table.concat(option, ", "))
+    end,
+})
+
+local ExchangeW2Toggle = ExchangeTab:Toggle({
+    Flag = "AutoExchangeW2Toggle",
+    Title = "Auto Exchange Token to Exchange Coin 2",
+    Desc = "Automatically Exchange Selected Token to Exchange Coin 2",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoExchangeW2Running = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoExchangeW2Running do
+                    if getgenv().SelectedTokenW2 and #getgenv().SelectedTokenW2 > 0 then
+                        for _, tokenName in ipairs(getgenv().SelectedTokenW2) do
+                            local tokenData = ExchangeW2Map[tokenName]
+                            if tokenData then
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Bench_Name"] = tokenData.Bench_Name,
+                                    ["Product_Id"] = tonumber(tokenData.Product_Id),
+                                    ["Action"] = "Merchant_Purchase",
+                                    ["Amount"] = 100,
+                                })
+                                print("[DEBUG] Sent Merchant_Purchase signal for W2 Token:", tokenName, "Amount: 100, Product_Id:", tokenData.Product_Id, "Bench_Name:", tokenData.Bench_Name)
+                                task.wait(0.1)  -- 等待0.1秒后发送下一个
+                            end
+                        end
+                    end
+                end
+            end)
+        else
+            print("[DEBUG] Auto Exchange W2 stopped")
+        end
+    end,
+})
+
+ExchangeTab:Divider()
+
+local ExchangeCoinsDropdown = ExchangeTab:Dropdown({
+    Flag = "ExchangeCoinsDropdown",
+    Title = "Select Coins",
+    Values = ExchangeCoinsOptions,
+    Value = {},
+    Multi = true,
+    AllowNone = true,
+    Callback = function(option)
+        getgenv().SelectedCoins = option
+        print("[DEBUG] Selected Coins:", table.concat(option, ", "))
+    end,
+})
+
+local ExchangeCoinsToggle = ExchangeTab:Toggle({
+    Flag = "AutoExchangeCoinsToggle",
+    Title = "Auto Exchange Coins to Exchange Coin 2",
+    Desc = "Automatically Exchange Selected Coins to Exchange Coin 2",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoExchangeCoinsRunning = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoExchangeCoinsRunning do
+                    if getgenv().SelectedCoins and #getgenv().SelectedCoins > 0 then
+                        for _, coinName in ipairs(getgenv().SelectedCoins) do
+                            local coinData = ExchangeCoinsMap[coinName]
+                            if coinData then
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Bench_Name"] = coinData.Bench_Name,
+                                    ["Product_Id"] = tonumber(coinData.Product_Id),
+                                    ["Action"] = "Merchant_Purchase",
+                                    ["Amount"] = 1,
+                                })
+                                print("[DEBUG] Sent Merchant_Purchase signal for Coins:", coinName, "Amount: 1, Product_Id:", coinData.Product_Id, "Bench_Name:", coinData.Bench_Name)
+                                task.wait(0.1)  -- 等待0.1秒后发送下一个
+                            end
+                        end
+                    end
+                end
+            end)
+        else
+            print("[DEBUG] Auto Exchange Coins stopped")
+        end
+    end,
+})
+
+ExchangeTab:Divider()
+
+local ExchangeMaterialsDropdown = ExchangeTab:Dropdown({
+    Flag = "ExchangeMaterialsDropdown",
+    Title = "Select Materials",
+    Values = ExchangeMaterialsOptions,
+    Value = {},
+    Multi = true,
+    AllowNone = true,
+    Callback = function(option)
+        getgenv().SelectedMaterials = option
+        print("[DEBUG] Selected Materials:", table.concat(option, ", "))
+    end,
+})
+
+local ExchangeMaterialsToggle = ExchangeTab:Toggle({
+    Flag = "AutoExchangeMaterialsToggle",
+    Title = "Auto Exchange Materials to Exchange Coin 2",
+    Desc = "Automatically Exchange Selected Materials to Exchange Coin 2",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoExchangeMaterialsRunning = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoExchangeMaterialsRunning do
+                    if getgenv().SelectedMaterials and #getgenv().SelectedMaterials > 0 then
+                        for _, materialName in ipairs(getgenv().SelectedMaterials) do
+                            local materialData = ExchangeMaterialsMap[materialName]
+                            if materialData then
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Bench_Name"] = materialData.Bench_Name,
+                                    ["Product_Id"] = tonumber(materialData.Product_Id),
+                                    ["Action"] = "Merchant_Purchase",
+                                    ["Amount"] = 1,
+})
+                                print("[DEBUG] Sent Merchant_Purchase signal for Materials:", materialName, "Amount: 1, Product_Id:", materialData.Product_Id, "Bench_Name:", materialData.Bench_Name)
+                                task.wait(0.1)  -- 等待0.1秒后发送下一个
+                            end
+                        end
+                    end
+                end
+            end)
+        else
+            print("[DEBUG] Auto Exchange Materials stopped")
+        end
+    end,
+})
+
 local QuestTab = Window:Tab({
         Title = "Quests",
         Icon = "scroll-text",
