@@ -2365,12 +2365,16 @@ local TitansEvolveToggle = TitansTab:Toggle({
                                             local children = list:GetChildren()
                                             print("[DEBUG] List has", #children, "children")
                                             for _, titanButton in pairs(children) do
+                                                print("[DEBUG] Checking child:", titanButton.Name, "ClassName:", titanButton.ClassName)
                                                 if titanButton:IsA("ImageButton") and titanButton:FindFirstChild("Inside") then
+                                                    print("[DEBUG] Child is ImageButton with Inside")
                                                     local inside = titanButton.Inside
                                                     if inside:IsA("Frame") and inside:FindFirstChild("Title") then
+                                                        print("[DEBUG] Inside has Title")
                                                         local title = inside.Title
                                                         if title:IsA("TextLabel") then
                                                             local titanName = title.Text
+                                                            print("[DEBUG] Title Text:", titanName)
                                                             local titantierFrame = inside:FindFirstChild("Tier")
                                                             if titanName and titanName ~= "" then
                                                                 if not titantierFrame then
@@ -2412,9 +2416,17 @@ local TitansEvolveToggle = TitansTab:Toggle({
                                                                         print("[DEBUG] Found Tier 2 titan:", titanButton.Name, "Name:", titanName)
                                                                     end
                                                                 end
+                                                            else
+                                                                print("[DEBUG] Titan name is empty or nil")
                                                             end
+                                                        else
+                                                            print("[DEBUG] Title is not TextLabel")
                                                         end
+                                                    else
+                                                        print("[DEBUG] Inside does not have Title")
                                                     end
+                                                else
+                                                    print("[DEBUG] Child is not ImageButton or no Inside")
                                                 end
                                             end
                                         else
