@@ -2346,40 +2346,26 @@ local TitansEvolveToggle = TitansTab:Toggle({
                     local player = game:GetService("Players").LocalPlayer
                     local playerGui = player:FindFirstChild("PlayerGui")
                     if playerGui and playerGui:IsA("PlayerGui") then
-                        print("[DEBUG] PlayerGui found")
                         local inventoryGui = playerGui:FindFirstChild("Inventory_1")
                         if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                            print("[DEBUG] Inventory_1 found")
                             local hub = inventoryGui:FindFirstChild("Hub")
                             if hub and hub:IsA("Frame") then
-                                print("[DEBUG] Hub found")
                                 local titans = hub:FindFirstChild("Titans")
                                 if titans and titans:IsA("Frame") then
-                                    print("[DEBUG] Titans found")
                                     local listFrame = titans:FindFirstChild("List_Frame")
                                     if listFrame and listFrame:IsA("Frame") then
-                                        print("[DEBUG] List_Frame found")
                                         local list = listFrame:FindFirstChild("List")
                                         if list and list:IsA("ScrollingFrame") then
-                                            print("[DEBUG] List found")
                                             local children = list:GetChildren()
-                                            print("[DEBUG] List has", #children, "children")
                                             for _, titanButton in pairs(children) do
-                                                print("[DEBUG] Checking child:", titanButton.Name, "ClassName:", titanButton.ClassName)
                                                 if titanButton:IsA("ImageButton") then
-                                                    print("[DEBUG] Child is ImageButton")
                                                     local inside = titanButton:FindFirstChild("Inside")
                                                     if inside then
-                                                        print("[DEBUG] Inside found")
-                                                        if inside:IsA("Frame") then
-                                                            print("[DEBUG] Inside is Frame")
+                                                        if inside:IsA("CanvasGroup") then
                                                             local title = inside:FindFirstChild("Title")
                                                             if title then
-                                                                print("[DEBUG] Title found")
                                                                 if title:IsA("TextLabel") then
-                                                                    print("[DEBUG] Title is TextLabel")
                                                                     local titanName = title.Text
-                                                                    print("[DEBUG] Title Text:", titanName)
                                                                     local titantierFrame = inside:FindFirstChild("Tier")
                                                                     if titanName and titanName ~= "" then
                                                                         if not titantierFrame then
@@ -2388,7 +2374,6 @@ local TitansEvolveToggle = TitansTab:Toggle({
                                                                                 titantier0Groups[titanName] = {}
                                                                             end
                                                                             table.insert(titantier0Groups[titanName], titanButton.Name)
-                                                                            print("[DEBUG] Found Tier 0 titan:", titanButton.Name, "Name:", titanName)
                                                                         elseif titantierFrame:IsA("Frame") then
                                                                             -- 检查Tier里面的ImageLabel
                                                                             local hasImage1 = false
@@ -2411,52 +2396,26 @@ local TitansEvolveToggle = TitansTab:Toggle({
                                                                                     titantier1Groups[titanName] = {}
                                                                                 end
                                                                                 table.insert(titantier1Groups[titanName], titanButton.Name)
-                                                                                print("[DEBUG] Found Tier 1 titan:", titanButton.Name, "Name:", titanName)
                                                                             elseif hasImage1 and hasImage2 and not hasImage3 then
                                                                                 -- Tier 2: has ImageLabel Name = "1" and "2" only, no "3"
                                                                                 if not titantier2Groups[titanName] then
                                                                                     titantier2Groups[titanName] = {}
                                                                                 end
                                                                                 table.insert(titantier2Groups[titanName], titanButton.Name)
-                                                                                print("[DEBUG] Found Tier 2 titan:", titanButton.Name, "Name:", titanName)
                                                                             end
                                                                         end
-                                                                    else
-                                                                        print("[DEBUG] Titan name is empty or nil")
                                                                     end
-                                                                else
-                                                                    print("[DEBUG] Title is not TextLabel")
                                                                 end
-                                                            else
-                                                                print("[DEBUG] Title not found in Inside")
                                                             end
-                                                        else
-                                                            print("[DEBUG] Inside is not Frame")
                                                         end
-                                                    else
-                                                        print("[DEBUG] Inside not found in titanButton")
                                                     end
-                                                else
-                                                    print("[DEBUG] Child is not ImageButton")
                                                 end
                                             end
-                                        else
-                                            print("[DEBUG] List not found")
                                         end
-                                    else
-                                        print("[DEBUG] List_Frame not found")
                                     end
-                                else
-                                    print("[DEBUG] Titans not found")
                                 end
-                            else
-                                print("[DEBUG] Hub not found")
                             end
-                        else
-                            print("[DEBUG] Inventory_1 not found")
                         end
-                    else
-                        print("[DEBUG] PlayerGui not found")
                     end
 
                     -- 发送Evolve信号
@@ -2472,7 +2431,6 @@ local TitansEvolveToggle = TitansTab:Toggle({
                                 ["Action"] = "Evolve",
                                 ["Bench_Name"] = "Titan_Evolve",
                             })
-                            print("[DEBUG] Sent Titan_Evolve signal for Tier 0", titanName, "titans:", table.concat(selected, ", "))
                             break  -- 只处理第一个符合的组
                         end
                     end
@@ -2489,7 +2447,6 @@ local TitansEvolveToggle = TitansTab:Toggle({
                                 ["Action"] = "Evolve",
                                 ["Bench_Name"] = "Titan_Evolve_2",
                             })
-                            print("[DEBUG] Sent Titan_Evolve_2 signal for Tier 1", titanName, "titans:", table.concat(selected, ", "))
                             break  -- 只处理第一个符合的组
                         end
                     end
@@ -2506,13 +2463,8 @@ local TitansEvolveToggle = TitansTab:Toggle({
                                 ["Action"] = "Evolve",
                                 ["Bench_Name"] = "Titan_Evolve_3",
                             })
-                            print("[DEBUG] Sent Titan_Evolve_3 signal for Tier 2", titanName, "titans:", table.concat(selected, ", "))
                             break  -- 只处理第一个符合的组
                         end
-                    end
-
-                    if not next(titantier0Groups) and not next(titantier1Groups) and not next(titantier2Groups) then
-                        print("[DEBUG] No titans found for any Tier")
                     end
 
                     task.wait(0.5)  -- 每0.5秒重新检测titan名字和Tier
@@ -2520,10 +2472,10 @@ local TitansEvolveToggle = TitansTab:Toggle({
             end)
         else
             -- Toggle关闭时，设置全局变量为false，循环停止
-            print("[DEBUG] Auto Evolve Titans stopped")
         end
     end,
 })
+
 TitansTab:Divider()
 
 local function getTitanUniqueId(titanName)
