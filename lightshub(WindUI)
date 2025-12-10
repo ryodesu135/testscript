@@ -2495,7 +2495,7 @@ local function getTitanUniqueId(titanName)
                             for _, titanButton in pairs(list:GetChildren()) do
                                 if titanButton:IsA("ImageButton") and titanButton:FindFirstChild("Inside") then
                                     local inside = titanButton.Inside
-                                    if inside:IsA("Frame") and inside:FindFirstChild("Title") then
+                                    if inside:IsA("CanvasGroup") and inside:FindFirstChild("Title") then
                                         local title = inside.Title
                                         if title:IsA("TextLabel") and title.Text == titanName then
                                             return titanButton.Name  -- 返回button的Name作为UniqueId
@@ -2547,7 +2547,7 @@ local TitanRefreshButton = TitansTab:Button({
                                 for _, titanButton in pairs(list:GetChildren()) do
                                     if titanButton:IsA("ImageButton") and titanButton:FindFirstChild("Inside") then
                                         local inside = titanButton.Inside
-                                        if inside:IsA("Frame") and inside:FindFirstChild("Title") then
+                                        if inside:IsA("CanvasGroup") and inside:FindFirstChild("Title") then
                                             local title = inside.Title
                                             if title:IsA("TextLabel") then
                                                 local titanName = title.Text  -- 直接获取Text属性
