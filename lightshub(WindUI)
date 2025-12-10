@@ -2362,7 +2362,9 @@ local TitansEvolveToggle = TitansTab:Toggle({
                                         local list = listFrame:FindFirstChild("List")
                                         if list and list:IsA("ScrollingFrame") then
                                             print("[DEBUG] List found")
-                                            for _, titanButton in pairs(list:GetChildren()) do
+                                            local children = list:GetChildren()
+                                            print("[DEBUG] List has", #children, "children")
+                                            for _, titanButton in pairs(children) do
                                                 if titanButton:IsA("ImageButton") and titanButton:FindFirstChild("Inside") then
                                                     local inside = titanButton.Inside
                                                     if inside:IsA("Frame") and inside:FindFirstChild("Title") then
