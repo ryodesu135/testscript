@@ -2346,16 +2346,22 @@ local TitansEvolveToggle = TitansTab:Toggle({
                     local player = game:GetService("Players").LocalPlayer
                     local playerGui = player:FindFirstChild("PlayerGui")
                     if playerGui and playerGui:IsA("PlayerGui") then
+                        print("[DEBUG] PlayerGui found")
                         local inventoryGui = playerGui:FindFirstChild("Inventory_1")
                         if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                            print("[DEBUG] Inventory_1 found")
                             local hub = inventoryGui:FindFirstChild("Hub")
                             if hub and hub:IsA("Frame") then
+                                print("[DEBUG] Hub found")
                                 local titans = hub:FindFirstChild("Titans")
                                 if titans and titans:IsA("Frame") then
+                                    print("[DEBUG] Titans found")
                                     local listFrame = titans:FindFirstChild("List_Frame")
                                     if listFrame and listFrame:IsA("Frame") then
+                                        print("[DEBUG] List_Frame found")
                                         local list = listFrame:FindFirstChild("List")
                                         if list and list:IsA("ScrollingFrame") then
+                                            print("[DEBUG] List found")
                                             for _, titanButton in pairs(list:GetChildren()) do
                                                 if titanButton:IsA("ImageButton") and titanButton:FindFirstChild("Inside") then
                                                     local inside = titanButton.Inside
@@ -2409,11 +2415,23 @@ local TitansEvolveToggle = TitansTab:Toggle({
                                                     end
                                                 end
                                             end
+                                        else
+                                            print("[DEBUG] List not found")
                                         end
+                                    else
+                                        print("[DEBUG] List_Frame not found")
                                     end
+                                else
+                                    print("[DEBUG] Titans not found")
                                 end
+                            else
+                                print("[DEBUG] Hub not found")
                             end
+                        else
+                            print("[DEBUG] Inventory_1 not found")
                         end
+                    else
+                        print("[DEBUG] PlayerGui not found")
                     end
 
                     -- 发送Evolve信号
@@ -2493,7 +2511,7 @@ local function getTitanUniqueId(titanName)
             local hub = inventoryGui:FindFirstChild("Hub")
             if hub and hub:IsA("Frame") then
                 local titans = hub:FindFirstChild("Titans")
-                if titans and titans:IsA("Frame") then
+                if titans and Titans:IsA("Frame") then
                     local listFrame = titans:FindFirstChild("List_Frame")
                     if listFrame and listFrame:IsA("Frame") then
                         local list = listFrame:FindFirstChild("List")
