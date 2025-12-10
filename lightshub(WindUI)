@@ -2323,6 +2323,265 @@ WeaponsTab:Toggle({
     end,
 })
 
+local TitansTab = Window:Tab({
+        Title = "Titans",
+        Icon = "person-standing",
+    })
+
+getgenv().AutoTitansEvolveRunning = false
+
+local TitansEvolveToggle = TitansTab:Toggle({
+    Flag = "TitansEvolve1",
+    Title = "Auto Evolve Titans",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoTitansEvolveRunning = state
+        if state then
+            -- 启动循环：每0.5秒重新检测titan名字和Tier并发送Evolve信号
+            task.spawn(function()
+                while getgenv().AutoTitansEvolveRunning do  -- 使用全局变量控制循环
+                    local titantier0Groups = {}  -- { ["Titan Name"] = {list of titan button names} } for Tier 0 (no Tier Frame)
+                    local titantier1Groups = {}  -- { ["Titan Name"] = {list of titan button names} } for Tier 1 (Tier Frame with ImageLabel Name = "1" only)
+                    local titantier2Groups = {}  -- { ["Titan Name"] = {list of titan button names} } for Tier 2 (Tier Frame with ImageLabel Name = "1" and "2" only, no "3")
+                    local player = game:GetService("Players").LocalPlayer
+                    local playerGui = player:FindFirstChild("PlayerGui")
+                    if playerGui and playerGui:IsA("PlayerGui") then
+                        local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+                        if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                            local hub = inventoryGui:FindFirstChild("Hub")
+                            if hub and hub:IsA("Frame") then
+                                local titans = hub:FindFirstChild("Titans")
+                                if titans and titans:IsA("Frame") then
+                                    local listFrame = titans:FindFirstChild("List_Frame")
+                                    if listFrame and listFrame:IsA("Frame") then
+                                        local list = listFrame:FindFirstChild("List")
+                                        if list and list:IsA("ScrollingFrame") then
+                                            for _, titanButton in pairs(list:GetChildren()) do
+                                                if titanButton:IsA("ImageButton") and titanButton:FindFirstChild("Inside") then
+                                                    local inside = titanButton.Inside
+                                                    if inside:IsA("Frame") and inside:FindFirstChild("Title") then
+                                                        local title = inside.Title
+                                                        if title:IsA("TextLabel") then
+                                                            local titanName = title.Text
+                                                            local titantierFrame = inside:FindFirstChild("Tier")
+                                                            if titanName and titanName ~= "" then
+                                                                if not titantierFrame then
+                                                                    -- Tier 0: no Tier Frame
+                                                                    if not titantier0Groups[titanName] then
+                                                                        titantier0Groups[titanName] = {}
+                                                                    end
+                                                                    table.insert(titantier0Groups[titanName], titanButton.Name)
+                                                                    print("[DEBUG] Found Tier 0 titan:", titanButton.Name, "Name:", titanName)
+                                                                elseif titantierFrame:IsA("Frame") then
+                                                                    -- 检查Tier里面的ImageLabel
+                                                                    local hasImage1 = false
+                                                                    local hasImage2 = false
+                                                                    local hasImage3 = false
+                                                                    for _, child in pairs(titantierFrame:GetChildren()) do
+                                                                        if child:IsA("ImageLabel") then
+                                                                            if child.Name == "1" then
+                                                                                hasImage1 = true
+                                                                            elseif child.Name == "2" then
+                                                                                hasImage2 = true
+                                                                            elseif child.Name == "3" then
+                                                                                hasImage3 = true
+                                                                            end
+                                                                        end
+                                                                    end
+                                                                    if hasImage1 and not hasImage2 and not hasImage3 then
+                                                                        -- Tier 1: has ImageLabel Name = "1" only
+                                                                        if not titantier1Groups[titanName] then
+                                                                            titantier1Groups[titanName] = {}
+                                                                        end
+                                                                        table.insert(titantier1Groups[titanName], titanButton.Name)
+                                                                        print("[DEBUG] Found Tier 1 titan:", titanButton.Name, "Name:", titanName)
+                                                                    elseif hasImage1 and hasImage2 and not hasImage3 then
+                                                                        -- Tier 2: has ImageLabel Name = "1" and "2" only, no "3"
+                                                                        if not titantier2Groups[titanName] then
+                                                                            titantier2Groups[titanName] = {}
+                                                                        end
+                                                                        table.insert(titantier2Groups[titanName], titanButton.Name)
+                                                                        print("[DEBUG] Found Tier 2 titan:", titanButton.Name, "Name:", titanName)
+                                                                    end
+                                                                end
+                                                            end
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+
+                    -- 发送Evolve信号
+                    -- Tier 0: Titan_Evolve, 2 titans
+                    for titanName, titanList in pairs(titantier0Groups) do
+                        if #titanList >= 2 then
+                            local selected = {}
+                            for i = 1, 2 do
+                                selected[i] = titanList[i]
+                            end
+                            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                ["Selected"] = selected,
+                                ["Action"] = "Evolve",
+                                ["Bench_Name"] = "Titan_Evolve",
+                            })
+                            print("[DEBUG] Sent Titan_Evolve signal for Tier 0", titanName, "titans:", table.concat(selected, ", "))
+                            break  -- 只处理第一个符合的组
+                        end
+                    end
+
+                    -- Tier 1: Titan_Evolve_2, 2 titans
+                    for titanName, titanList in pairs(titantier1Groups) do
+                        if #titanList >= 2 then
+                            local selected = {}
+                            for i = 1, 2 do
+                                selected[i] = titanList[i]
+                            end
+                            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                ["Selected"] = selected,
+                                ["Action"] = "Evolve",
+                                ["Bench_Name"] = "Titan_Evolve_2",
+                            })
+                            print("[DEBUG] Sent Titan_Evolve_2 signal for Tier 1", titanName, "titans:", table.concat(selected, ", "))
+                            break  -- 只处理第一个符合的组
+                        end
+                    end
+
+                    -- Tier 2: Titan_Evolve_3, 2 titans
+                    for titanName, titanList in pairs(titantier2Groups) do
+                        if #titanList >= 2 then
+                            local selected = {}
+                            for i = 1, 2 do
+                                selected[i] = titanList[i]
+                            end
+                            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                ["Selected"] = selected,
+                                ["Action"] = "Evolve",
+                                ["Bench_Name"] = "Titan_Evolve_3",
+                            })
+                            print("[DEBUG] Sent Titan_Evolve_3 signal for Tier 2", titanName, "titans:", table.concat(selected, ", "))
+                            break  -- 只处理第一个符合的组
+                        end
+                    end
+
+                    if not next(titantier0Groups) and not next(titantier1Groups) and not next(titantier2Groups) then
+                        print("[DEBUG] No titans found for any Tier")
+                    end
+
+                    task.wait(0.5)  -- 每0.5秒重新检测titan名字和Tier
+                end
+            end)
+        else
+            -- Toggle关闭时，设置全局变量为false，循环停止
+            print("[DEBUG] Auto Evolve Titans stopped")
+        end
+    end,
+})
+
+TitansTab:Divider()
+
+local function getTitanUniqueId(titanName)
+    local player = game:GetService("Players").LocalPlayer
+    local playerGui = player:FindFirstChild("PlayerGui")
+    if playerGui and playerGui:IsA("PlayerGui") then
+        local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+        if inventoryGui and inventoryGui:IsA("ScreenGui") then
+            local hub = inventoryGui:FindFirstChild("Hub")
+            if hub and hub:IsA("Frame") then
+                local titans = hub:FindFirstChild("Titans")
+                if titans and titans:IsA("Frame") then
+                    local listFrame = titans:FindFirstChild("List_Frame")
+                    if listFrame and listFrame:IsA("Frame") then
+                        local list = listFrame:FindFirstChild("List")
+                        if list and list:IsA("ScrollingFrame") then
+                            for _, titanButton in pairs(list:GetChildren()) do
+                                if titanButton:IsA("ImageButton") and titanButton:FindFirstChild("Inside") then
+                                    local inside = titanButton.Inside
+                                    if inside:IsA("Frame") and inside:FindFirstChild("Title") then
+                                        local title = inside.Title
+                                        if title:IsA("TextLabel") and title.Text == titanName then
+                                            return titanButton.Name  -- 返回button的Name作为UniqueId
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return nil
+end
+
+local TitansDropdown = TitansTab:Dropdown({
+    Flag = "TitansDropdown1",
+    Title = "Select Titans to Inject",
+    Values = {},  -- 初始为空
+    Value = {},
+    Multi = true,
+    AllowNone = true,
+    Callback = function(option)
+        getgenv().SelectedTitans = option
+        print("[DEBUG] Selected Titans:", table.concat(option, ", "))
+    end,
+})
+
+local TitanRefreshButton = TitansTab:Button({
+    Flag = "RefreshButton3",
+    Title = "Refresh Titans List",
+    Callback = function()
+        -- 类似Mob刷新逻辑：重新扫描并刷新dropdown
+        local titanList = {}
+        local player = game:GetService("Players").LocalPlayer
+        local playerGui = player:FindFirstChild("PlayerGui")
+        if playerGui and playerGui:IsA("PlayerGui") then
+            local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+            if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                local hub = inventoryGui:FindFirstChild("Hub")
+                if hub and hub:IsA("Frame") then
+                    local titans = hub:FindFirstChild("Titans")
+                    if titans and titans:IsA("Frame") then
+                        local listFrame = titans:FindFirstChild("List_Frame")
+                        if listFrame and listFrame:IsA("Frame") then
+                            local list = listFrame:FindFirstChild("List")
+                            if list and list:IsA("ScrollingFrame") then
+                                for _, titanButton in pairs(list:GetChildren()) do
+                                    if titanButton:IsA("ImageButton") and titanButton:FindFirstChild("Inside") then
+                                        local inside = titanButton.Inside
+                                        if inside:IsA("Frame") and inside:FindFirstChild("Title") then
+                                            local title = inside.Title
+                                            if title:IsA("TextLabel") then
+                                                local titanName = title.Text  -- 直接获取Text属性
+                                                if titanName and titanName ~= "" then
+                                                    table.insert(titanList, titanName)
+                                                    print("[DEBUG] Found titan:", titanName)  -- 添加调试打印
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        print("[DEBUG] Total titans found:", #titanList)  -- 添加调试打印
+
+        if #titanList == 0 then
+            TitansDropdown:Refresh({"None"})
+        else
+            TitansDropdown:Refresh(titanList)
+        end
+    end,
+})
+
 local ProgressionTab = Window:Tab({
         Title = "Progression",
         Icon = "chevrons-up",
