@@ -1119,6 +1119,34 @@ local ExchangeShopW2KeysMap = {
     ["Body Improvement Key"] = {Product_Id = "11", Bench_Name = "Exchange_Shop_Keys_2"},
 }
 
+local ExchangeShopW2ProductsOptions = {
+    "Coins Potion","Damage Potion","Energy Potion","Luck Potion","Exp Potion","Soul Potion","Shadow Soul Potion","Stats Reset","Attack Range Potion I","Expensive Stats Reset","Chocolate Bar","Cheese Pizza Slice","Milk","Green Gummy Bear","Hot Sauce","Coffee","Doughnut","Fried Egg","Waffle","Drop Potion"
+}
+
+local ExchangeShopW2ProductsMap = {
+    --Maze Products
+    ["Coins Potion"] = {Product_Id = "1", Bench_Name = "Maze_Merchant"},
+    ["Damage Potion"] = {Product_Id = "2", Bench_Name = "Maze_Merchant"},
+    ["Energy Potion"] = {Product_Id = "3", Bench_Name = "Maze_Merchant"},
+    ["Luck Potion"] = {Product_Id = "4", Bench_Name = "Maze_Merchant"},
+    ["Exp Potion"] = {Product_Id = "5", Bench_Name = "Maze_Merchant"},
+    ["Soul Potion"] = {Product_Id = "6", Bench_Name = "Maze_Merchant"},
+    ["Shadow Soul Potion"] = {Product_Id = "7", Bench_Name = "Maze_Merchant"},
+    ["Stats Reset"] = {Product_Id = "8", Bench_Name = "Maze_Merchant"},
+    ["Attack Range Potion I"] = {Product_Id = "9", Bench_Name = "Maze_Merchant"},
+    ["Expensive Stats Reset"] = {Product_Id = "10", Bench_Name = "Maze_Merchant"},
+    ["Chocolate Bar"] = {Product_Id = "11", Bench_Name = "Maze_Merchant"},
+    ["Cheese Pizza Slice"] = {Product_Id = "12", Bench_Name = "Maze_Merchant"},
+    ["Milk"] = {Product_Id = "13", Bench_Name = "Maze_Merchant"},
+    ["Green Gummy Bear"] = {Product_Id = "14", Bench_Name = "Maze_Merchant"},
+    ["Hot Sauce"] = {Product_Id = "15", Bench_Name = "Maze_Merchant"},
+    ["Coffee"] = {Product_Id = "16", Bench_Name = "Maze_Merchant"},
+    ["Doughnut"] = {Product_Id = "17", Bench_Name = "Maze_Merchant"},
+    ["Fried Egg"] = {Product_Id = "18", Bench_Name = "Maze_Merchant"},
+    ["Waffle"] = {Product_Id = "19", Bench_Name = "Maze_Merchant"},
+    ["Drop Potion"] = {Product_Id = "20", Bench_Name = "Maze_Merchant"},
+}
+
 local ExchangeShopW1Dropdown = ExchangeShopTab:Dropdown({
     Flag = "ExchangeShopW1Dropdown",
     Title = "Select W1 TO W19 Token",
@@ -1206,7 +1234,7 @@ local ExchangeShopW1KeysToggle = ExchangeShopTab:Toggle({
                 end
             end)
         else
-            print("[DEBUG] Auto Exchange W2 stopped")
+            print("[DEBUG] Auto Exchange W1 stopped")
         end
     end,
 })
@@ -1304,9 +1332,98 @@ local ExchangeShopW2Toggle = ExchangeShopTab:Toggle({
     end,
 })
 
-ExchangeTab:Divider()
+ExchangeShopTab:Divider()
 
+local ExchangeShopW2KeysDropdown = ExchangeShopTab:Dropdown({
+    Flag = "ExchangeShopW2KeysDropdown",
+    Title = "Select W20 TO W30 Keys to Buy",
+    Values = ExchangeShopW2KeysOptions,
+    Value = {},
+    Multi = true,
+    AllowNone = true,
+    Callback = function(option)
+        getgenv().SelectedShopKeysW2 = option
+        print("[DEBUG] Selected Shop Token:", table.concat(option, ", "))
+    end,
+})
 
+local ExchangeShopW2KeysToggle = ExchangeShopTab:Toggle({
+    Flag = "AutoExchangeShopW2KeysToggle",
+    Title = "Auto Exchange Coin to W20 TO W30 Keys",
+    Desc = "Automatically Exchange Coin to Selected Keys",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoExchangeShopW2KeysRunning = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoExchangeShopW2KeysRunning do
+                    if getgenv().SelectedShopKeysW2 and #getgenv().SelectedShopKeysW2 > 0 then
+                        for _, ShopKeysName in ipairs(getgenv().SelectedShopKeysW2) do
+                            local ShopKeysData = ExchangeShopW2KeysMap[ShopKeysName]
+                            if ShopKeysData then
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Bench_Name"] = ShopKeysData.Bench_Name,
+                                    ["Product_Id"] = tonumber(ShopKeysData.Product_Id),
+                                    ["Action"] = "Merchant_Purchase",
+                                    ["Amount"] = 1,
+                                })
+                                task.wait(0.1)  -- 等待0.1秒后发送下一个
+                            end
+                        end
+                    end
+                end
+            end)
+        else
+            print("[DEBUG] Auto Exchange W2 stopped")
+        end
+    end,
+})
+
+ExchangeShopTab:Divider()
+
+local ExchangeShopW2ProductsDropdown = ExchangeShopTab:Dropdown({
+    Flag = "ExchangeShopW2ProductsDropdown",
+    Title = "Select W20 TO W30 Products to Buy",
+    Values = ExchangeShopW2ProductsOptions,
+    Value = {},
+    Multi = true,
+    AllowNone = true,
+    Callback = function(option)
+        getgenv().SelectedShopProductsW2 = option
+    end,
+})
+
+local ExchangeShopW2ProductsToggle = ExchangeShopTab:Toggle({
+    Flag = "AutoExchangeShopW2ProductsToggle",
+    Title = "Auto Exchange Coin to W20 TO W30 Products",
+    Desc = "Automatically Exchange Coin to Selected Products",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoExchangeShopW2ProductsRunning = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoExchangeShopW2ProductsRunning do
+                    if getgenv().SelectedShopProductsW2 and #getgenv().SelectedShopProductsW2 > 0 then
+                        for _, ShopProductsName in ipairs(getgenv().SelectedShopProductsW2) do
+                            local ShopProductsData = ExchangeShopW2ProductsMap[ShopProductsName]
+                            if ShopProductsData then
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Bench_Name"] = ShopProductsData.Bench_Name,
+                                    ["Product_Id"] = tonumber(ShopProductsData.Product_Id),
+                                    ["Action"] = "Merchant_Purchase",
+                                    ["Amount"] = 1,
+                                })
+                                task.wait(0.1)  -- 等待0.1秒后发送下一个
+                            end
+                        end
+                    end
+                end
+            end)
+        else
+            print("[DEBUG] Auto Exchange Products W2 stopped")
+        end
+    end,
+})
 
 local QuestTab = Window:Tab({
         Title = "Quests",
