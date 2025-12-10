@@ -2178,6 +2178,8 @@ local WeaponRefreshButton = WeaponsTab:Button({
     end,
 })
 
+WeaponsTab:Divider()
+
 -- 全局控制变量
 getgenv().AutoBreathingsRunning = false
 getgenv().AutoBankaiRunning = false
@@ -2572,6 +2574,46 @@ local TitanRefreshButton = TitansTab:Button({
             TitansDropdown:Refresh({"None"})
         else
             TitansDropdown:Refresh(titanList)
+        end
+    end,
+})
+
+TitansTab:Divider()
+
+getgenv().AutoInjectionRunning = false
+
+TitansTab:Toggle({
+    Flag = "AutoInjection1",
+    Title = "Auto Roll Injection",
+    Desc = "Automatically Roll Injection Using Selected Titan",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoInjectionRunning = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoInjectionRunning do
+                    if getgenv().SelectedTitans and #getgenv().SelectedTitans > 0 then
+                        for _, titanName in ipairs(getgenv().SelectedTitans) do
+                            -- 获取weapon的UniqueId（button Name）
+                            local uniqueId = getWeaponUniqueId(titanName)
+                            if uniqueId then
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Type"] = "Enchant",
+                                    ["UniqueId"] = uniqueId,
+                                    ["Action"] = "Enchantment",
+                                    ["Enchantment_Name"] = "Titan_Injection",
+                                })
+                                print("[DEBUG] Sent Injection signal for titan:", titanName, "UniqueId:", uniqueId)
+                            else
+                                print("[DEBUG] UniqueId not found for titan:", titanName)
+                            end
+                        end
+                    end
+                    task.wait(0.2)
+                end
+            end)
+        else
+            print("[DEBUG] Auto Roll Injection stopped")
         end
     end,
 })
