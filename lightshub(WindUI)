@@ -34,7 +34,6 @@ local function captureCurrentStats()
     local humanoid = char:WaitForChild("Humanoid")
     getgenv().CurrentWalkSpeed = humanoid.WalkSpeed
     getgenv().CurrentJumpPower = humanoid.JumpPower
-    print("[DEBUG] 捕捉当前速度:", getgenv().CurrentWalkSpeed, " 跳跃力:", getgenv().CurrentJumpPower)
 end
 
 -- ✅ 维持设定的速度与跳跃力
@@ -64,33 +63,32 @@ local MainTab = Window:Tab({
 }) 
 
 local PlayerTab = Window:Tab({
-        Title = "Player",
-        Icon = "user",
-    })
+    Title = "Player",
+    Icon = "user",
+})
 
 -------------------------------------------------
 -- 玩家设定（WalkSpeed、Jump）
 -------------------------------------------------
 PlayerTab:Slider({
-        Flag = "Slider1",
-        Title = "Walk Speed",
-        Desc = "Adjust Your Walk Speed",
-        Step = 1,
-        Value = {
-            Min = 30,
-            Max = 150,
-            Default = getgenv().CurrentWalkSpeed or 35,
-        },
-        Callback = function(Value)
+    Flag = "Slider1",
+    Title = "Walk Speed",
+    Desc = "Adjust Your Walk Speed",
+    Step = 1,
+    Value = {
+        Min = 30,
+        Max = 150,
+        Default = getgenv().CurrentWalkSpeed or 35,
+    },
+    Callback = function(Value)
         local char = player.Character
         local humanoid = char and char:FindFirstChild("Humanoid")
         if humanoid then
             humanoid.WalkSpeed = Value
             getgenv().UserSetWalkSpeed = Value
-            print("[DEBUG] 玩家设定 WalkSpeed:", Value)
         end
     end,
-    })
+})
 
 PlayerTab:Slider({
     Flag = "Slider2",
@@ -108,7 +106,6 @@ PlayerTab:Slider({
         if humanoid then
             humanoid.JumpPower = Value
             getgenv().UserSetJumpPower = Value
-            print("[DEBUG] 玩家设定 JumpPower:", Value)
         end
     end,
 })
@@ -163,7 +160,6 @@ local function updateWhitelist(text)
         table.insert(list, name)
     end
     getgenv().AntiPublicWhitelist = list
-    print("[DEBUG] Whitelist Updated:", table.concat(list, ", "))
 end
 
 --✨ 主功能：检测是否要 kick 自己
@@ -192,7 +188,7 @@ local function checkServerPlayers()
             end
         end
 
-        -- 🟢 如果 whitelist 里面的人在，但**没有其他人** → 不 kick
+        -- 🟢 如果 whitelist 里面的人在，但没有其他人 → 不 kick
         if whitelistFound and #others == 0 then
             continue
         end
@@ -216,10 +212,7 @@ PlayerTab:Toggle({
         getgenv().AntiPublicEnabled = state
 
         if state then
-            print("[DEBUG] Anti Public Server Enabled")
             task.spawn(checkServerPlayers)
-        else
-            print("[DEBUG] Anti Public Server Disabled")
         end
     end,
 })
@@ -705,7 +698,6 @@ local ExchangeW1Dropdown = ExchangeTab:Dropdown({
     AllowNone = true,
     Callback = function(option)
         getgenv().SelectedTokenW1 = option
-        print("[DEBUG] Selected Token:", table.concat(option, ", "))
     end,
 })
 
@@ -729,7 +721,6 @@ local ExchangeW1Toggle = ExchangeTab:Toggle({
                                     ["Action"] = "Merchant_Purchase",
                                     ["Amount"] = 100,
                                 })
-                                print("[DEBUG] Sent Merchant_Purchase signal for W1 Token:", tokenName, "Amount: 100, Product_Id:", tokenData.Product_Id, "Bench_Name:", tokenData.Bench_Name)
                                 task.wait(0.1)  -- 等待0.1秒后发送下一个
                             end
                         end
@@ -737,7 +728,7 @@ local ExchangeW1Toggle = ExchangeTab:Toggle({
                 end
             end)
         else
-            print("[DEBUG] Auto Exchange W1 stopped")
+            -- stopped
         end
     end,
 })
@@ -753,7 +744,6 @@ local ExchangeW2Dropdown = ExchangeTab:Dropdown({
     AllowNone = true,
     Callback = function(option)
         getgenv().SelectedTokenW2 = option
-        print("[DEBUG] Selected Token:", table.concat(option, ", "))
     end,
 })
 
@@ -777,7 +767,6 @@ local ExchangeW2Toggle = ExchangeTab:Toggle({
                                     ["Action"] = "Merchant_Purchase",
                                     ["Amount"] = 100,
                                 })
-                                print("[DEBUG] Sent Merchant_Purchase signal for W2 Token:", tokenName, "Amount: 100, Product_Id:", tokenData.Product_Id, "Bench_Name:", tokenData.Bench_Name)
                                 task.wait(0.1)  -- 等待0.1秒后发送下一个
                             end
                         end
@@ -785,7 +774,7 @@ local ExchangeW2Toggle = ExchangeTab:Toggle({
                 end
             end)
         else
-            print("[DEBUG] Auto Exchange W2 stopped")
+            -- stopped
         end
     end,
 })
@@ -801,7 +790,6 @@ local ExchangeCoinsDropdown = ExchangeTab:Dropdown({
     AllowNone = true,
     Callback = function(option)
         getgenv().SelectedCoins = option
-        print("[DEBUG] Selected Coins:", table.concat(option, ", "))
     end,
 })
 
@@ -825,7 +813,6 @@ local ExchangeCoinsToggle = ExchangeTab:Toggle({
                                     ["Action"] = "Merchant_Purchase",
                                     ["Amount"] = 1,
                                 })
-                                print("[DEBUG] Sent Merchant_Purchase signal for Coins:", coinName, "Amount: 1, Product_Id:", coinData.Product_Id, "Bench_Name:", coinData.Bench_Name)
                                 task.wait(0.1)  -- 等待0.1秒后发送下一个
                             end
                         end
@@ -833,7 +820,7 @@ local ExchangeCoinsToggle = ExchangeTab:Toggle({
                 end
             end)
         else
-            print("[DEBUG] Auto Exchange Coins stopped")
+            -- stopped
         end
     end,
 })
@@ -849,7 +836,6 @@ local ExchangeMaterialsDropdown = ExchangeTab:Dropdown({
     AllowNone = true,
     Callback = function(option)
         getgenv().SelectedMaterials = option
-        print("[DEBUG] Selected Materials:", table.concat(option, ", "))
     end,
 })
 
@@ -873,7 +859,6 @@ local ExchangeMaterialsToggle = ExchangeTab:Toggle({
                                     ["Action"] = "Merchant_Purchase",
                                     ["Amount"] = 1,
                                 })
-                                print("[DEBUG] Sent Merchant_Purchase signal for Materials:", materialName, "Amount: 1, Product_Id:", materialData.Product_Id, "Bench_Name:", materialData.Bench_Name)
                                 task.wait(0.1)  -- 等待0.1秒后发送下一个
                             end
                         end
@@ -881,7 +866,7 @@ local ExchangeMaterialsToggle = ExchangeTab:Toggle({
                 end
             end)
         else
-            print("[DEBUG] Auto Exchange Materials stopped")
+            -- stopped
         end
     end,
 })
@@ -1155,7 +1140,6 @@ local ExchangeShopW1Dropdown = ExchangeShopTab:Dropdown({
     AllowNone = true,
     Callback = function(option)
         getgenv().SelectedShopTokenW1 = option
-        print("[DEBUG] Selected Shop Token:", table.concat(option, ", "))
     end,
 })
 
@@ -1186,7 +1170,7 @@ local ExchangeShopW1Toggle = ExchangeShopTab:Toggle({
                 end
             end)
         else
-            print("[DEBUG] Auto Exchange W1 stopped")
+            -- stopped
         end
     end,
 })
@@ -1202,7 +1186,6 @@ local ExchangeShopW1KeysDropdown = ExchangeShopTab:Dropdown({
     AllowNone = true,
     Callback = function(option)
         getgenv().SelectedShopKeysW1 = option
-        print("[DEBUG] Selected Shop Token:", table.concat(option, ", "))
     end,
 })
 
@@ -1233,7 +1216,6 @@ local ExchangeShopW1KeysToggle = ExchangeShopTab:Toggle({
                 end
             end)
         else
-            print("[DEBUG] Auto Exchange W1 stopped")
         end
     end,
 })
@@ -1279,7 +1261,6 @@ local ExchangeShopW1ProductsToggle = ExchangeShopTab:Toggle({
                 end
             end)
         else
-            print("[DEBUG] Auto Exchange Products W1 stopped")
         end
     end,
 })
