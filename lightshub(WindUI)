@@ -2488,7 +2488,7 @@ local function getTitanUniqueId(titanName)
             local hub = inventoryGui:FindFirstChild("Hub")
             if hub and hub:IsA("Frame") then
                 local titans = hub:FindFirstChild("Titans")
-                if titans and Titans:IsA("Frame") then
+                if titans and titans:IsA("Frame") then
                     local listFrame = titans:FindFirstChild("List_Frame")
                     if listFrame and listFrame:IsA("Frame") then
                         local list = listFrame:FindFirstChild("List")
