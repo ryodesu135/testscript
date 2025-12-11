@@ -310,12 +310,11 @@ CodesTab:Button({
     Locked = false,
     Callback = function()
     local codes = {"SlashX", "Derp", "Heyyyo", 
-    "Update26", "755KFav", "Update26Code", "ThanksgivingOnPart2?", "Update26Code2", "Update26Restart1",
-    "Update26P2", "250MVisits", "Update26P2Code", "SorryNoTurkey", "PowerOfFriendship",
     "Update27", "400KLikes", "760KFav", "Update27Code", "NoThanksgivingCode" , "Update27Delay", "Update27Restart", "Update27HeroKey", "SorryNoTurkey2", "SorryNoTurkey3", "SorryNoTurkey4",
     "Update27P2", "765KFav", "770KFav", "Update27P2Code", "255MVisits", "NothanksgivingCode2",
     "Update28", "Update28Code", "775KFav", "260MVisits", "Update28Code2",
-    "Update28P2", "Update28P2Code", "405KLikes", "265MVisits", "Update28P2Code2"
+    "Update28P2", "Update28P2Code", "405KLikes", "265MVisits", "Update28P2Code2",
+    "Update28P3","Update28P2Code","Update28P2Code2","Update28P2Code3","780KFav","Update28P3Code","Update28P3Code2"
 
 }
     for _, code in ipairs(codes) do
@@ -2595,7 +2594,7 @@ TitansTab:Toggle({
                     if getgenv().SelectedTitans and #getgenv().SelectedTitans > 0 then
                         for _, titanName in ipairs(getgenv().SelectedTitans) do
                             -- 获取weapon的UniqueId（button Name）
-                            local uniqueId = getWeaponUniqueId(titanName)
+                            local uniqueId = getTitanUniqueId(titanName)
                             if uniqueId then
                                 game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                     ["Type"] = "Enchant",
