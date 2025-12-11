@@ -2772,7 +2772,7 @@ local StandsEvolveToggle = StandsTab:Toggle({
 
 StandsTab:Divider()
 
-local function getTitanUniqueId(standName)
+local function getStandUniqueId(standName)
     local player = game:GetService("Players").LocalPlayer
     local playerGui = player:FindFirstChild("PlayerGui")
     if playerGui and playerGui:IsA("PlayerGui") then
