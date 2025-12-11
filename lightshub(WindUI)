@@ -1276,7 +1276,6 @@ local ExchangeShopW2Dropdown = ExchangeShopTab:Dropdown({
     AllowNone = true,
     Callback = function(option)
         getgenv().SelectedShopTokenW2 = option
-        print("[DEBUG] Selected Shop Token:", table.concat(option, ", "))
     end,
 })
 
@@ -1307,7 +1306,6 @@ local ExchangeShopW2Toggle = ExchangeShopTab:Toggle({
                 end
             end)
         else
-            print("[DEBUG] Auto Exchange W2 stopped")
         end
     end,
 })
@@ -1323,7 +1321,6 @@ local ExchangeShopW2KeysDropdown = ExchangeShopTab:Dropdown({
     AllowNone = true,
     Callback = function(option)
         getgenv().SelectedShopKeysW2 = option
-        print("[DEBUG] Selected Shop Token:", table.concat(option, ", "))
     end,
 })
 
@@ -1354,7 +1351,6 @@ local ExchangeShopW2KeysToggle = ExchangeShopTab:Toggle({
                 end
             end)
         else
-            print("[DEBUG] Auto Exchange W2 stopped")
         end
     end,
 })
@@ -1400,7 +1396,6 @@ local ExchangeShopW2ProductsToggle = ExchangeShopTab:Toggle({
                 end
             end)
         else
-            print("[DEBUG] Auto Exchange Products W2 stopped")
         end
     end,
 })
@@ -1766,7 +1761,6 @@ local StarDropdown = StarTab:Dropdown({
     Value = "[W1] Earth City",
     Callback = function(option)
         getgenv().selectedStars = option
-        print("[DEBUG] Star Option changed:", option)
     end,
 })
 
@@ -1797,7 +1791,6 @@ StarTab:Toggle({
             end)
         else
             getgenv().AutoOpenStar = false
-            print("[DEBUG] AutoOpenStar disabled")
         end
     end,
 })
@@ -1847,7 +1840,6 @@ local RollDropdown = RollTab:Dropdown({
     Value = "[W1] Dragon Race",
     Callback = function(option)
         getgenv().selectedRolls = option
-        print("[DEBUG] Roll Option changed:", option)
     end,
 })
 
@@ -1860,14 +1852,11 @@ RollTab:Toggle({
     Callback = function(state)
         if state then
             getgenv().AutoRoll = true
-            print("[DEBUG] AutoRoll enabled")
             task.spawn(function()
                 while getgenv().AutoRoll do
                     pcall(function()
-                        print("[DEBUG] Attempting to roll, selectedRolls:", getgenv().selectedRolls)
                         -- 生成 Name：移除 "[W X] " 前缀，并将空格替换为下划线
                         local name = string.gsub(getgenv().selectedRolls, "^%[W%d+%] ", ""):gsub(" ", "_")
-                        print("[DEBUG] Generated name:", name)
                         game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                             ["Open_Amount"] = 5,
                             ["Name"] = name,
@@ -1879,7 +1868,6 @@ RollTab:Toggle({
             end)
         else
             getgenv().AutoRoll = false
-            print("[DEBUG] AutoRoll disabled")
         end
     end,
 })
@@ -1938,7 +1926,6 @@ local WeaponsEvolveToggle = WeaponsTab:Toggle({
                                                                         tier0Groups[weaponName] = {}
                                                                     end
                                                                     table.insert(tier0Groups[weaponName], weaponButton.Name)
-                                                                    print("[DEBUG] Found Tier 0 weapon:", weaponButton.Name, "Name:", weaponName)
                                                                 elseif tierFrame:IsA("Frame") then
                                                                     -- 检查Tier里面的ImageLabel
                                                                     local hasImage1 = false
@@ -1961,14 +1948,12 @@ local WeaponsEvolveToggle = WeaponsTab:Toggle({
                                                                             tier1Groups[weaponName] = {}
                                                                         end
                                                                         table.insert(tier1Groups[weaponName], weaponButton.Name)
-                                                                        print("[DEBUG] Found Tier 1 weapon:", weaponButton.Name, "Name:", weaponName)
                                                                     elseif hasImage1 and hasImage2 and not hasImage3 then
                                                                         -- Tier 2: has ImageLabel Name = "1" and "2" only, no "3"
                                                                         if not tier2Groups[weaponName] then
                                                                             tier2Groups[weaponName] = {}
                                                                         end
                                                                         table.insert(tier2Groups[weaponName], weaponButton.Name)
-                                                                        print("[DEBUG] Found Tier 2 weapon:", weaponButton.Name, "Name:", weaponName)
                                                                     end
                                                                 end
                                                             end
@@ -1999,7 +1984,6 @@ local WeaponsEvolveToggle = WeaponsTab:Toggle({
                                 ["Action"] = "Evolve",
                                 ["Bench_Name"] = benchName,
                             })
-                            print("[DEBUG] Sent", benchName, "signal for Tier 0", weaponName, "weapons:", table.concat(selected, ", "))
                             break  -- 只处理第一个符合的组
                         end
                     end
@@ -2019,7 +2003,6 @@ local WeaponsEvolveToggle = WeaponsTab:Toggle({
                                 ["Action"] = "Evolve",
                                 ["Bench_Name"] = benchName,
                             })
-                            print("[DEBUG] Sent", benchName, "signal for Tier 1", weaponName, "weapons:", table.concat(selected, ", "))
                             break  -- 只处理第一个符合的组
                         end
                     end
@@ -2038,13 +2021,11 @@ local WeaponsEvolveToggle = WeaponsTab:Toggle({
                                 ["Action"] = "Evolve",
                                 ["Bench_Name"] = benchName,
                             })
-                            print("[DEBUG] Sent", benchName, "signal for Tier 2", weaponName, "weapons:", table.concat(selected, ", "))
                             break  -- 只处理第一个符合的组
                         end
                     end
 
                     if not next(tier0Groups) and not next(tier1Groups) and not next(tier2Groups) then
-                        print("[DEBUG] No weapons found for any Tier")
                     end
 
                     task.wait(0.5)  -- 每0.5秒重新检测武器名字和Tier
@@ -2052,7 +2033,6 @@ local WeaponsEvolveToggle = WeaponsTab:Toggle({
             end)
         else
             -- Toggle关闭时，设置全局变量为false，循环停止
-            print("[DEBUG] Auto Evolve Weapons stopped")
         end
     end,
 })
@@ -2103,7 +2083,6 @@ local WeaponsDropdown = WeaponsTab:Dropdown({
     AllowNone = true,
     Callback = function(option)
         getgenv().SelectedWeapons = option
-        print("[DEBUG] Selected Weapon:", table.concat(option, ", "))
     end,
 })
 
@@ -2135,7 +2114,6 @@ local WeaponRefreshButton = WeaponsTab:Button({
                                                 local weaponName = title.Text  -- 直接获取Text属性
                                                 if weaponName and weaponName ~= "" then
                                                     table.insert(weaponList, weaponName)
-                                                    print("[DEBUG] Found weapon:", weaponName)  -- 添加调试打印
                                                 end
                                             end
                                         end
@@ -2147,8 +2125,6 @@ local WeaponRefreshButton = WeaponsTab:Button({
                 end
             end
         end
-
-        print("[DEBUG] Total weapons found:", #weaponList)  -- 添加调试打印
 
         if #weaponList == 0 then
             WeaponsDropdown:Refresh({"None"})
@@ -2187,9 +2163,7 @@ WeaponsTab:Toggle({
                                     ["Action"] = "Enchantment",
                                     ["Enchantment_Name"] = "Breathings",
                                 })
-                                print("[DEBUG] Sent Breathings signal for weapon:", weaponName, "UniqueId:", uniqueId)
                             else
-                                print("[DEBUG] UniqueId not found for weapon:", weaponName)
                             end
                         end
                     end
@@ -2197,7 +2171,6 @@ WeaponsTab:Toggle({
                 end
             end)
         else
-            print("[DEBUG] Auto Roll Breathings stopped")
         end
     end,
 })
@@ -2222,9 +2195,7 @@ WeaponsTab:Toggle({
                                     ["Action"] = "Enchantment",
                                     ["Enchantment_Name"] = "Bankai",
                                 })
-                                print("[DEBUG] Sent Bankai signal for weapon:", weaponName, "UniqueId:", uniqueId)
                             else
-                                print("[DEBUG] UniqueId not found for weapon:", weaponName)
                             end
                         end
                     end
@@ -2232,7 +2203,6 @@ WeaponsTab:Toggle({
                 end
             end)
         else
-            print("[DEBUG] Auto Roll Bankai stopped")
         end
     end,
 })
@@ -2257,9 +2227,7 @@ WeaponsTab:Toggle({
                                     ["Action"] = "Enchantment",
                                     ["Enchantment_Name"] = "Chakra_Infusion",
                                 })
-                                print("[DEBUG] Sent Chakra Infusion signal for weapon:", weaponName, "UniqueId:", uniqueId)
                             else
-                                print("[DEBUG] UniqueId not found for weapon:", weaponName)
                             end
                         end
                     end
@@ -2267,7 +2235,6 @@ WeaponsTab:Toggle({
                 end
             end)
         else
-            print("[DEBUG] Auto Roll Chakra Infusion stopped")
         end
     end,
 })
@@ -2292,7 +2259,6 @@ WeaponsTab:Toggle({
                                     ["Action"] = "Prog_Lv_Items",
                                     ["Bench_Name"] = "Scythe_Leveling",
                                 })
-                                print("[DEBUG] Sent Scythe Leveling signal for weapon:", weaponName, "UniqueId:", uniqueId)
                             end
                         end
                     end
@@ -2300,7 +2266,6 @@ WeaponsTab:Toggle({
                 end
             end)
         else
-            print("[DEBUG] Auto Upgrade Scythe Leveling stopped")
         end
     end,
 })
@@ -2503,7 +2468,6 @@ local TitansDropdown = TitansTab:Dropdown({
     AllowNone = true,
     Callback = function(option)
         getgenv().SelectedTitans = option
-        print("[DEBUG] Selected Titans:", table.concat(option, ", "))
     end,
 })
 
@@ -2535,7 +2499,6 @@ local TitanRefreshButton = TitansTab:Button({
                                                 local titanName = title.Text  -- 直接获取Text属性
                                                 if titanName and titanName ~= "" then
                                                     table.insert(titanList, titanName)
-                                                    print("[DEBUG] Found titan:", titanName)  -- 添加调试打印
                                                 end
                                             end
                                         end
@@ -2547,8 +2510,6 @@ local TitanRefreshButton = TitansTab:Button({
                 end
             end
         end
-
-        print("[DEBUG] Total titans found:", #titanList)  -- 添加调试打印
 
         if #titanList == 0 then
             TitansDropdown:Refresh({"None"})
@@ -2583,9 +2544,7 @@ TitansTab:Toggle({
                                     ["Action"] = "Enchantment",
                                     ["Enchantment_Name"] = "Titan_Injection",
                                 })
-                                print("[DEBUG] Sent Injection signal for titan:", titanName, "UniqueId:", uniqueId)
                             else
-                                print("[DEBUG] UniqueId not found for titan:", titanName)
                             end
                         end
                     end
@@ -2593,7 +2552,6 @@ TitansTab:Toggle({
                 end
             end)
         else
-            print("[DEBUG] Auto Roll Injection stopped")
         end
     end,
 })
@@ -2796,7 +2754,6 @@ local StandsDropdown = StandsTab:Dropdown({
     AllowNone = true,
     Callback = function(option)
         getgenv().SelectedStands = option
-        print("[DEBUG] Selected Stands:", table.concat(option, ", "))
     end,
 })
 
@@ -2828,7 +2785,6 @@ local StandRefreshButton = StandsTab:Button({
                                                 local standName = title.Text  -- 直接获取Text属性
                                                 if standName and standName ~= "" then
                                                     table.insert(standList, standName)
-                                                    print("[DEBUG] Found stand:", standName)  -- 添加调试打印
                                                 end
                                             end
                                         end
@@ -2840,8 +2796,6 @@ local StandRefreshButton = StandsTab:Button({
                 end
             end
         end
-
-        print("[DEBUG] Total stands found:", #standList)  -- 添加调试打印
 
         if #standList == 0 then
             StandsDropdown:Refresh({"None"})
@@ -2876,9 +2830,7 @@ StandsTab:Toggle({
                                     ["Action"] = "Enchantment",
                                     ["Enchantment_Name"] = "Requiem_Injection",
                                 })
-                                print("[DEBUG] Sent Injection signal for stand:", standName, "UniqueId:", uniqueId)
                             else
-                                print("[DEBUG] UniqueId not found for stand:", standName)
                             end
                         end
                     end
@@ -2886,7 +2838,6 @@ StandsTab:Toggle({
                 end
             end)
         else
-            print("[DEBUG] Auto Roll Requiem Injection stopped")
         end
     end,
 })
@@ -2925,7 +2876,6 @@ local ProgressionDropdown = ProgressionTab:Dropdown({
     Value = "[W2] Haki Upgrade",
     Callback = function(option)
         getgenv().selectedProgression = option
-        print("[DEBUG] Progression Option changed:", option)
     end,
 })
 
@@ -2987,15 +2937,12 @@ ProgressionTab:Toggle({
     Callback = function(state)
         if state then
             getgenv().AutoProgression = true
-            print("[DEBUG] AutoProgression enabled")
             task.spawn(function()
                 while getgenv().AutoProgression do
                     pcall(function()
-                        print("[DEBUG] Attempting to upgrade, selectedProgression:", getgenv().selectedProgression)
                         local progressionData = ProgressionMap[getgenv().selectedProgression]
                         if progressionData then
                             local upgradingName, upgradeName, action = progressionData[1], progressionData[2], progressionData[3]
-                            print("[DEBUG] Upgrading_Name:", upgradingName, "Upgrade_Name:", upgradeName, "Action:", action)
                             if action == "_Progression" then
                                 game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                     ["Upgrade_Name"] = upgradingName,
@@ -3010,7 +2957,6 @@ ProgressionTab:Toggle({
                                 })
                             end
                         else
-                            print("[DEBUG] No mapping found for:", getgenv().selectedProgression)
                         end
                         task.wait(0.05)
                     end)
@@ -3018,7 +2964,6 @@ ProgressionTab:Toggle({
             end)
         else
             getgenv().AutoProgression = false
-            print("[DEBUG] AutoProgression disabled")
         end
     end,
 })
@@ -3068,7 +3013,6 @@ local AutoUpgradeDropdown = UpgradesTab:Dropdown({
     Multi = true,
     Callback = function(option)
         getgenv().selectedUpgrades = option
-        print("[DEBUG] Upgrade Option changed:", table.concat(option, ", "))
     end,
 })
 
@@ -3095,7 +3039,6 @@ UpgradesTab:Toggle({
                                     ["Action"] = "_Upgrades",
                                     ["Upgrade_Name"] = upgradeData.Upgrade_Name,
                                 })
-                                print("[DEBUG] Sent upgrade signal for:", upgradeName, "Upgrading_Name:", upgradeData.Upgrading_Name, "Upgrade_Name:", upgradeData.Upgrade_Name)
                             end
                         end
                     end
@@ -3104,7 +3047,6 @@ UpgradesTab:Toggle({
             end)
         else
             -- Toggle关闭时，设置全局变量为false，循环停止
-            print("[DEBUG] Auto Upgrades stopped")
         end
     end,
 })
@@ -3128,7 +3070,6 @@ UpgradesTab:Toggle({
                                 ["Action"] = "_Upgrades",
                                 ["Upgrade_Name"] = upgradeData.Upgrade_Name,
                             })
-                            print("[DEBUG] Sent upgrade signal for:", upgradeName, "Upgrading_Name:", upgradeData.Upgrading_Name, "Upgrade_Name:", upgradeData.Upgrade_Name)
                         end
                     end
                     task.wait(0.5)  -- 每0.5秒发送一次所有upgrades
@@ -3136,7 +3077,6 @@ UpgradesTab:Toggle({
             end)
         else
             -- Toggle关闭时，设置全局变量为false，循环停止
-            print("[DEBUG] Auto Upgrades ALL stopped")
         end
     end,
 })
@@ -3175,7 +3115,6 @@ local MobDropdown = FarmTab:Dropdown({
     Callback = function(option)
         selectedMobs = option or {}
         getgenv().FarmTargetChanged = true
-        print("[DEBUG] 🎯 Mob target changed:", table.concat(selectedMobs, ", "))
     end,
 })
 
@@ -3423,7 +3362,6 @@ local function StartDungeonAutoFarm()
                 task.cancel(LeaveTimer)
                 LeaveTimer = nil
                 LeaveTimerStarted = false
-                print("[DEBUG] Monsters detected via ChildAdded, cleared leave timer")
             end
         end)
     end
@@ -3445,9 +3383,6 @@ local function StartDungeonAutoFarm()
                 end
             end
 
-            -- 调试打印：每次循环打印hasMonsters和LeaveTimer状态
-            print("[DEBUG] Loop check - hasMonsters:", hasMonsters, "LeaveTimer exists:", LeaveTimer ~= nil)
-
             -- 检查是否是特定raid（Maze Level 1,2,3, Dungeon Labyrinth）
             local isSpecificRaid = getgenv().CurrentRaidName and (getgenv().CurrentRaidName == "Maze Level 1" or getgenv().CurrentRaidName == "Maze Level 2" or getgenv().CurrentRaidName == "Maze Level 3" or getgenv().CurrentRaidName == "Dungeon Labyrinth" or getgenv().CurrentRaidName == "Maze Level 4")
 
@@ -3456,12 +3391,10 @@ local function StartDungeonAutoFarm()
                 task.cancel(LeaveTimer)
                 LeaveTimer = nil
                 LeaveTimerStarted = false
-                print("[DEBUG] Monsters detected, cleared leave timer")
             end
 
             -- 如果raid中有怪物，先清掉
             if hasMonsters then
-                print("[DEBUG] hasMonsters: true, LeaveTimer: ", LeaveTimer ~= nil, "isSpecificRaid: ", isSpecificRaid)
                 if monstersFolder then
                     for _, mob in pairs(monstersFolder:GetChildren()) do
                         if not getgenv().AutoDungeonFarmRunning or not getgenv().InDungeon then break end
@@ -3492,7 +3425,6 @@ local function StartDungeonAutoFarm()
                             end
                         end
                         if not hasMonsters then
-                            print("[DEBUG] No monsters after 10 seconds, leaving dungeon")
                             game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                 ["Action"] = "Dungeon_Leave",
                             })
@@ -3500,7 +3432,6 @@ local function StartDungeonAutoFarm()
                         LeaveTimerStarted = false
                         LeaveTimer = nil
                     end)
-                    print("[DEBUG] Started leave timer for 10 seconds")
                 end
                 -- 如果没有怪物，检测Door并按优先级开（Monster_Room保存并开 -> Treasure_Room -> Merchant_Room -> End_Room）
                 pcall(function()
@@ -3718,7 +3649,6 @@ local function StopNormalAutoFarm()
         getgenv().AutoFarmRunning = false
         getgenv().WasAutoFarmRunning = true
         getgenv().FarmTargetChanged = true
-        print("[DEBUG] Stopped Normal Auto Farm")
     end
 end
 
@@ -3742,13 +3672,11 @@ local function EnterRaid(raidName)
 
     getgenv().CurrentRaidName = raidName
     ToServer:FireServer(data)
-    print("[DEBUG] Entering Raid:", raidName, "with data:", data)
 
     -- Timeout: 如果5秒后仍没有进入raid，重置flag
     task.delay(5, function()
         if not getgenv().InRaid then
             getgenv().IsEnteringRaid = false
-            print("[DEBUG] Raid entry failed, resetting flag")
         end
     end)
 end
@@ -3766,7 +3694,6 @@ local function ResumeAutoFarm()
     task.delay(5, function()
         if not getgenv().InDungeon and not getgenv().InRaid and getgenv().WasAutoFarmRunning then
             StartNormalAutoFarm()
-            print("[DEBUG] Resuming Auto Farm after 5 seconds")
         end
     end)
 end
@@ -3788,7 +3715,6 @@ Remote.OnClientEvent:Connect(function(data)
                     ["Name"] = signalName,
                 })
                 getgenv().CurrentDungeonName = dungeonName
-                print("[DEBUG] Auto Entering Dungeon:", dungeonName, "with Name:", signalName)
                 break  -- 假设一次只匹配一个
             end
         end
@@ -3805,7 +3731,6 @@ Remote.OnClientEvent:Connect(function(data)
                 getgenv().InRaid = true
                 StopNormalAutoFarm()  -- 进入 Raid 后停止普通 Auto Farm
             end
-            print("[DEBUG] Entered Dungeon/Raid")
         else
             -- 离开 Dungeon/Raid
             getgenv().InDungeon = false
@@ -3818,7 +3743,6 @@ Remote.OnClientEvent:Connect(function(data)
             if getgenv().AutoRaidEnabled then
                 EnterNextRaid()
             end
-            print("[DEBUG] Left Dungeon/Raid")
         end
     end
 end)
@@ -3850,7 +3774,6 @@ local AutoDungeonDropdown = AutoDungeonTab:Dropdown({
     AllowNone = true,
     Callback = function(option)
         getgenv().SelectedDungeons = option
-        print("[DEBUG] 🏰 Selected Dungeons:", table.concat(option, ", "))
     end,
 })
 
@@ -3860,7 +3783,6 @@ local AutoDungeonToggle = AutoDungeonTab:Toggle({
     Default = false,
     Callback = function(state)
         getgenv().AutoDungeonEnabled = state
-        print(state and "[DEBUG] 🟢 Auto Dungeon Enabled" or "[DEBUG] 🔴 Auto Dungeon Disabled")
     end,
 })
 
@@ -3881,7 +3803,6 @@ local AutoRaidDropdown = AutoRaidTab:Dropdown({
     Callback = function(option)
         getgenv().SelectedRaids = option
         getgenv().CurrentRaidIndex = 1
-        print("[DEBUG] ☠️ Selected Raids:", table.concat(option, ", "))
     end,
 })
 
@@ -3893,7 +3814,6 @@ local AutoRaidSpeedDropdown = AutoRaidTab:Dropdown({
     Multi = false,
     Callback = function(option)
         getgenv().SelectedRaidSpeed = option
-        print("[DEBUG] ☠️ Raid Speed Selected:", option)
     end,
 })
 
@@ -3903,6 +3823,5 @@ local AutoRaidToggle = AutoRaidTab:Toggle({
     Default = false,
     Callback = function(state)
         getgenv().AutoRaidEnabled = state
-        print(state and "[DEBUG] 🟢 Auto Raid Enabled" or "[DEBUG] 🔴 Auto Raid Disabled")
     end,
 })
