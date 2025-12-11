@@ -19,6 +19,17 @@ local Window = WindUI:CreateWindow({
     HideSearchBar = true,
     ScrollBarEnabled = false,
     ToggleKey = Enum.KeyCode.K,
+
+    KeySystem = {                                                   
+        Note = "Example Key System. With luarmor.",                 
+        API = {                                                     
+            { -- luarmor
+                Type = "luarmor", -- type
+                ScriptId = "https://ads.luarmor.net/get_key?for=Lights_Hub_Keys-fOxkZtawipgw", -- script id
+                Discord = "Discord URL", -- DISCORD server link
+            },                                                      
+        },                                                          
+    },                                                              
 })
 
 -- 🧠 初始化全局变量
