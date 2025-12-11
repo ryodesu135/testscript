@@ -2617,6 +2617,299 @@ TitansTab:Toggle({
     end,
 })
 
+local StandsTab = Window:Tab({
+        Title = "Stands",
+        Icon = "arrow-up-from-dot",
+    })
+
+getgenv().AutoStandsEvolveRunning = false
+
+local StandsEvolveToggle = StandsTab:Toggle({
+    Flag = "StandsEvolve1",
+    Title = "Auto Evolve Stands",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoStandsEvolveRunning = state
+        if state then
+            -- 启动循环：每0.5秒重新检测titan名字和Tier并发送Evolve信号
+            task.spawn(function()
+                while getgenv().AutoStandsEvolveRunning do  -- 使用全局变量控制循环
+                    local standtier0Groups = {}  -- { ["Titan Name"] = {list of titan button names} } for Tier 0 (no Tier Frame)
+                    local standtier1Groups = {}  -- { ["Titan Name"] = {list of titan button names} } for Tier 1 (Tier Frame with ImageLabel Name = "1" only)
+                    local standtier2Groups = {}  -- { ["Titan Name"] = {list of titan button names} } for Tier 2 (Tier Frame with ImageLabel Name = "1" and "2" only, no "3")
+                    local player = game:GetService("Players").LocalPlayer
+                    local playerGui = player:FindFirstChild("PlayerGui")
+                    if playerGui and playerGui:IsA("PlayerGui") then
+                        local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+                        if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                            local hub = inventoryGui:FindFirstChild("Hub")
+                            if hub and hub:IsA("Frame") then
+                                local stands = hub:FindFirstChild("Stands")
+                                if stands and stands:IsA("Frame") then
+                                    local listFrame = stands:FindFirstChild("List_Frame")
+                                    if listFrame and listFrame:IsA("Frame") then
+                                        local list = listFrame:FindFirstChild("List")
+                                        if list and list:IsA("ScrollingFrame") then
+                                            local children = list:GetChildren()
+                                            for _, standButton in pairs(children) do
+                                                if standButton:IsA("ImageButton") then
+                                                    local inside = standButton:FindFirstChild("Inside")
+                                                    if inside then
+                                                        if inside:IsA("CanvasGroup") then
+                                                            local title = inside:FindFirstChild("Title")
+                                                            if title then
+                                                                if title:IsA("TextLabel") then
+                                                                    local standName = title.Text
+                                                                    local standtierFrame = inside:FindFirstChild("Tier")
+                                                                    if standName and standName ~= "" then
+                                                                        if not standtierFrame then
+                                                                            -- Tier 0: no Tier Frame
+                                                                            if not standtier0Groups[standName] then
+                                                                                standtier0Groups[standName] = {}
+                                                                            end
+                                                                            table.insert(standtier0Groups[standName], standButton.Name)
+                                                                        elseif standtierFrame:IsA("Frame") then
+                                                                            -- 检查Tier里面的ImageLabel
+                                                                            local hasImage1 = false
+                                                                            local hasImage2 = false
+                                                                            local hasImage3 = false
+                                                                            for _, child in pairs(standtierFrame:GetChildren()) do
+                                                                                if child:IsA("ImageLabel") then
+                                                                                    if child.Name == "1" then
+                                                                                        hasImage1 = true
+                                                                                    elseif child.Name == "2" then
+                                                                                        hasImage2 = true
+                                                                                    elseif child.Name == "3" then
+                                                                                        hasImage3 = true
+                                                                                    end
+                                                                                end
+                                                                            end
+                                                                            if hasImage1 and not hasImage2 and not hasImage3 then
+                                                                                -- Tier 1: has ImageLabel Name = "1" only
+                                                                                if not standtier1Groups[standName] then
+                                                                                    standtier1Groups[standName] = {}
+                                                                                end
+                                                                                table.insert(standtier1Groups[standName], standButton.Name)
+                                                                            elseif hasImage1 and hasImage2 and not hasImage3 then
+                                                                                -- Tier 2: has ImageLabel Name = "1" and "2" only, no "3"
+                                                                                if not standtier2Groups[standName] then
+                                                                                    standtier2Groups[standName] = {}
+                                                                                end
+                                                                                table.insert(standtier2Groups[standName], standButton.Name)
+                                                                            end
+                                                                        end
+                                                                    end
+                                                                end
+                                                            end
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+
+                    -- 发送Evolve信号
+                    -- Tier 0: Titan_Evolve, 2 titans
+                    for standName, standList in pairs(standtier0Groups) do
+                        if #standList >= 2 then
+                            local selected = {}
+                            for i = 1, 2 do
+                                selected[i] = standList[i]
+                            end
+                            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                ["Selected"] = selected,
+                                ["Action"] = "Evolve",
+                                ["Bench_Name"] = "Stand_Evolve",
+                            })
+                            break  -- 只处理第一个符合的组
+                        end
+                    end
+
+                    -- Tier 1: Titan_Evolve_2, 2 titans
+                    for standName, standList in pairs(standtier1Groups) do
+                        if #standList >= 2 then
+                            local selected = {}
+                            for i = 1, 2 do
+                                selected[i] = standList[i]
+                            end
+                            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                ["Selected"] = selected,
+                                ["Action"] = "Evolve",
+                                ["Bench_Name"] = "Stand_Evolve_2",
+                            })
+                            break  -- 只处理第一个符合的组
+                        end
+                    end
+
+                    -- Tier 2: Titan_Evolve_3, 2 titans
+                    for standName, standList in pairs(standtier2Groups) do
+                        if #standList >= 2 then
+                            local selected = {}
+                            for i = 1, 2 do
+                                selected[i] = standList[i]
+                            end
+                            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                ["Selected"] = selected,
+                                ["Action"] = "Evolve",
+                                ["Bench_Name"] = "Stand_Evolve_3",
+                            })
+                            break  -- 只处理第一个符合的组
+                        end
+                    end
+
+                    task.wait(0.5)  -- 每0.5秒重新检测titan名字和Tier
+                end
+            end)
+        else
+            -- Toggle关闭时，设置全局变量为false，循环停止
+        end
+    end,
+})
+
+StandsTab:Divider()
+
+local function getTitanUniqueId(standName)
+    local player = game:GetService("Players").LocalPlayer
+    local playerGui = player:FindFirstChild("PlayerGui")
+    if playerGui and playerGui:IsA("PlayerGui") then
+        local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+        if inventoryGui and inventoryGui:IsA("ScreenGui") then
+            local hub = inventoryGui:FindFirstChild("Hub")
+            if hub and hub:IsA("Frame") then
+                local stands = hub:FindFirstChild("Stands")
+                if stands and stands:IsA("Frame") then
+                    local listFrame = stands:FindFirstChild("List_Frame")
+                    if listFrame and listFrame:IsA("Frame") then
+                        local list = listFrame:FindFirstChild("List")
+                        if list and list:IsA("ScrollingFrame") then
+                            for _, standButton in pairs(list:GetChildren()) do
+                                if standButton:IsA("ImageButton") and standButton:FindFirstChild("Inside") then
+                                    local inside = standButton.Inside
+                                    if inside:IsA("CanvasGroup") and inside:FindFirstChild("Title") then
+                                        local title = inside.Title
+                                        if title:IsA("TextLabel") and title.Text == standName then
+                                            return standButton.Name  -- 返回button的Name作为UniqueId
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return nil
+end
+
+local StandsDropdown = StandsTab:Dropdown({
+    Flag = "StandsDropdown1",
+    Title = "Select Stands to Inject",
+    Values = {},  -- 初始为空
+    Value = {},
+    Multi = true,
+    AllowNone = true,
+    Callback = function(option)
+        getgenv().SelectedStands = option
+        print("[DEBUG] Selected Stands:", table.concat(option, ", "))
+    end,
+})
+
+local StandRefreshButton = StandsTab:Button({
+    Flag = "RefreshButton4",
+    Title = "Refresh Stands List",
+    Callback = function()
+        -- 类似Mob刷新逻辑：重新扫描并刷新dropdown
+        local standList = {}
+        local player = game:GetService("Players").LocalPlayer
+        local playerGui = player:FindFirstChild("PlayerGui")
+        if playerGui and playerGui:IsA("PlayerGui") then
+            local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+            if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                local hub = inventoryGui:FindFirstChild("Hub")
+                if hub and hub:IsA("Frame") then
+                    local stands = hub:FindFirstChild("Stands")
+                    if stands and stands:IsA("Frame") then
+                        local listFrame = stands:FindFirstChild("List_Frame")
+                        if listFrame and listFrame:IsA("Frame") then
+                            local list = listFrame:FindFirstChild("List")
+                            if list and list:IsA("ScrollingFrame") then
+                                for _, standButton in pairs(list:GetChildren()) do
+                                    if standButton:IsA("ImageButton") and standButton:FindFirstChild("Inside") then
+                                        local inside = standButton.Inside
+                                        if inside:IsA("CanvasGroup") and inside:FindFirstChild("Title") then
+                                            local title = inside.Title
+                                            if title:IsA("TextLabel") then
+                                                local standName = title.Text  -- 直接获取Text属性
+                                                if standName and standName ~= "" then
+                                                    table.insert(standList, standName)
+                                                    print("[DEBUG] Found stand:", standName)  -- 添加调试打印
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        print("[DEBUG] Total stands found:", #standList)  -- 添加调试打印
+
+        if #standList == 0 then
+            StandsDropdown:Refresh({"None"})
+        else
+            StandsDropdown:Refresh(standList)
+        end
+    end,
+})
+
+StandsTab:Divider()
+
+getgenv().AutoStandsInjectionRunning = false
+
+StandsTab:Toggle({
+    Flag = "AutoInjection2",
+    Title = "Auto Roll Requiem Injection",
+    Desc = "Automatically Roll Requiem Injection Using Selected Stand",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoStandsInjectionRunning = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoStandsInjectionRunning do
+                    if getgenv().SelectedStands and #getgenv().SelectedStands > 0 then
+                        for _, standName in ipairs(getgenv().SelectedStands) do
+                            -- 获取weapon的UniqueId（button Name）
+                            local uniqueId = getStandUniqueId(standName)
+                            if uniqueId then
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Type"] = "Enchant",
+                                    ["UniqueId"] = uniqueId,
+                                    ["Action"] = "Enchantment",
+                                    ["Enchantment_Name"] = "Requiem_Injection",
+                                })
+                                print("[DEBUG] Sent Injection signal for stand:", standName, "UniqueId:", uniqueId)
+                            else
+                                print("[DEBUG] UniqueId not found for stand:", standName)
+                            end
+                        end
+                    end
+                    task.wait(0.2)
+                end
+            end)
+        else
+            print("[DEBUG] Auto Roll Requiem Injection stopped")
+        end
+    end,
+})
+
 local ProgressionTab = Window:Tab({
         Title = "Progression",
         Icon = "chevrons-up",
