@@ -74,6 +74,20 @@ local MainTab = Window:Tab({
     Icon = "lightbulb",
 }) 
 
+MainTab:Section({
+        Title = [[Lights Hub - Anime Eternal [Update 28 P3]
+
+This script is still in Beta, so you may encounter bugs.
+More function is coming very soon.
+I appreciate you to use my script as I will continue improving the experience.
+
+Discord Server: Coming Soon]],
+        TextSize = 18,
+        TextTransparency = .35,
+        FontWeight = Enum.FontWeight.Medium,
+    })
+
+
 local PlayerTab = Window:Tab({
     Title = "Player",
     Icon = "user",
