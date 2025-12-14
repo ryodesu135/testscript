@@ -265,7 +265,7 @@ configTab:Button({
     Title = "Update Selected Config",
     Callback = function()
         if not currentConfigName or currentConfigName == "" or currentConfigName == "none" or currentConfigName == "(none)" then
-            warn("[Config] Please select a config from dropdown first.")
+            --Need to add notify
             return
         end
 
@@ -647,7 +647,8 @@ local redeemCodesButton = CodesTab:Button({
     "Update28", "Update28Code", "775KFav", "260MVisits", "Update28Code2",
     "Update28P2", "Update28P2Code", "405KLikes", "265MVisits", "Update28P2Code2",
     "Update28P3","Update28P2Code","Update28P2Code2","Update28P2Code3","780KFav","Update28P3Code","Update28P3Code2",
-    "Update29","Update29Code","270MVisits","Update29Code2","Update29Code3","ChristmasSoon?!","Update29RestartCode"
+    "Update29","Update29Code","270MVisits","Update29Code2","Update29Code3","ChristmasSoon?!","Update29RestartCode",
+    "Update29P2","Update29P2Code","Update29P2Code2","IsChristmasComing?!","785KFav","SuperUPD29Code"
 
 }
     for _, code in ipairs(codes) do
@@ -818,6 +819,114 @@ local claimDailyChestToggle = CollectTab:Toggle({
             end)
         else
             getgenv().ClaimDailyChestRunning = false
+        end
+    end,
+})
+
+--Auto Claim Christmas Chest
+local claimChristmasChestToggle = CollectTab:Toggle({
+    Name = "Auto Claim Christmas Chest",
+    Title = "Auto Claim Christmas Chest",
+    Desc = "Automatically claim christmas chest",
+    Default = false,
+    Callback = function(state)
+        if state then
+            getgenv().ClaimChristmasChestRunning = true
+            task.spawn(function()
+                while getgenv().ClaimChristmasChestRunning do
+                    pcall(function()
+                        game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Action"] = "_Chest_Claim",
+                        ["Name"] = "Christmas_Chest",
+                        })
+                    end)
+
+                    task.wait(60)
+                end
+            end)
+        else
+            getgenv().ClaimChristmasChestRunning = false
+        end
+    end,
+})
+
+--Auto Claim Santa Chest
+local claimSantaChestToggle = CollectTab:Toggle({
+    Name = "Auto Claim Santa Chest",
+    Title = "Auto Claim Santa Chest",
+    Desc = "Automatically claim santa chest",
+    Default = false,
+    Callback = function(state)
+        if state then
+            getgenv().ClaimSantaChestRunning = true
+            task.spawn(function()
+                while getgenv().ClaimSantaChestRunning do
+                    pcall(function()
+                        game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Action"] = "_Chest_Claim",
+                        ["Name"] = "Santa_Chest",
+                        })
+                    end)
+
+                    task.wait(60)
+                end
+            end)
+        else
+            getgenv().ClaimSantaChestRunning = false
+        end
+    end,
+})
+
+--Auto Claim Ice Chest
+local claimIceChestToggle = CollectTab:Toggle({
+    Name = "Auto Claim Ice Chest",
+    Title = "Auto Claim Ice Chest",
+    Desc = "Automatically claim ice chest",
+    Default = false,
+    Callback = function(state)
+        if state then
+            getgenv().ClaimIceChestRunning = true
+            task.spawn(function()
+                while getgenv().ClaimIceChestRunning do
+                    pcall(function()
+                        game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Action"] = "_Chest_Claim",
+                        ["Name"] = "Ice_Chest",
+                        })
+                    end)
+
+                    task.wait(60)
+                end
+            end)
+        else
+            getgenv().ClaimIceChestRunning = false
+        end
+    end,
+})
+
+--Auto Claim Christmas Tree Chest
+local claimChristmasTreeChestToggle = CollectTab:Toggle({
+    Name = "Auto Claim Christmas Tree Chest",
+    Title = "Auto Claim Christmas Tree Chest",
+    Desc = "Automatically claim christmas tree chest",
+    Default = false,
+    Callback = function(state)
+        if state then
+            getgenv().ClaimChristmasTreeChestRunning = true
+            task.spawn(function()
+                while getgenv().ClaimChristmasTreeChestRunning do
+                    pcall(function()
+                        game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Action"] = "_Chest_Claim",
+                        ["Name"] = "Christmas_Tree_Chest",
+                        })
+                    end)
+
+                    task.wait(60)
+                end
+            end)
+        else
+            getgenv().ClaimChristmasTreeChestRunning = false
         end
     end,
 })
@@ -3616,7 +3725,7 @@ local RaidOptions = {
     "Ghoul Raid","Chainsaw Defense","Netherworld Defense","Green Planet Raid",
     "Hollow Raid","One Hero Raid","Tomb Arena Raid","Halloween Raid","Graveyard Raid",
     "Dungeon Suffering","Dungeon Adventure","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3","Maze Level 4","Dungeon Labyrinth","Crimson Canyon",
-    "Body Improvement Challenge"
+    "Body Improvement Challenge","Breathing Raid","Mugen Dungoen"
 
 }
 
@@ -3639,7 +3748,7 @@ local RaidSpeedOptions = {"1x Speed", "2x Speed", "3x Speed"}
 local AutoFarmDungeons = {
     "Dungeon Easy", "Dungeon Medium", "Dungeon Hard", "Dungeon Insane", "Dungeon Crazy", "Dungeon Nightmare",
     "Kaiju Dungeon", "Dungeon Suffering", "Dungeon Adventure", "Dungeon Torment", "Dungeon Labyrinth", "Crimson Canyon", "Maze Level 1", "Maze Level 2", "Maze Level 3", "Maze Level 4",
-    "Body Improvement Challenge"
+    "Body Improvement Challenge","Mugen Dungeon"
 
 }
 
@@ -3682,7 +3791,9 @@ local RaidNameMap = {
     ["Dungeon Labyrinth"] = "Dungeon_Labyrinth",
     ["Crimson Canyon"] = "Crimson_Canyon",
     ["One Hero Raid"] = "One_Hero_Raid",
-    ["Body Improvement Challenge"] = "Body_Improvement_Challenge"
+    ["Body Improvement Challenge"] = "Body_Improvement_Challenge",
+    ["Breathing Raid"] = "Breathing_Raid",
+    ["Mugen Dungeon"] = "Mugen_Dungeon"
 
 }
 
