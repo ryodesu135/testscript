@@ -18,8 +18,8 @@ local Window = WindUI:CreateWindow({
     BackgroundImageTransparency = 0.42,
     HideSearchBar = true,
     ScrollBarEnabled = false,
-    ToggleKey = Enum.KeyCode.K,                                                
-})
+    ToggleKey = Enum.KeyCode.K,
+})                                                                                                          
 
 -- 🧠 初始化全局变量
 getgenv().UserSetWalkSpeed = nil
@@ -63,13 +63,13 @@ local MainTab = Window:Tab({
 }) 
 
 MainTab:Section({
-        Title = [[Lights Hub - Anime Eternal [Update 28 P3]
+        Title = [[Lights Hub - Anime Eternal [Update 29]
 
-This script is still in Beta, so you may encounter bugs.
+This Script is still in development, so you may encounter bugs.
 More function is coming very soon.
 I appreciate you to use my script as I will continue improving the experience.
 
-Discord Server: Coming Soon]],
+Discord Server: https://discord.gg/ryenf7d6C5]],
         TextSize = 18,
         TextTransparency = .35,
         FontWeight = Enum.FontWeight.Medium,
@@ -126,6 +126,57 @@ PlayerTab:Slider({
 
 PlayerTab:Divider()
 
+
+local AttackRangeOptions = {"Low Range", "Medium Range", "High Range"}
+
+local rangeValues = {
+    ["Low Range"] = 10,
+    ["Medium Range"] = 25,
+    ["High Range"] = 100,
+}
+local FastKillAuraDropdown = PlayerTab:Dropdown({
+    Flag = "KillAuraRange",
+    Title = "Attack Range",
+    Values = AttackRangeOptions,
+    Value = "Low Range",
+    Multi = false,
+    Callback = function(option)
+        getgenv().SelectedAttackRange = option
+        -- 可选：如果需要实时更新范围，可以在这里发送事件，但通常在Toggle开启时发送一次
+    end,
+})
+
+local FastKillAuraToggle = PlayerTab:Toggle({
+    Flag = "FastKillAura1",
+    Title = "Fast Kill Aura",
+    Desc = "Very Fast Auto Click + More Attack Range",
+    Value = false,
+    Callback = function(state)
+        getgenv().FastKillAuraRunning = state
+        if state then
+            -- 根据选择的范围发送设置事件（假设游戏支持此事件）
+            local rangeValue = getgenv().SelectedAttackRange
+            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                ["Action"] = "Set_Attack_Range",
+                ["Range"] = rangeValue,  -- 传递字符串，如 "Low Range"
+            })
+            
+            -- 启动循环：每0.01秒发送鼠标点击事件
+            task.spawn(function()
+                while getgenv().FastKillAuraRunning do
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Action"] = "_Mouse_Click",
+                    })
+                    task.wait(0.01)
+                end
+            end)
+        else
+            -- Toggle关闭时，停止循环（通过全局变量控制）
+            print("[DEBUG] Fast Kill Aura stopped")
+        end
+    end,
+})
+
 -------------------------------------------------
 -- 🛡️ Anti AFK
 -------------------------------------------------
@@ -137,7 +188,6 @@ PlayerTab:Toggle({
     Flag = "Toggle1",
     Title = "Anti AFK",
     Desc = "Prevents you from being kicked for being AFK",
-    Type = "Checkbox",
     Value = false,
     Callback = function(state)
         if state then
@@ -317,11 +367,11 @@ CodesTab:Button({
     Locked = false,
     Callback = function()
     local codes = {"SlashX", "Derp", "Heyyyo", 
-    "Update27", "400KLikes", "760KFav", "Update27Code", "NoThanksgivingCode" , "Update27Delay", "Update27Restart", "Update27HeroKey", "SorryNoTurkey2", "SorryNoTurkey3", "SorryNoTurkey4",
     "Update27P2", "765KFav", "770KFav", "Update27P2Code", "255MVisits", "NothanksgivingCode2",
     "Update28", "Update28Code", "775KFav", "260MVisits", "Update28Code2",
     "Update28P2", "Update28P2Code", "405KLikes", "265MVisits", "Update28P2Code2",
-    "Update28P3","Update28P2Code","Update28P2Code2","Update28P2Code3","780KFav","Update28P3Code","Update28P3Code2"
+    "Update28P3","Update28P2Code","Update28P2Code2","Update28P2Code3","780KFav","Update28P3Code","Update28P3Code2",
+    "Update29","Update29Code","270MVisits","Update29Code2","Update29Code3","ChristmasSoon?!","Update29RestartCode"
 
 }
     for _, code in ipairs(codes) do
@@ -1749,6 +1799,48 @@ QuestTab:Toggle({
 end,
 })
 
+--Auto Complete Bento Box Quest
+QuestTab:Toggle({
+    Flag = "Quest2305",
+   Title = "Auto Complete Bento Box Quest",
+   Desc = "Automatically accept and complete Bento Box quest",
+   Default = false,
+   Callback = function(state)
+   if state then
+    getgenv().AutoBentoQuestRunning = true
+    task.spawn(function()
+        while getgenv().AutoBentoQuestRunning do
+            pcall(function()
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Id"] = "2305",
+                        ["Type"] = "Accept",
+                        ["Action"] = "_Quest",
+                    })
+                    task.wait(1.5)
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Type"] = "Find_Found",
+                        ["Action"] = "_Quest",
+                        ["Target"] = "Lost_Bento_Box",
+                        ["Object_Index"] = 1,
+                        ["Id"] = "2305",
+                    })
+                    task.wait(1.5)
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Id"] = "2305",
+                        ["Type"] = "Complete",
+                        ["Action"] = "_Quest",
+                    })
+            end)
+            task.wait(60)
+
+        end
+    end)
+   else
+    getgenv().AutoBentoQuestRunning = false
+   end
+end,
+})
+
 local StarTab = Window:Tab({
         Title = "Star",
         Icon = "star",
@@ -1770,7 +1862,7 @@ local StarDropdown = StarTab:Dropdown({
 
     "[W26] Amusement Park","[W27] Re:Manor","[W28] Asfordo Academy","[W29] Science Village","[W30] Sand Village",
 
-    "[W31] Night Raid Base","[W32] Salty School"
+    "[W31] Night Raid Base","[W32] Salty School","[W33] Mugen District"
 },
     Value = "[W1] Earth City",
     Callback = function(option)
@@ -1814,7 +1906,7 @@ local RollTab = Window:Tab({
         Icon = "dices",
     })
 
---Auto Open Star
+--Auto Roll
 local RollDropdown = RollTab:Dropdown({
     Flag = "RollDropdown",
    Title = "Roll List",
@@ -1849,7 +1941,8 @@ local RollDropdown = RollTab:Dropdown({
     "[W29] IQ","[W29] Scientific Weapons",
     "[W30] Shinobi Clan","[W30] Kekkei Genkai","[W30] Power Eyes 2",
     "[W31] Energy Teigu","[W31] Damage Teigu",
-    "[W32] Psycho Flow","[W32] Psycho Destruction"
+    "[W32] Psycho Flow","[W32] Psycho Destruction",
+    "[W33] Slayer Marks","[W33] Demon Bloodline"
 },
     Value = "[W1] Dragon Race",
     Callback = function(option)
@@ -2868,6 +2961,7 @@ local ProgressionDropdown = ProgressionTab:Dropdown({
    Values = {"[W2] Haki Upgrade",
     "[W3] Spiritual Pressure",
     "[W4] Cursed Progression",
+    "[W5] Slayer Energy Progression",
     "[W6] ReAwakening Progression","[W6] Monarch Progression",
     "[W7] Water Spirit Progression","[W7] Fire Spirit Progression","[W7] Wind Spirit Progression",
     "[W8] Chakra Progression",
@@ -2893,10 +2987,11 @@ local ProgressionDropdown = ProgressionTab:Dropdown({
     end,
 })
 
-local ProgressionMap = {
+local ProgressionMap = { -- Upgrade_Name, Bench_Name, Action
     ["[W2] Haki Upgrade"] = {"Haki_Upgrade", "Haki_Upgrade", "_Upgrades"},
     ["[W3] Spiritual Pressure"] = {"Spiritual_Pressure", "Spiritual_Pressure", "_Upgrades"},
     ["[W4] Cursed Progression"] = {"Curse", "Cursed_Progression", "_Upgrades"},
+    ["[W5] Slayer Energy Progression"] = {"Energy", "Slayer_Energy_Progression", "_Progression"},
     ["[W6] ReAwakening Progression"] = {"ReAwakening", "ReAwakening_Progression", "_Upgrades"},
     ["[W6] Monarch Progression"] = {"Monarch", "Monarch_Progression", "_Upgrades"},
     ["[W7] Water Spirit Progression"] = {"Water_Spirit", "Water_Spirit_Progression", "_Upgrades"},
