@@ -261,15 +261,12 @@ configTab:Button({
 
 -- 使用输入的名字创建/切换 config
 configTab:Button({
-    Title = "Use / Create Config From Input",
-    Desc = "用上面输入框的名字 CreateConfig 并设为当前 config",
+    Title = "Update Selected Config",
     Callback = function()
         local name = currentConfigName
         if (not name or name == "") and configNameInput and configNameInput.Value then
-            name = configNameInput.Value
+            myConfig:Save()
         end
-        SetActiveConfig(name)
-        print("[Config] Active Config =", currentConfigName)
     end
 })
 
