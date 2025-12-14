@@ -155,6 +155,7 @@ local FastKillAuraToggle = PlayerTab:Toggle({
     Value = false,
     Callback = function(state)
         getgenv().FastKillAuraRunning = state
+        getgenv().MobIndex = 1  -- 初始化索引
         if state then
             -- 启动循环：每0.01秒检测范围内怪物并发送相应点击事件
             task.spawn(function()
@@ -207,12 +208,20 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                         
                         -- 根据是否有怪物发送不同的事件
                         if #mobsInRange > 0 then
-                            for _, mobId in ipairs(mobsInRange) do
-                                print("[DEBUG] Sending click with Id:", mobId)
-                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-                                    ["Action"] = "_Mouse_Click",
-                                    ["Id"] = mobId,
-                                })
+                            -- 选择下一个怪物（循环索引）
+                            local selectedMobId = mobsInRange[getgenv().MobIndex]
+                            if not selectedMobId then
+                                getgenv().MobIndex = 1  -- 重置索引
+                                selectedMobId = mobsInRange[1]
+                            end
+                            print("[DEBUG] Sending click with Id:", selectedMobId, "Index:", getgenv().MobIndex)
+                            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                ["Action"] = "_Mouse_Click",
+                                ["Id"] = selectedMobId,
+                            })
+                            getgenv().MobIndex = getgenv().MobIndex + 1  -- 移动到下一个
+                            if getgenv().MobIndex > #mobsInRange then
+                                getgenv().MobIndex = 1  -- 循环回第一个
                             end
                         else
                             print("[DEBUG] Sending normal click")
