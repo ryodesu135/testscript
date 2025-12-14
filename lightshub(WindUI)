@@ -3725,7 +3725,7 @@ local RaidOptions = {
     "Ghoul Raid","Chainsaw Defense","Netherworld Defense","Green Planet Raid",
     "Hollow Raid","One Hero Raid","Tomb Arena Raid","Halloween Raid","Graveyard Raid",
     "Dungeon Suffering","Dungeon Adventure","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3","Maze Level 4","Dungeon Labyrinth","Crimson Canyon",
-    "Body Improvement Challenge","Breathing Raid","Mugen Dungoen"
+    "Body Improvement Challenge","Breathing Raid","Mugen Dungeon"
 
 }
 
@@ -3793,7 +3793,7 @@ local RaidNameMap = {
     ["One Hero Raid"] = "One_Hero_Raid",
     ["Body Improvement Challenge"] = "Body_Improvement_Challenge",
     ["Breathing Raid"] = "Breathing_Raid",
-    ["Mugen Dungeon"] = "Mugen_Dungeon",
+    ["Mugen Dungeon"] = "Mugen_Dungeon"
 
 }
 
