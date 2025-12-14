@@ -76,11 +76,10 @@ Discord Server: https://discord.gg/ryenf7d6C5]],
     })
 
 -- 初始化保存的配置名称列表
-local ConfigManager = Window.ConfigManager
 getgenv().SavedConfigNames = getgenv().SavedConfigNames or {}
 
 -- 创建Config Tab
-local ConfigTab = ConfigManager:Tab({
+local ConfigTab = Window:Tab({
     Title = "Config",
     Icon = "settings",
 })
