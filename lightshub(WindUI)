@@ -163,46 +163,30 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                         local char = player.Character
                         local hrp = char and char:FindFirstChild("HumanoidRootPart")
                         if not hrp then 
-                            print("[DEBUG] Player HumanoidRootPart not found")
                             task.wait(0.01)
                             return 
                         end
                         local playerPos = hrp.Position
-                        print("[DEBUG] Player position:", playerPos)
                         
                         local rangeNum = rangeValues[getgenv().SelectedAttackRange] or 50
-                        print("[DEBUG] Selected range:", getgenv().SelectedAttackRange, "Value:", rangeNum)
                         
                         local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
                         local mobsInRange = {}  -- 存储在范围内的怪物
                         
                         if monstersFolder then
-                            print("[DEBUG] Monsters folder found, children count:", #monstersFolder:GetChildren())
                             -- 遍历Monsters中的Model
                             for _, mob in pairs(monstersFolder:GetChildren()) do
-                                print("[DEBUG] Checking mob:", mob.Name, "IsA Model:", mob:IsA("Model"))
                                 if mob and mob:IsA("Model") then
                                     local mobHRP = mob:FindFirstChild("HumanoidRootPart")
                                     if mobHRP then
                                         local mobPos = mobHRP.Position
                                         local distance = (playerPos - mobPos).Magnitude
-                                        print("[DEBUG] Mob:", mob.Name, "Position:", mobPos, "Distance:", distance)
-                                        print("[DEBUG] Distance check: distance =", distance, "rangeNum =", rangeNum, "is <= ?", distance <= rangeNum)
                                         if distance <= rangeNum then
                                             table.insert(mobsInRange, mob)  -- 添加怪物对象
-                                            print("[DEBUG] Mob in range! Name:", mob.Name)
-                                        else
-                                            print("[DEBUG] Mob not in range")
                                         end
-                                    else
-                                        print("[DEBUG] Mob has no HumanoidRootPart:", mob.Name)
                                     end
-                                else
-                                    print("[DEBUG] Mob is not a Model:", mob.Name, "ClassName:", mob.ClassName)
                                 end
                             end
-                        else
-                            print("[DEBUG] Monsters folder not found")
                         end
                         
                         -- 检查当前目标怪物是否还存在且在范围内
@@ -215,30 +199,25 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                             if distance <= rangeNum then
                                 -- 当前目标还活着且在范围内，继续发送它的Id
                                 local mobId = targetMob.Name
-                                print("[DEBUG] Continuing to target mob:", mobId)
                                 game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                     ["Action"] = "_Mouse_Click",
                                     ["Id"] = mobId,
                                 })
                             else
                                 -- 目标不在范围内，重置并选择下一个
-                                print("[DEBUG] Target mob out of range, resetting")
                                 getgenv().CurrentTargetMob = nil
                             end
                         else
                             -- 当前目标死了或不存在，选择下一个
-                            print("[DEBUG] Target mob dead or not set, selecting new")
                             if #mobsInRange > 0 then
                                 getgenv().CurrentTargetMob = mobsInRange[1]  -- 选择第一个
                                 local mobId = getgenv().CurrentTargetMob.Name
-                                print("[DEBUG] Switching to new target mob:", mobId)
                                 game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                     ["Action"] = "_Mouse_Click",
                                     ["Id"] = mobId,
                                 })
                             else
                                 -- 没有怪物，发送普通点击
-                                print("[DEBUG] No mobs in range, sending normal click")
                                 game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                     ["Action"] = "_Mouse_Click",
                                 })
@@ -252,6 +231,8 @@ local FastKillAuraToggle = PlayerTab:Toggle({
         end
     end,
 })
+
+PlayerTab:Divider()
 
 -------------------------------------------------
 -- 🛡️ Anti AFK
