@@ -224,12 +224,10 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                                 -- 目标不在范围内，重置并选择下一个
                                 print("[DEBUG] Target mob out of range, resetting")
                                 getgenv().CurrentTargetMob = nil
-                                -- 继续到下面的逻辑选择新目标
                             end
-                        end
-                        
-                        -- 如果没有当前目标，选择下一个
-                        if not getgenv().CurrentTargetMob then
+                        else
+                            -- 当前目标死了或不存在，选择下一个
+                            print("[DEBUG] Target mob dead or not set, selecting new")
                             if #mobsInRange > 0 then
                                 getgenv().CurrentTargetMob = mobsInRange[1]  -- 选择第一个
                                 local mobId = getgenv().CurrentTargetMob.Name
@@ -244,6 +242,7 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                                 game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                     ["Action"] = "_Mouse_Click",
                                 })
+                                getgenv().CurrentTargetMob = nil  -- 重置目标
                             end
                         end
                     end)
