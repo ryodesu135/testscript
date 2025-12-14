@@ -148,6 +148,17 @@ local FastKillAuraDropdown = PlayerTab:Dropdown({
     end,
 })
 
+local FastKillAuraDropdown = PlayerTab:Dropdown({
+    Flag = "KillAuraRange",
+    Title = "Attack Range",
+    Values = AttackRangeOptions,
+    Value = "Low Range",
+    Multi = false,
+    Callback = function(option)
+        getgenv().SelectedAttackRange = option
+    end,
+})
+
 local FastKillAuraToggle = PlayerTab:Toggle({
     Flag = "FastKillAura1",
     Title = "Fast Kill Aura",
@@ -155,9 +166,8 @@ local FastKillAuraToggle = PlayerTab:Toggle({
     Value = false,
     Callback = function(state)
         getgenv().FastKillAuraRunning = state
-        getgenv().MobIndex = 1  -- 初始化索引
         if state then
-            -- 启动循环：每0.01秒检测范围内怪物并发送相应点击事件
+            -- 启动循环：检测范围内怪物，选择一个，发送事件，等待死亡，再下一个
             task.spawn(function()
                 while getgenv().FastKillAuraRunning do
                     pcall(function()
@@ -166,6 +176,7 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                         local hrp = char and char:FindFirstChild("HumanoidRootPart")
                         if not hrp then 
                             print("[DEBUG] Player HumanoidRootPart not found")
+                            task.wait(1)
                             return 
                         end
                         local playerPos = hrp.Position
@@ -175,7 +186,7 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                         print("[DEBUG] Selected range:", getgenv().SelectedAttackRange, "Value:", rangeNum)
                         
                         local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
-                        local mobsInRange = {}  -- 存储在范围内的怪物Id
+                        local mobsInRange = {}  -- 存储在范围内的怪物
                         
                         if monstersFolder then
                             print("[DEBUG] Monsters folder found, children count:", #monstersFolder:GetChildren())
@@ -190,8 +201,8 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                                         print("[DEBUG] Mob:", mob.Name, "Position:", mobPos, "Distance:", distance)
                                         print("[DEBUG] Distance check: distance =", distance, "rangeNum =", rangeNum, "is <= ?", distance <= rangeNum)
                                         if distance <= rangeNum then
-                                            table.insert(mobsInRange, mob.Name)  -- 添加到列表
-                                            print("[DEBUG] Mob in range! Id:", mob.Name)
+                                            table.insert(mobsInRange, mob)  -- 添加怪物对象
+                                            print("[DEBUG] Mob in range! Name:", mob.Name)
                                         else
                                             print("[DEBUG] Mob not in range")
                                         end
@@ -206,31 +217,31 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                             print("[DEBUG] Monsters folder not found")
                         end
                         
-                        -- 根据是否有怪物发送不同的事件
+                        -- 如果有怪物，选择第一个，发送事件，等待死亡
                         if #mobsInRange > 0 then
-                            -- 选择下一个怪物（循环索引）
-                            local selectedMobId = mobsInRange[getgenv().MobIndex]
-                            if not selectedMobId then
-                                getgenv().MobIndex = 1  -- 重置索引
-                                selectedMobId = mobsInRange[1]
-                            end
-                            print("[DEBUG] Sending click with Id:", selectedMobId, "Index:", getgenv().MobIndex)
+                            local targetMob = mobsInRange[1]  -- 选择第一个
+                            local mobId = targetMob.Name
+                            print("[DEBUG] Targeting mob:", mobId)
                             game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                 ["Action"] = "_Mouse_Click",
-                                ["Id"] = selectedMobId,
+                                ["Id"] = mobId,
                             })
-                            getgenv().MobIndex = getgenv().MobIndex + 1  -- 移动到下一个
-                            if getgenv().MobIndex > #mobsInRange then
-                                getgenv().MobIndex = 1  -- 循环回第一个
-                            end
+                            
+                            -- 等待怪物死亡（类似Auto Farm的等待逻辑）
+                            repeat 
+                                task.wait(0.05) 
+                                print("[DEBUG] Waiting for mob to die:", mobId)
+                            until not targetMob.Parent or not targetMob:FindFirstChild("HumanoidRootPart") or not getgenv().FastKillAuraRunning
+                            
+                            print("[DEBUG] Mob died or disappeared:", mobId)
                         else
-                            print("[DEBUG] Sending normal click")
+                            print("[DEBUG] No mobs in range, sending normal click")
                             game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                 ["Action"] = "_Mouse_Click",
                             })
+                            task.wait(0.05)  -- 等待一下再检查
                         end
                     end)
-                    task.wait(0.01)
                 end
             end)
         end
