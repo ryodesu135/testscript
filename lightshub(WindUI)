@@ -264,7 +264,7 @@ configTab:Button({
 configTab:Button({
     Title = "Update Selected Config",
     Callback = function()
-        if not currentConfigName or currentConfigName == "" or currentConfigName == "(none)" or currentConfigName == "(click refresh)" then
+        if not currentConfigName or currentConfigName == "" or currentConfigName == "none" or currentConfigName == "(none)" then
             warn("[Config] Please select a config from dropdown first.")
             return
         end
