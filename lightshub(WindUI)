@@ -127,13 +127,15 @@ PlayerTab:Slider({
 PlayerTab:Divider()
 
 
-local AttackRangeOptions = {"Low Range", "Medium Range", "High Range"}
+local AttackRangeOptions = {"Low Range", "Medium Range", "High Range","Ultra Range"}
 
 local rangeValues = {
-    ["Low Range"] = 10,
-    ["Medium Range"] = 25,
+    ["Low Range"] = 35,
+    ["Medium Range"] = 70,
     ["High Range"] = 100,
+    ["Ultra Range"] = 300,
 }
+
 local FastKillAuraDropdown = PlayerTab:Dropdown({
     Flag = "KillAuraRange",
     Title = "Attack Range",
@@ -154,12 +156,42 @@ local FastKillAuraToggle = PlayerTab:Toggle({
     Callback = function(state)
         getgenv().FastKillAuraRunning = state
         if state then
-            -- 根据选择的范围发送设置事件（假设游戏支持此事件）
+            -- 立即设置一次攻击范围
             local rangeValue = getgenv().SelectedAttackRange
-            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-                ["Action"] = "Set_Attack_Range",
-                ["Range"] = rangeValue,  -- 传递字符串，如 "Low Range"
-            })
+            local rangeNum = rangeValues[rangeValue] or 35
+            local Remote = game:GetService("ReplicatedStorage").ReplicaRemoteEvents.Replica_ReplicaSetValue
+            firesignal(Remote.OnClientEvent, table.unpack({
+                [1] = 3,
+                [2] = {
+                    [1] = "Stats",
+                    [2] = "Total",
+                    [3] = "Click_Range",
+                },
+                [3] = rangeNum,
+            }))
+            
+            -- 启动维持攻击范围的函数（类似SpeedMonitor）
+            getgenv().RangeMonitorRunning = true
+            task.spawn(function()
+                while getgenv().RangeMonitorRunning do
+                    pcall(function()
+                        if getgenv().SelectedAttackRange then
+                            local rangeNum = rangeValues[getgenv().SelectedAttackRange] or 35
+                            local Remote = game:GetService("ReplicatedStorage").ReplicaRemoteEvents.Replica_ReplicaSetValue
+                            firesignal(Remote.OnClientEvent, table.unpack({
+                                [1] = 3,
+                                [2] = {
+                                    [1] = "Stats",
+                                    [2] = "Total",
+                                    [3] = "Click_Range",
+                                },
+                                [3] = rangeNum,
+                            }))
+                        end
+                    end)
+                    task.wait(0.3)
+                end
+            end)
             
             -- 启动循环：每0.01秒发送鼠标点击事件
             task.spawn(function()
@@ -171,8 +203,8 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                 end
             end)
         else
-            -- Toggle关闭时，停止循环（通过全局变量控制）
-            print("[DEBUG] Fast Kill Aura stopped")
+            -- Toggle关闭时，停止所有循环
+            getgenv().RangeMonitorRunning = false
         end
     end,
 })
