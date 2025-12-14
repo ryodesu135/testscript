@@ -77,9 +77,9 @@ Discord Server: https://discord.gg/ryenf7d6C5]],
 
 local configTab = Window:Tab({ Title = "Config ⚙️" })
 
--- Access the ConfigManager from Window
 local ConfigManager = Window.ConfigManager
-local myConfig = ConfigManager:CreateConfig("MyHubConfig")
+local myConfig = nil
+local currentConfigName = nil
 
 -- Register your Local Tab toggles
 -- Player
@@ -190,23 +190,100 @@ myConfig:Register("RaidSelect", AutoRaidDropdown)
 myConfig:Register("RaidSpeed", AutoRaidSpeedDropdown)
 myConfig:Register("AutoJoinRaid", AutoRaidToggle)
 
--- Add Save button
+local function SetActiveConfig(name)
+    if not name or name == "" then return end
+    currentConfigName = name
+    myConfig = ConfigManager:CreateConfig(name)
+    RegisterAll(myConfig)
+end
+
+local configNameInput = configTab:Input({
+    Title = "Config File Name",
+    Desc = "输入/切换 config 名字（例：config1）",
+    Value = "MyHubConfig",
+    Placeholder = "config1",
+    Type = "Input", -- 如果你库里没有 Input 类型，就删掉这一行
+    Callback = function(text)
+        -- 只记录，不自动创建，避免每打一个字就重建
+        currentConfigName = text
+    end,
+})
+
+local configsDropdown = configTab:Dropdown({
+    Title = "Saved Configs",
+    Desc = "选择一个已保存的 config",
+    Values = {"(click refresh)"},
+    Value = "(click refresh)",
+    Multi = false,
+    AllowNone = true,
+    Callback = function(name)
+        if name and name ~= "" and name ~= "(none)" and name ~= "(click refresh)" then
+            -- 选择后同步到输入框（如果 WindUI Input 支持:SetValue 就用；不支持就忽略）
+            currentConfigName = name
+        end
+    end,
+})
+local function RefreshConfigList()
+    local list = {}
+    local all = ConfigManager:AllConfigs()
+
+    if type(all) == "table" then
+        for k, v in pairs(all) do
+            if type(k) == "string" then
+                table.insert(list, k)
+            elseif type(v) == "string" then
+                table.insert(list, v)
+            elseif type(v) == "table" and type(v.Name) == "string" then
+                table.insert(list, v.Name)
+            end
+        end
+    end
+
+    table.sort(list)
+    if #list == 0 then list = {"(none)"} end
+    configsDropdown:Refresh(list)
+end
+
 configTab:Button({
-    Title = "Save Config",
-    Desc = "Save all current settings",
+    Title = "Refresh Config List",
+    Desc = "读取当前已有保存的 config 文件并刷新下拉列表",
     Callback = function()
-        myConfig:Save()
-        print("[Config] Saved MyHubConfig")
+        RefreshConfigList()
     end
 })
 
--- Add Load button
+-- 使用输入的名字创建/切换 config
+configTab:Button({
+    Title = "Use / Create Config From Input",
+    Desc = "用上面输入框的名字 CreateConfig 并设为当前 config",
+    Callback = function()
+        local name = currentConfigName
+        if (not name or name == "") and configNameInput and configNameInput.Value then
+            name = configNameInput.Value
+        end
+        SetActiveConfig(name)
+        print("[Config] Active Config =", currentConfigName)
+    end
+})
+
+-- Save / Load 按钮（对当前 active config 生效）
+configTab:Button({
+    Title = "Save Config",
+    Desc = "保存当前 config",
+    Callback = function()
+        if not myConfig then SetActiveConfig(currentConfigName or "MyHubConfig") end
+        myConfig:Save()
+        print("[Config] Saved:", currentConfigName)
+    end
+})
+
 configTab:Button({
     Title = "Load Config",
-    Desc = "Load saved settings",
+    Desc = "读取当前 config",
     Callback = function()
+        if not myConfig then SetActiveConfig(currentConfigName or "MyHubConfig") end
         myConfig:Load()
-        print("[Config] Loaded MyHubConfig")
+        print("[Config] Loaded:", currentConfigName)
     end
 })
 
