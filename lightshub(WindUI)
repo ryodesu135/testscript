@@ -75,11 +75,101 @@ Discord Server: https://discord.gg/ryenf7d6C5]],
         FontWeight = Enum.FontWeight.Medium,
     })
 
+-- 初始化保存的配置名称列表
+local ConfigManager = Window.ConfigManager
+getgenv().SavedConfigNames = getgenv().SavedConfigNames or {}
 
-local PlayerTab = Window:Tab({
-    Title = "Player",
-    Icon = "user",
+-- 创建Config Tab
+local ConfigTab = ConfigManager:Tab({
+    Title = "Config",
+    Icon = "settings",
 })
+
+-- 输入框：配置名称
+local ConfigNameInput = ConfigTab:Input({
+    Flag = "ConfigName",
+    Title = "Config Name",
+    Desc = "Enter a name for your config",
+    Value = "",
+    Placeholder = "e.g., MySettings",
+})
+
+-- 保存按钮（使用WindUI内置方法 + 自定义命名）
+local SaveConfigButton = ConfigTab:Button({
+    Title = "Save Config",
+    Desc = "Save current UI settings with the entered name",
+    Callback = function()
+        local name = ConfigNameInput.Value
+        if name == "" then
+            print("Please enter a config name.")
+            return
+        end
+        
+        -- 检查名称是否已存在
+        if table.find(getgenv().SavedConfigNames, name) then
+            print("Config name already exists. Overwriting...")
+        else
+            table.insert(getgenv().SavedConfigNames, name)
+        end
+        
+        -- 临时修改Window的Folder为自定义名称（子文件夹）
+        local originalFolder = Window.Folder
+        Window.Folder = originalFolder .. "/" .. name
+        
+        -- 使用WindUI内置保存
+        Window:SaveConfig()
+        
+        -- 恢复原始Folder
+        Window.Folder = originalFolder
+        
+        -- 更新下拉菜单
+        UpdateLoadDropdown()
+        
+        print("Config '" .. name .. "' saved!")
+    end,
+})
+
+-- 刷新按钮
+local RefreshConfigButton = ConfigTab:Button({
+    Title = "Refresh Config List",
+    Desc = "Refresh the list of saved configs",
+    Callback = function()
+        UpdateLoadDropdown()
+        print("Config list refreshed!")
+    end,
+})
+
+-- 下拉菜单：选择加载配置
+local LoadConfigDropdown = ConfigTab:Dropdown({
+    Flag = "LoadConfig",
+    Title = "Load Config",
+    Values = {},
+    Value = nil,
+    Multi = false,
+    Callback = function(selectedName)
+        if selectedName then
+            -- 临时修改Folder为选中名称
+            local originalFolder = Window.Folder
+            Window.Folder = originalFolder .. "/" .. selectedName
+            
+            -- 使用WindUI内置加载
+            Window:LoadConfig()
+            
+            -- 恢复原始Folder
+            Window.Folder = originalFolder
+            
+            print("Config '" .. selectedName .. "' loaded!")
+        end
+    end,
+})
+
+-- 函数：更新下拉菜单选项
+local function UpdateLoadDropdown()
+    LoadConfigDropdown:SetValues(getgenv().SavedConfigNames)
+end
+
+-- 初始化下拉菜单
+UpdateLoadDropdown()
 
 -------------------------------------------------
 -- 玩家设定（WalkSpeed、Jump）
