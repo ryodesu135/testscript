@@ -75,120 +75,123 @@ Discord Server: https://discord.gg/ryenf7d6C5]],
         FontWeight = Enum.FontWeight.Medium,
     })
 
+-- Config Tab
 local configTab = Window:Tab({ Title = "Config ⚙️" })
 
 local ConfigManager = Window.ConfigManager
 local myConfig = nil
 local currentConfigName = nil
 
--- Register your Local Tab toggles
--- Player
-myConfig:Register("WalkSpeed", WalkspeedSlider)
-myConfig:Register("JumpHeight", JumpHeightSlider)
-myConfig:Register("KillAuraRange", FastKillAuraDropdown)
-myConfig:Register("FastKillAura", FastKillAuraToggle)
-myConfig:Register("AntiAFK", afkToggle)
-myConfig:Register("AntiPublicServer", antiPublicToggle)
-myConfig:Register("WhitelistPlayers", whitelistInput)
+-- 把你原本那一大串 Register 集中成一个函数（切换 config 时要重新 Register）
+local function RegisterAll(cfg)
+    -- Player
+    cfg:Register("WalkSpeed", WalkspeedSlider)
+    cfg:Register("JumpHeight", JumpHeightSlider)
+    cfg:Register("KillAuraRange", FastKillAuraDropdown)
+    cfg:Register("FastKillAura", FastKillAuraToggle)
+    cfg:Register("AntiAFK", afkToggle)
+    cfg:Register("AntiPublicServer", antiPublicToggle)
+    cfg:Register("WhitelistPlayers", whitelistInput)
 
--- Ranking
-myConfig:Register("AutoRankUp", autoRankUpToggle)
-myConfig:Register("AutoPrestige", autoPrestigeToggle)
+    -- Ranking
+    cfg:Register("AutoRankUp", autoRankUpToggle)
+    cfg:Register("AutoPrestige", autoPrestigeToggle)
 
--- Codes
-myConfig:Register("RedeemCodes", redeemCodesButton)
+    -- Codes
+    cfg:Register("RedeemCodes", redeemCodesButton)
 
--- Collect
-myConfig:Register("HourlyDailyRewards", hourlyDailyRewardsToggle)
-myConfig:Register("ClaimGroupChest", claimGroupChestToggle)
-myConfig:Register("ClaimPremiumChest", claimPremiumChestToggle)
-myConfig:Register("ClaimVIPChest", claimVIPChestToggle)
-myConfig:Register("ClaimDailyChest", claimDailyChestToggle)
+    -- Collect
+    cfg:Register("HourlyDailyRewards", hourlyDailyRewardsToggle)
+    cfg:Register("ClaimGroupChest", claimGroupChestToggle)
+    cfg:Register("ClaimPremiumChest", claimPremiumChestToggle)
+    cfg:Register("ClaimVIPChest", claimVIPChestToggle)
+    cfg:Register("ClaimDailyChest", claimDailyChestToggle)
 
--- Exchange
-myConfig:Register("ExchangeW1Dropdown", ExchangeW1Dropdown)
-myConfig:Register("AutoExchangeW1Toggle", ExchangeW1Toggle)
-myConfig:Register("ExchangeW2Dropdown", ExchangeW2Dropdown)
-myConfig:Register("AutoExchangeW2Toggle", ExchangeW2Toggle)
-myConfig:Register("ExchangeCoinsDropdown", ExchangeCoinsDropdown)
-myConfig:Register("AutoExchangeCoinsToggle", ExchangeCoinsToggle)
-myConfig:Register("ExchangeMaterialsDropdown", ExchangeMaterialsDropdown)
-myConfig:Register("AutoExchangeMaterialsToggle", ExchangeMaterialsToggle)
+    -- Exchange
+    cfg:Register("ExchangeW1Dropdown", ExchangeW1Dropdown)
+    cfg:Register("AutoExchangeW1Toggle", ExchangeW1Toggle)
+    cfg:Register("ExchangeW2Dropdown", ExchangeW2Dropdown)
+    cfg:Register("AutoExchangeW2Toggle", ExchangeW2Toggle)
+    cfg:Register("ExchangeCoinsDropdown", ExchangeCoinsDropdown)
+    cfg:Register("AutoExchangeCoinsToggle", ExchangeCoinsToggle)
+    cfg:Register("ExchangeMaterialsDropdown", ExchangeMaterialsDropdown)
+    cfg:Register("AutoExchangeMaterialsToggle", ExchangeMaterialsToggle)
 
--- Exchange Shop
-myConfig:Register("ExchangeShopW1Dropdown", ExchangeShopW1Dropdown)
-myConfig:Register("AutoExchangeShopW1Toggle", ExchangeShopW1Toggle)
-myConfig:Register("ExchangeShopW1KeysDropdown", ExchangeShopW1KeysDropdown)
-myConfig:Register("AutoExchangeShopW1KeysToggle", ExchangeShopW1KeysToggle)
-myConfig:Register("ExchangeShopW1ProductsDropdown", ExchangeShopW1ProductsDropdown)
-myConfig:Register("AutoExchangeShopW1ProductsToggle", ExchangeShopW1ProductsToggle)
+    -- Exchange Shop
+    cfg:Register("ExchangeShopW1Dropdown", ExchangeShopW1Dropdown)
+    cfg:Register("AutoExchangeShopW1Toggle", ExchangeShopW1Toggle)
+    cfg:Register("ExchangeShopW1KeysDropdown", ExchangeShopW1KeysDropdown)
+    cfg:Register("AutoExchangeShopW1KeysToggle", ExchangeShopW1KeysToggle)
+    cfg:Register("ExchangeShopW1ProductsDropdown", ExchangeShopW1ProductsDropdown)
+    cfg:Register("AutoExchangeShopW1ProductsToggle", ExchangeShopW1ProductsToggle)
 
-myConfig:Register("ExchangeShopW2Dropdown", ExchangeShopW2Dropdown)
-myConfig:Register("AutoExchangeShopW2Toggle", ExchangeShopW2Toggle)
-myConfig:Register("ExchangeShopW2KeysDropdown", ExchangeShopW2KeysDropdown)
-myConfig:Register("AutoExchangeShopW2KeysToggle", ExchangeShopW2KeysToggle)
-myConfig:Register("ExchangeShopW2ProductsDropdown", ExchangeShopW2ProductsDropdown)
-myConfig:Register("AutoExchangeShopW2ProductsToggle", ExchangeShopW2ProductsToggle)
+    cfg:Register("ExchangeShopW2Dropdown", ExchangeShopW2Dropdown)
+    cfg:Register("AutoExchangeShopW2Toggle", ExchangeShopW2Toggle)
+    cfg:Register("ExchangeShopW2KeysDropdown", ExchangeShopW2KeysDropdown)
+    cfg:Register("AutoExchangeShopW2KeysToggle", ExchangeShopW2KeysToggle)
+    cfg:Register("ExchangeShopW2ProductsDropdown", ExchangeShopW2ProductsDropdown)
+    cfg:Register("AutoExchangeShopW2ProductsToggle", ExchangeShopW2ProductsToggle)
 
--- Quests
-myConfig:Register("AutoDailyQuest", DailyQuestToggle)
-myConfig:Register("AutoPunchingMachineQuest", PunchingMachineQuestToggle)
-myConfig:Register("AutoDemonFruitQuest", DemonFruitQuestToggle)
-myConfig:Register("AutoBriefcaseQuest", BriefcaseQuestToggle)
-myConfig:Register("AutoAssassinKnifeQuest", AssassinKnifeQuestToggle)
-myConfig:Register("AutoAssassinPistolQuest", AssassinPistolQuestToggle)
-myConfig:Register("AutoExorciseHumansQuest", ExorciseHumansQuestToggle)
-myConfig:Register("AutoEvilSpiritQuest", EvilSpiritQuestToggle)
-myConfig:Register("AutoBentoBoxQuest", BentoBoxQuestToggle)
+    -- Quests
+    cfg:Register("AutoDailyQuest", DailyQuestToggle)
+    cfg:Register("AutoPunchingMachineQuest", PunchingMachineQuestToggle)
+    cfg:Register("AutoDemonFruitQuest", DemonFruitQuestToggle)
+    cfg:Register("AutoBriefcaseQuest", BriefcaseQuestToggle)
+    cfg:Register("AutoAssassinKnifeQuest", AssassinKnifeQuestToggle)
+    cfg:Register("AutoAssassinPistolQuest", AssassinPistolQuestToggle)
+    cfg:Register("AutoExorciseHumansQuest", ExorciseHumansQuestToggle)
+    cfg:Register("AutoEvilSpiritQuest", EvilSpiritQuestToggle)
+    cfg:Register("AutoBentoBoxQuest", BentoBoxQuestToggle)
 
--- Star
-myConfig:Register("StarDropdown", StarDropdown)
-myConfig:Register("AutoOpenStar", AutoOpenStarToggle)
+    -- Star
+    cfg:Register("StarDropdown", StarDropdown)
+    cfg:Register("AutoOpenStar", AutoOpenStarToggle)
 
--- Roll (NOTE: your Auto Roll toggle isn't stored in a variable, so it can't be registered unless you save it to a variable)
-myConfig:Register("RollDropdown", RollDropdown)
+    -- Roll（你的 AutoRoll toggle 没存变量就无法 Register）
+    cfg:Register("RollDropdown", RollDropdown)
 
--- Weapons
-myConfig:Register("AutoEvolveWeapons", WeaponsEvolveToggle)
-myConfig:Register("WeaponsSelect", WeaponsDropdown)
-myConfig:Register("RefreshWeaponsList", WeaponRefreshButton)
-myConfig:Register("AutoRollBreathings", AutoBreathingsToggle)
-myConfig:Register("AutoRollBankai", AutoBankaiToggle)
-myConfig:Register("AutoRollChakraInfusion", AutoChakraToggle)
-myConfig:Register("AutoUpgradeScytheLeveling", AutoScytheToggle)
+    -- Weapons
+    cfg:Register("AutoEvolveWeapons", WeaponsEvolveToggle)
+    cfg:Register("WeaponsSelect", WeaponsDropdown)
+    cfg:Register("RefreshWeaponsList", WeaponRefreshButton)
+    cfg:Register("AutoRollBreathings", AutoBreathingsToggle)
+    cfg:Register("AutoRollBankai", AutoBankaiToggle)
+    cfg:Register("AutoRollChakraInfusion", AutoChakraToggle)
+    cfg:Register("AutoUpgradeScytheLeveling", AutoScytheToggle)
 
--- Titans
-myConfig:Register("AutoEvolveTitans", TitansEvolveToggle)
-myConfig:Register("TitansSelect", TitansDropdown)
-myConfig:Register("RefreshTitansList", TitanRefreshButton)
-myConfig:Register("AutoRollTitanInjection", AutoInjectionTitanToggle)
+    -- Titans
+    cfg:Register("AutoEvolveTitans", TitansEvolveToggle)
+    cfg:Register("TitansSelect", TitansDropdown)
+    cfg:Register("RefreshTitansList", TitanRefreshButton)
+    cfg:Register("AutoRollTitanInjection", AutoInjectionTitanToggle)
 
--- Stands
-myConfig:Register("AutoEvolveStands", StandsEvolveToggle)
-myConfig:Register("StandsSelect", StandsDropdown)
-myConfig:Register("RefreshStandsList", StandRefreshButton)
-myConfig:Register("AutoRollRequiemInjection", AutoStandsInjectionToggle)
+    -- Stands
+    cfg:Register("AutoEvolveStands", StandsEvolveToggle)
+    cfg:Register("StandsSelect", StandsDropdown)
+    cfg:Register("RefreshStandsList", StandRefreshButton)
+    cfg:Register("AutoRollRequiemInjection", AutoStandsInjectionToggle)
 
--- Progression
-myConfig:Register("ProgressionDropdown", ProgressionDropdown)
-myConfig:Register("AutoProgression", UpgradeProgressionToggle)
+    -- Progression
+    cfg:Register("ProgressionDropdown", ProgressionDropdown)
+    cfg:Register("AutoProgression", UpgradeProgressionToggle)
 
--- Upgrades
-myConfig:Register("UpgradesSelect", AutoUpgradeDropdown)
-myConfig:Register("AutoUpgrades", AutoUpgradesToggle)
-myConfig:Register("AutoUpgradesAll", AutoUpgradeAllToggle)
+    -- Upgrades
+    cfg:Register("UpgradesSelect", AutoUpgradeDropdown)
+    cfg:Register("AutoUpgrades", AutoUpgradesToggle)
+    cfg:Register("AutoUpgradesAll", AutoUpgradeAllToggle)
 
--- Farm
-myConfig:Register("MobsList", MobDropdown)
-myConfig:Register("RefreshMobsList", MobRefreshButton)
-myConfig:Register("AutoFarm", AutoFarmToggle)
+    -- Farm
+    cfg:Register("MobsList", MobDropdown)
+    cfg:Register("RefreshMobsList", MobRefreshButton)
+    cfg:Register("AutoFarm", AutoFarmToggle)
 
--- Dungeon / Raid
-myConfig:Register("DungeonSelect", AutoDungeonDropdown)
-myConfig:Register("AutoJoinDungeon", AutoDungeonToggle)
-myConfig:Register("RaidSelect", AutoRaidDropdown)
-myConfig:Register("RaidSpeed", AutoRaidSpeedDropdown)
-myConfig:Register("AutoJoinRaid", AutoRaidToggle)
+    -- Dungeon / Raid
+    cfg:Register("DungeonSelect", AutoDungeonDropdown)
+    cfg:Register("AutoJoinDungeon", AutoDungeonToggle)
+    cfg:Register("RaidSelect", AutoRaidDropdown)
+    cfg:Register("RaidSpeed", AutoRaidSpeedDropdown)
+    cfg:Register("AutoJoinRaid", AutoRaidToggle)
+end
 
 local function SetActiveConfig(name)
     if not name or name == "" then return end
@@ -197,6 +200,7 @@ local function SetActiveConfig(name)
     RegisterAll(myConfig)
 end
 
+-- 输入文件名
 local configNameInput = configTab:Input({
     Title = "Config File Name",
     Desc = "输入/切换 config 名字（例：config1）",
@@ -209,6 +213,7 @@ local configNameInput = configTab:Input({
     end,
 })
 
+-- Dropdown：已有 configs
 local configsDropdown = configTab:Dropdown({
     Title = "Saved Configs",
     Desc = "选择一个已保存的 config",
@@ -223,6 +228,8 @@ local configsDropdown = configTab:Dropdown({
         end
     end,
 })
+
+-- 刷新按钮：用 AllConfigs() 刷新 dropdown list
 local function RefreshConfigList()
     local list = {}
     local all = ConfigManager:AllConfigs()
