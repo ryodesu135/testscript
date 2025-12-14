@@ -3793,7 +3793,7 @@ local RaidNameMap = {
     ["One Hero Raid"] = "One_Hero_Raid",
     ["Body Improvement Challenge"] = "Body_Improvement_Challenge",
     ["Breathing Raid"] = "Breathing_Raid",
-    ["Mugen Dungeon"] = "Mugen_Dungeon"
+    ["Mugen Dungeon"] = "Mugen_Dungeon",
 
 }
 
