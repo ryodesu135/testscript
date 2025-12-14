@@ -174,8 +174,7 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                         print("[DEBUG] Selected range:", getgenv().SelectedAttackRange, "Value:", rangeNum)
                         
                         local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
-                        local hasMobInRange = false
-                        local mobId = nil
+                        local mobsInRange = {}  -- 存储在范围内的怪物Id
                         
                         if monstersFolder then
                             print("[DEBUG] Monsters folder found, children count:", #monstersFolder:GetChildren())
@@ -190,10 +189,8 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                                         print("[DEBUG] Mob:", mob.Name, "Position:", mobPos, "Distance:", distance)
                                         print("[DEBUG] Distance check: distance =", distance, "rangeNum =", rangeNum, "is <= ?", distance <= rangeNum)
                                         if distance <= rangeNum then
-                                            hasMobInRange = true
-                                            mobId = mob.Name  -- 直接使用mob.Name作为Id
-                                            print("[DEBUG] Mob in range! Id:", mobId)
-                                            break  -- 找到一个就够了
+                                            table.insert(mobsInRange, mob.Name)  -- 添加到列表
+                                            print("[DEBUG] Mob in range! Id:", mob.Name)
                                         else
                                             print("[DEBUG] Mob not in range")
                                         end
@@ -209,12 +206,14 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                         end
                         
                         -- 根据是否有怪物发送不同的事件
-                        if hasMobInRange and mobId then
-                            print("[DEBUG] Sending click with Id:", mobId)
-                            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-                                ["Action"] = "_Mouse_Click",
-                                ["Id"] = mobId,
-                            })
+                        if #mobsInRange > 0 then
+                            for _, mobId in ipairs(mobsInRange) do
+                                print("[DEBUG] Sending click with Id:", mobId)
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Action"] = "_Mouse_Click",
+                                    ["Id"] = mobId,
+                                })
+                            end
                         else
                             print("[DEBUG] Sending normal click")
                             game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
