@@ -163,15 +163,22 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                         local player = game.Players.LocalPlayer
                         local char = player.Character
                         local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                        if not hrp then return end
+                        if not hrp then 
+                            print("[DEBUG] Player HumanoidRootPart not found")
+                            return 
+                        end
                         local playerPos = hrp.Position
+                        print("[DEBUG] Player position:", playerPos)
                         
                         local rangeNum = rangeValues[getgenv().SelectedAttackRange] or 35
+                        print("[DEBUG] Selected range:", getgenv().SelectedAttackRange, "Value:", rangeNum)
+                        
                         local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
                         local hasMobInRange = false
                         local mobId = nil
                         
                         if monstersFolder then
+                            print("[DEBUG] Monsters folder found, children count:", #monstersFolder:GetChildren())
                             -- 遍历Monsters中的Model
                             for _, mob in pairs(monstersFolder:GetChildren()) do
                                 if mob and mob:IsA("Model") and mob:FindFirstChild("Data") then
@@ -180,24 +187,37 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                                         local mobHRP = mob:FindFirstChild("HumanoidRootPart")
                                         if mobHRP then
                                             local mobPos = mobHRP.Position
-                                            if (playerPos - mobPos).Magnitude <= rangeNum then
+                                            local distance = (playerPos - mobPos).Magnitude
+                                            print("[DEBUG] Mob:", mob.Name, "Position:", mobPos, "Distance:", distance)
+                                            if distance <= rangeNum then
                                                 hasMobInRange = true
                                                 mobId = data.Name
+                                                print("[DEBUG] Mob in range! Id:", mobId)
                                                 break  -- 找到一个就够了
                                             end
+                                        else
+                                            print("[DEBUG] Mob has no HumanoidRootPart:", mob.Name)
                                         end
+                                    else
+                                        print("[DEBUG] Mob has no valid Data.Name:", mob.Name)
                                     end
+                                else
+                                    print("[DEBUG] Invalid mob:", mob.Name, "IsA Model:", mob:IsA("Model"), "Has Data:", mob:FindFirstChild("Data") ~= nil)
                                 end
                             end
+                        else
+                            print("[DEBUG] Monsters folder not found")
                         end
                         
                         -- 根据是否有怪物发送不同的事件
                         if hasMobInRange and mobId then
+                            print("[DEBUG] Sending click with Id:", mobId)
                             game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                 ["Action"] = "_Mouse_Click",
                                 ["Id"] = mobId,
                             })
                         else
+                            print("[DEBUG] Sending normal click")
                             game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                 ["Action"] = "_Mouse_Click",
                             })
