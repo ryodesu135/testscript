@@ -208,30 +208,30 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                         -- 检查当前目标怪物是否还存在且在范围内
                         local targetMob = getgenv().CurrentTargetMob
                         if targetMob and targetMob.Parent and targetMob:FindFirstChild("HumanoidRootPart") then
-                            -- 当前目标还活着，继续发送它的Id
-                            local mobId = targetMob.Name
-                            print("[DEBUG] Continuing to target mob:", mobId)
-                            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-                                ["Action"] = "_Mouse_Click",
-                                ["Id"] = mobId,
-                            })
-                        else
-                            -- 当前目标死了或不存在，选择下一个
+                            -- 检查目标是否仍在范围内
+                            local mobHRP = targetMob:FindFirstChild("HumanoidRootPart")
+                            local mobPos = mobHRP.Position
+                            local distance = (playerPos - mobPos).Magnitude
+                            if distance <= rangeNum then
+                                -- 当前目标还活着且在范围内，继续发送它的Id
+                                local mobId = targetMob.Name
+                                print("[DEBUG] Continuing to target mob:", mobId)
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Action"] = "_Mouse_Click",
+                                    ["Id"] = mobId,
+                                })
+                            else
+                                -- 目标不在范围内，重置并选择下一个
+                                print("[DEBUG] Target mob out of range, resetting")
+                                getgenv().CurrentTargetMob = nil
+                                -- 继续到下面的逻辑选择新目标
+                            end
+                        end
+                        
+                        -- 如果没有当前目标，选择下一个
+                        if not getgenv().CurrentTargetMob then
                             if #mobsInRange > 0 then
-                                -- 找到当前目标在列表中的索引，切换到下一个
-                                local nextIndex = 1
-                                if targetMob then
-                                    for i, mob in ipairs(mobsInRange) do
-                                        if mob == targetMob then
-                                            nextIndex = i + 1
-                                            if nextIndex > #mobsInRange then
-                                                nextIndex = 1  -- 循环回第一个
-                                            end
-                                            break
-                                        end
-                                    end
-                                end
-                                getgenv().CurrentTargetMob = mobsInRange[nextIndex]
+                                getgenv().CurrentTargetMob = mobsInRange[1]  -- 选择第一个
                                 local mobId = getgenv().CurrentTargetMob.Name
                                 print("[DEBUG] Switching to new target mob:", mobId)
                                 game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
@@ -244,7 +244,6 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                                 game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                     ["Action"] = "_Mouse_Click",
                                 })
-                                getgenv().CurrentTargetMob = nil  -- 重置目标
                             end
                         end
                     end)
