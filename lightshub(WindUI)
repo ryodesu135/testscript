@@ -76,7 +76,10 @@ Discord Server: https://discord.gg/ryenf7d6C5]],
     })
 
 -- Config Tab
-local configTab = Window:Tab({ Title = "Config ⚙️" })
+local configTab = Window:Tab({ 
+    Title = "Config",
+    Icon = "save",
+ })
 
 local ConfigManager = Window.ConfigManager
 local myConfig = nil
@@ -203,8 +206,8 @@ end
 -- 输入文件名
 local configNameInput = configTab:Input({
     Title = "Config File Name",
-    Desc = "输入/切换 config 名字（例：config1）",
-    Value = "MyHubConfig",
+    Desc = "Example: config1",
+    Value = "LightsHubConfig",
     Placeholder = "config1",
     Type = "Input", -- 如果你库里没有 Input 类型，就删掉这一行
     Callback = function(text)
@@ -215,10 +218,10 @@ local configNameInput = configTab:Input({
 
 -- Dropdown：已有 configs
 local configsDropdown = configTab:Dropdown({
-    Title = "Saved Configs",
-    Desc = "选择一个已保存的 config",
-    Values = {"(click refresh)"},
-    Value = "(click refresh)",
+    Title = "Configs List",
+    Desc = "Select saved config from the list",
+    Values = {"none"},
+    Value = "none",
     Multi = false,
     AllowNone = true,
     Callback = function(name)
@@ -253,7 +256,6 @@ end
 
 configTab:Button({
     Title = "Refresh Config List",
-    Desc = "读取当前已有保存的 config 文件并刷新下拉列表",
     Callback = function()
         RefreshConfigList()
     end
@@ -261,7 +263,6 @@ configTab:Button({
 
 configTab:Button({
     Title = "Update Selected Config",
-    Desc = "用下拉选择的 config 名字设为当前 config，并立刻保存一次",
     Callback = function()
         if not currentConfigName or currentConfigName == "" or currentConfigName == "(none)" or currentConfigName == "(click refresh)" then
             warn("[Config] Please select a config from dropdown first.")
@@ -273,8 +274,6 @@ configTab:Button({
 
         -- 立刻保存一次
         myConfig:Save()
-        print("[Config] Updated (Saved):", currentConfigName)
-
         -- 可选：保存后刷新一下列表
         -- RefreshConfigList()
     end
@@ -283,21 +282,17 @@ configTab:Button({
 -- Save / Load 按钮（对当前 active config 生效）
 configTab:Button({
     Title = "Save Config",
-    Desc = "保存当前 config",
     Callback = function()
-        if not myConfig then SetActiveConfig(currentConfigName or "MyHubConfig") end
+        if not myConfig then SetActiveConfig(currentConfigName or "LightsHubConfig") end
         myConfig:Save()
-        print("[Config] Saved:", currentConfigName)
     end
 })
 
 configTab:Button({
     Title = "Load Config",
-    Desc = "读取当前 config",
     Callback = function()
-        if not myConfig then SetActiveConfig(currentConfigName or "MyHubConfig") end
+        if not myConfig then SetActiveConfig(currentConfigName or "LightsHubConfig") end
         myConfig:Load()
-        print("[Config] Loaded:", currentConfigName)
     end
 })
 
