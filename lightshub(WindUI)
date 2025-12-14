@@ -162,24 +162,30 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                     pcall(function()
                         local player = game.Players.LocalPlayer
                         local char = player.Character
-                        if not char or not char.PrimaryPart then return end
-                        local playerPos = char.PrimaryPart.Position
+                        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                        if not hrp then return end
+                        local playerPos = hrp.Position
                         
                         local rangeNum = rangeValues[getgenv().SelectedAttackRange] or 35
-                        local monsters = workspace.Debris.Monsters
+                        local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
                         local hasMobInRange = false
                         local mobId = nil
                         
-                        -- 遍历Monsters中的Model
-                        for _, model in pairs(monsters:GetChildren()) do
-                            if model:IsA("Model") and model:FindFirstChild("Data") then
-                                local data = model.Data
-                                if data and data.Name then
-                                    local mobPos = model:GetPivot().Position  -- 使用Pivot.WorldPivot.Position
-                                    if mobPos and (playerPos - mobPos).Magnitude <= rangeNum then
-                                        hasMobInRange = true
-                                        mobId = data.Name
-                                        break  -- 找到一个就够了
+                        if monstersFolder then
+                            -- 遍历Monsters中的Model
+                            for _, mob in pairs(monstersFolder:GetChildren()) do
+                                if mob and mob:IsA("Model") and mob:FindFirstChild("Data") then
+                                    local data = mob.Data
+                                    if data and data.Name then
+                                        local mobHRP = mob:FindFirstChild("HumanoidRootPart")
+                                        if mobHRP then
+                                            local mobPos = mobHRP.Position
+                                            if (playerPos - mobPos).Magnitude <= rangeNum then
+                                                hasMobInRange = true
+                                                mobId = data.Name
+                                                break  -- 找到一个就够了
+                                            end
+                                        end
                                     end
                                 end
                             end
