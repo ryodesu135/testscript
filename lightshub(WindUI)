@@ -80,7 +80,10 @@ local ConfigTab = Window:Tab({
     Icon = "settings",
 })
 
--- 输入框：配置名称（基于示例）
+-- 确保你已经初始化了 ConfigManager
+-- 例如（具体看WindUI文档/你的版本暴露方式）：
+-- local ConfigManager = WindUI.ConfigManager or getgenv().ConfigManager
+
 local ConfigNameInput = ConfigTab:Input({
     Flag = "ConfigName",
     Title = "Config Name",
@@ -89,44 +92,47 @@ local ConfigNameInput = ConfigTab:Input({
     Placeholder = "Enter name...",
 })
 
--- 创建配置按钮（基于示例）
-ConfigTab:Button({
-    Flag = "CreateConfig",
-    Title = "Create Config",
-    Callback = function()
-        ConfigManager:CreateConfig(ConfigNameInput.Value):Save()
-        ConfigDropdown:Refresh(ConfigManager:AllConfigs())
-        print("Config created and saved!")
-    end,
-})
-
--- 下拉菜单：选择配置（基于示例）
 local ConfigDropdown = ConfigTab:Dropdown({
     Flag = "Configs",
     Title = "Configs",
     Values = ConfigManager:AllConfigs(),
     Multi = false,
     AllowNone = true,
-    Callback = function() end,  -- 无需回调，加载按钮处理
+    Callback = function() end,
 })
 
--- 加载配置按钮（基于示例）
-ConfigTab:Button({
-    Flag = "LoadConfig",
-    Title = "Load Config",
+local CreateConfigButton = ConfigTab:Button({
+    Flag = "CreateConfig",
+    Title = "Create Config",
     Callback = function()
-        ConfigManager:CreateConfig(ConfigDropdown.Value):Load()
-        print("Config loaded!")
+        local name = ConfigNameInput.Value
+        if not name or name == "" then
+            return
+        end
+
+        ConfigManager:CreateConfig(name):Save()
+        ConfigDropdown:Refresh(ConfigManager:AllConfigs())
     end,
 })
 
--- 刷新按钮（可选，基于您的需求）
-ConfigTab:Button({
+local LoadConfigButton = ConfigTab:Button({
+    Flag = "LoadConfig",
+    Title = "Load Config",
+    Callback = function()
+        local selected = ConfigDropdown.Value
+        if not selected or selected == "" then
+            return
+        end
+
+        ConfigManager:CreateConfig(selected):Load()
+    end,
+})
+
+local RefreshConfigButton = ConfigTab:Button({
     Title = "Refresh Config List",
     Desc = "Refresh the list of saved configs",
     Callback = function()
         ConfigDropdown:Refresh(ConfigManager:AllConfigs())
-        print("Config list refreshed!")
     end,
 })
 
