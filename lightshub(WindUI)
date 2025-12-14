@@ -183,35 +183,22 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                             for _, mob in pairs(monstersFolder:GetChildren()) do
                                 print("[DEBUG] Checking mob:", mob.Name, "IsA Model:", mob:IsA("Model"))
                                 if mob and mob:IsA("Model") then
-                                    local hasData = mob:FindFirstChild("Data") ~= nil
-                                    print("[DEBUG] Has Data:", hasData)
-                                    if hasData then
-                                        local data = mob.Data
-                                        local dataName = data.Name
-                                        print("[DEBUG] Data.Name:", dataName, "Is empty:", dataName == "" or dataName == nil)
-                                        if data and dataName and dataName ~= "" then
-                                            local mobHRP = mob:FindFirstChild("HumanoidRootPart")
-                                            if mobHRP then
-                                                local mobPos = mobHRP.Position
-                                                local distance = (playerPos - mobPos).Magnitude
-                                                print("[DEBUG] Mob:", mob.Name, "Position:", mobPos, "Distance:", distance)
-                                                print("[DEBUG] Distance check: distance =", distance, "rangeNum =", rangeNum, "is <= ?", distance <= rangeNum)
-                                                if distance <= rangeNum then
-                                                    hasMobInRange = true
-                                                    mobId = dataName
-                                                    print("[DEBUG] Mob in range! Id:", mobId)
-                                                    break  -- 找到一个就够了
-                                                else
-                                                    print("[DEBUG] Mob not in range")
-                                                end
-                                            else
-                                                print("[DEBUG] Mob has no HumanoidRootPart:", mob.Name)
-                                            end
+                                    local mobHRP = mob:FindFirstChild("HumanoidRootPart")
+                                    if mobHRP then
+                                        local mobPos = mobHRP.Position
+                                        local distance = (playerPos - mobPos).Magnitude
+                                        print("[DEBUG] Mob:", mob.Name, "Position:", mobPos, "Distance:", distance)
+                                        print("[DEBUG] Distance check: distance =", distance, "rangeNum =", rangeNum, "is <= ?", distance <= rangeNum)
+                                        if distance <= rangeNum then
+                                            hasMobInRange = true
+                                            mobId = mob.Name  -- 直接使用mob.Name作为Id
+                                            print("[DEBUG] Mob in range! Id:", mobId)
+                                            break  -- 找到一个就够了
                                         else
-                                            print("[DEBUG] Data.Name is empty or nil for mob:", mob.Name)
+                                            print("[DEBUG] Mob not in range")
                                         end
                                     else
-                                        print("[DEBUG] Mob has no Data folder:", mob.Name)
+                                        print("[DEBUG] Mob has no HumanoidRootPart:", mob.Name)
                                     end
                                 else
                                     print("[DEBUG] Mob is not a Model:", mob.Name, "ClassName:", mob.ClassName)
