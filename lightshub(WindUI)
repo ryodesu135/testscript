@@ -75,67 +75,140 @@ Discord Server: https://discord.gg/ryenf7d6C5]],
         FontWeight = Enum.FontWeight.Medium,
     })
 
-local ConfigTab = Window:Tab({
-    Title = "Config",
-    Icon = "settings",
-})
+local configTab = Window:Tab({ Title = "Config ⚙️" })
 
--- 确保你已经初始化了 ConfigManager
--- 例如（具体看WindUI文档/你的版本暴露方式）：
--- local ConfigManager = WindUI.ConfigManager or getgenv().ConfigManager
+-- Access the ConfigManager from Window
+local ConfigManager = Window.ConfigManager
+local myConfig = ConfigManager:CreateConfig("MyHubConfig")
 
-local ConfigNameInput = ConfigTab:Input({
-    Flag = "ConfigName",
-    Title = "Config Name",
-    Value = "Example Config",
-    Type = "Input",
-    Placeholder = "Enter name...",
-})
+-- Register your Local Tab toggles
+-- Player
+myConfig:Register("WalkSpeed", WalkspeedSlider)
+myConfig:Register("JumpHeight", JumpHeightSlider)
+myConfig:Register("KillAuraRange", FastKillAuraDropdown)
+myConfig:Register("FastKillAura", FastKillAuraToggle)
+myConfig:Register("AntiAFK", afkToggle)
+myConfig:Register("AntiPublicServer", antiPublicToggle)
+myConfig:Register("WhitelistPlayers", whitelistInput)
 
-local ConfigDropdown = ConfigTab:Dropdown({
-    Flag = "Configs",
-    Title = "Configs",
-    Values = ConfigManager:AllConfigs(),
-    Multi = false,
-    AllowNone = true,
-    Callback = function() end,
-})
+-- Ranking
+myConfig:Register("AutoRankUp", autoRankUpToggle)
+myConfig:Register("AutoPrestige", autoPrestigeToggle)
 
-local CreateConfigButton = ConfigTab:Button({
-    Flag = "CreateConfig",
-    Title = "Create Config",
+-- Codes
+myConfig:Register("RedeemCodes", redeemCodesButton)
+
+-- Collect
+myConfig:Register("HourlyDailyRewards", hourlyDailyRewardsToggle)
+myConfig:Register("ClaimGroupChest", claimGroupChestToggle)
+myConfig:Register("ClaimPremiumChest", claimPremiumChestToggle)
+myConfig:Register("ClaimVIPChest", claimVIPChestToggle)
+myConfig:Register("ClaimDailyChest", claimDailyChestToggle)
+
+-- Exchange
+myConfig:Register("ExchangeW1Dropdown", ExchangeW1Dropdown)
+myConfig:Register("AutoExchangeW1Toggle", ExchangeW1Toggle)
+myConfig:Register("ExchangeW2Dropdown", ExchangeW2Dropdown)
+myConfig:Register("AutoExchangeW2Toggle", ExchangeW2Toggle)
+myConfig:Register("ExchangeCoinsDropdown", ExchangeCoinsDropdown)
+myConfig:Register("AutoExchangeCoinsToggle", ExchangeCoinsToggle)
+myConfig:Register("ExchangeMaterialsDropdown", ExchangeMaterialsDropdown)
+myConfig:Register("AutoExchangeMaterialsToggle", ExchangeMaterialsToggle)
+
+-- Exchange Shop
+myConfig:Register("ExchangeShopW1Dropdown", ExchangeShopW1Dropdown)
+myConfig:Register("AutoExchangeShopW1Toggle", ExchangeShopW1Toggle)
+myConfig:Register("ExchangeShopW1KeysDropdown", ExchangeShopW1KeysDropdown)
+myConfig:Register("AutoExchangeShopW1KeysToggle", ExchangeShopW1KeysToggle)
+myConfig:Register("ExchangeShopW1ProductsDropdown", ExchangeShopW1ProductsDropdown)
+myConfig:Register("AutoExchangeShopW1ProductsToggle", ExchangeShopW1ProductsToggle)
+
+myConfig:Register("ExchangeShopW2Dropdown", ExchangeShopW2Dropdown)
+myConfig:Register("AutoExchangeShopW2Toggle", ExchangeShopW2Toggle)
+myConfig:Register("ExchangeShopW2KeysDropdown", ExchangeShopW2KeysDropdown)
+myConfig:Register("AutoExchangeShopW2KeysToggle", ExchangeShopW2KeysToggle)
+myConfig:Register("ExchangeShopW2ProductsDropdown", ExchangeShopW2ProductsDropdown)
+myConfig:Register("AutoExchangeShopW2ProductsToggle", ExchangeShopW2ProductsToggle)
+
+-- Quests
+myConfig:Register("AutoDailyQuest", DailyQuestToggle)
+myConfig:Register("AutoPunchingMachineQuest", PunchingMachineQuestToggle)
+myConfig:Register("AutoDemonFruitQuest", DemonFruitQuestToggle)
+myConfig:Register("AutoBriefcaseQuest", BriefcaseQuestToggle)
+myConfig:Register("AutoAssassinKnifeQuest", AssassinKnifeQuestToggle)
+myConfig:Register("AutoAssassinPistolQuest", AssassinPistolQuestToggle)
+myConfig:Register("AutoExorciseHumansQuest", ExorciseHumansQuestToggle)
+myConfig:Register("AutoEvilSpiritQuest", EvilSpiritQuestToggle)
+myConfig:Register("AutoBentoBoxQuest", BentoBoxQuestToggle)
+
+-- Star
+myConfig:Register("StarDropdown", StarDropdown)
+myConfig:Register("AutoOpenStar", AutoOpenStarToggle)
+
+-- Roll (NOTE: your Auto Roll toggle isn't stored in a variable, so it can't be registered unless you save it to a variable)
+myConfig:Register("RollDropdown", RollDropdown)
+
+-- Weapons
+myConfig:Register("AutoEvolveWeapons", WeaponsEvolveToggle)
+myConfig:Register("WeaponsSelect", WeaponsDropdown)
+myConfig:Register("RefreshWeaponsList", WeaponRefreshButton)
+myConfig:Register("AutoRollBreathings", AutoBreathingsToggle)
+myConfig:Register("AutoRollBankai", AutoBankaiToggle)
+myConfig:Register("AutoRollChakraInfusion", AutoChakraToggle)
+myConfig:Register("AutoUpgradeScytheLeveling", AutoScytheToggle)
+
+-- Titans
+myConfig:Register("AutoEvolveTitans", TitansEvolveToggle)
+myConfig:Register("TitansSelect", TitansDropdown)
+myConfig:Register("RefreshTitansList", TitanRefreshButton)
+myConfig:Register("AutoRollTitanInjection", AutoInjectionTitanToggle)
+
+-- Stands
+myConfig:Register("AutoEvolveStands", StandsEvolveToggle)
+myConfig:Register("StandsSelect", StandsDropdown)
+myConfig:Register("RefreshStandsList", StandRefreshButton)
+myConfig:Register("AutoRollRequiemInjection", AutoStandsInjectionToggle)
+
+-- Progression
+myConfig:Register("ProgressionDropdown", ProgressionDropdown)
+myConfig:Register("AutoProgression", UpgradeProgressionToggle)
+
+-- Upgrades
+myConfig:Register("UpgradesSelect", AutoUpgradeDropdown)
+myConfig:Register("AutoUpgrades", AutoUpgradesToggle)
+myConfig:Register("AutoUpgradesAll", AutoUpgradeAllToggle)
+
+-- Farm
+myConfig:Register("MobsList", MobDropdown)
+myConfig:Register("RefreshMobsList", MobRefreshButton)
+myConfig:Register("AutoFarm", AutoFarmToggle)
+
+-- Dungeon / Raid
+myConfig:Register("DungeonSelect", AutoDungeonDropdown)
+myConfig:Register("AutoJoinDungeon", AutoDungeonToggle)
+myConfig:Register("RaidSelect", AutoRaidDropdown)
+myConfig:Register("RaidSpeed", AutoRaidSpeedDropdown)
+myConfig:Register("AutoJoinRaid", AutoRaidToggle)
+
+-- Add Save button
+configTab:Button({
+    Title = "Save Config",
+    Desc = "Save all current settings",
     Callback = function()
-        local name = ConfigNameInput.Value
-        if not name or name == "" then
-            return
-        end
-
-        ConfigManager:CreateConfig(name):Save()
-        ConfigDropdown:Refresh(ConfigManager:AllConfigs())
-    end,
+        myConfig:Save()
+        print("[Config] Saved MyHubConfig")
+    end
 })
 
-local LoadConfigButton = ConfigTab:Button({
-    Flag = "LoadConfig",
+-- Add Load button
+configTab:Button({
     Title = "Load Config",
+    Desc = "Load saved settings",
     Callback = function()
-        local selected = ConfigDropdown.Value
-        if not selected or selected == "" then
-            return
-        end
-
-        ConfigManager:CreateConfig(selected):Load()
-    end,
+        myConfig:Load()
+        print("[Config] Loaded MyHubConfig")
+    end
 })
-
-local RefreshConfigButton = ConfigTab:Button({
-    Title = "Refresh Config List",
-    Desc = "Refresh the list of saved configs",
-    Callback = function()
-        ConfigDropdown:Refresh(ConfigManager:AllConfigs())
-    end,
-})
-
 
 local PlayerTab = Window:Tab({
     Title = "Player",
@@ -144,7 +217,7 @@ local PlayerTab = Window:Tab({
 -------------------------------------------------
 -- 玩家设定（WalkSpeed、Jump）
 -------------------------------------------------
-PlayerTab:Slider({
+local WalkspeedSlider = PlayerTab:Slider({
     Flag = "Slider1",
     Title = "Walk Speed",
     Desc = "Adjust Your Walk Speed",
@@ -164,7 +237,7 @@ PlayerTab:Slider({
     end,
 })
 
-PlayerTab:Slider({
+local JumpHeightSlider = PlayerTab:Slider({
     Flag = "Slider2",
     Title = "Jump Height",
     Desc = "Adjust Your Jump Height",
@@ -301,7 +374,7 @@ PlayerTab:Divider()
 local bb = game:service'VirtualUser'
 local afkConnection
 
-PlayerTab:Toggle({
+local afkToggle = PlayerTab:Toggle({
     Flag = "Toggle1",
     Title = "Anti AFK",
     Desc = "Prevents you from being kicked for being AFK",
@@ -384,7 +457,7 @@ local function checkServerPlayers()
 end
 
 --🟢 Anti Public Server Toggle
-PlayerTab:Toggle({
+local antiPublicToggle = PlayerTab:Toggle({
     Flag = "Toggle2",
     Title = "Anti Public Server",
     Desc = "Automatically kicks you from public servers when non-whitelisted players are detected.",
@@ -399,7 +472,7 @@ PlayerTab:Toggle({
 })
 
 --📝 Whitelist 输入框
-PlayerTab:Input({
+local whitelistInput = PlayerTab:Input({
     Flag = "Input1",
     Title = "Whitelist Player",
     Desc = "Enter player username (Not Display Name) separated by commas to whitelist them.",
@@ -418,7 +491,7 @@ local RankingTab = Window:Tab({
     })
 
 -- ✅ Auto Rank Up
-RankingTab:Toggle({
+local autoRankUpToggle = RankingTab:Toggle({
     Flag = "RankUp1",
     Title = "Auto Rank Up",
     Desc = "Automatically rank up",
@@ -445,7 +518,7 @@ RankingTab:Toggle({
 })
 
 --Auto Prestige
-RankingTab:Toggle({
+local autoPrestigeToggle = RankingTab:Toggle({
     Flag = "AutoPrestige1",
     Title = "Auto Prestige",
     Desc = "Automatically prestige levels",
@@ -477,7 +550,7 @@ local CodesTab = Window:Tab({
     })
 
 -- ✅ Redeem Codes Button
-CodesTab:Button({
+local redeemCodesButton = CodesTab:Button({
     Flag = "RedeemCodes1",
     Title = "Redeem All Codes",
     Desc = "Redeem all codes automatically.",
@@ -508,7 +581,7 @@ local CollectTab = Window:Tab({
     })
 
 --Auto Collect Hourly and Daily Rewards
-CollectTab:Toggle({
+local hourlyDailyRewardsToggle = CollectTab:Toggle({
     Flag = "HourlyDailyRewards1",
     Title = "Auto Collect Hourly and Daily Rewards",
     Desc = "Automatically collect hourly and daily rewards",
@@ -553,7 +626,7 @@ CollectTab:Toggle({
 CollectTab:Divider()
 
 --Auto Claim Group Chest
-CollectTab:Toggle({
+local claimGroupChestToggle = CollectTab:Toggle({
     Flag = "ClaimGroupChest1",
     Title = "Auto Claim Group Chest",
     Desc = "Automatically claim group chest",
@@ -581,7 +654,7 @@ CollectTab:Toggle({
 })
 
 --Auto Claim Premium Chest
-CollectTab:Toggle({
+local claimPremiumChestToggle = CollectTab:Toggle({
     Flag = "ClaimPremiumChest1",
     Title = "Auto Claim Premium Chest",
     Desc = "Automatically claim premium chest",
@@ -609,7 +682,7 @@ CollectTab:Toggle({
 })
 
 --Auto Claim VIP Chest
-CollectTab:Toggle({
+local claimVIPChestToggle = CollectTab:Toggle({
     Flag = "ClaimVIPChest1",
     Title = "Auto Claim VIP Chest",
     Desc = "Automatically claim VIP chest",
@@ -637,7 +710,7 @@ CollectTab:Toggle({
 })
 
 --Auto Claim Daily Chest
-CollectTab:Toggle({
+local claimDailyChestToggle = CollectTab:Toggle({
     Name = "Auto Claim Daily Chest",
     Title = "Auto Claim Daily Chest",
     Desc = "Automatically claim daily chest",
@@ -1587,7 +1660,7 @@ local QuestTab = Window:Tab({
     })
 
 --Auto Get Daily Quest
-QuestTab:Toggle({
+local DailyQuestToggle = QuestTab:Toggle({
     Flag = "DailyQuest1",
    Title = "Auto Get Daily Quest",
    Desc = "Automatically accept daily quests",
@@ -1621,7 +1694,7 @@ end,
 QuestTab:Divider()
 
 --Auto Find & Collect Punching Machine
-QuestTab:Toggle({
+local PunchingMachineQuestToggle = QuestTab:Toggle({
     Flag = "Quest2301",
    Title = "Auto Complete Punching Machine Quest",
    Desc = "Automatically accept and complete Punching Machine quest",
@@ -1665,7 +1738,7 @@ end,
 --Auto Hero Quests
 
 --Auto Demon Fruit Quest
-QuestTab:Toggle({
+local DemonFruitQuestToggle = QuestTab:Toggle({
     Flag = "Quest2302",
    Title = "Auto Complete Demon Fruit Quest",
    Desc = "Automatically accept and complete Demon Fruit quest",
@@ -1707,7 +1780,7 @@ end,
 })
 
 --Auto Complete Briefcase Quest
-QuestTab:Toggle({
+local BriefcaseQuestToggle = QuestTab:Toggle({
     Flag = "Quest2601",
    Title = "Auto Complete Briefcase Quest",
    Desc = "Automatically accept and complete Briefcase quest",
@@ -1749,7 +1822,7 @@ end,
 })
 
 --Auto Complete Assassin Knife Quest
-QuestTab:Toggle({
+local AssassinKnifeQuestToggle = QuestTab:Toggle({
     Flag = "Quest2609",
    Title = "Auto Complete Assassin Knife Quest",
    Desc = "Automatically accept and complete Assassin Knife quest",
@@ -1791,7 +1864,7 @@ end,
 })
 
 --Auto Complete Assassin Pistol Quest
-QuestTab:Toggle({
+local AssassinPistolQuestToggle = QuestTab:Toggle({
     Flag = "Quest2610",
    Title = "Auto Complete Assassin Pistol Quest",
    Desc = "Automatically accept and complete Assassin Pistol quest",
@@ -1833,7 +1906,7 @@ end,
 })
 
 --Auto Complete Exorcise Humans Quest
-QuestTab:Toggle({
+local ExorciseHumansQuestToggle = QuestTab:Toggle({
     Flag = "Quest2303",
    Title = "Auto Complete Exorcise Humans Quest",
    Desc = "Automatically accept and complete Exorcise Humans quest",
@@ -1875,7 +1948,7 @@ end,
 })
 
 --Auto Complete Evil Spirit Quest
-QuestTab:Toggle({
+local EvilSpiritQuestToggle = QuestTab:Toggle({
     Flag = "Quest2304",
    Title = "Auto Complete Evil Spirit Quest",
    Desc = "Automatically accept and complete Evil Spirit quest",
@@ -1917,7 +1990,7 @@ end,
 })
 
 --Auto Complete Bento Box Quest
-QuestTab:Toggle({
+local BentoBoxQuestToggle = QuestTab:Toggle({
     Flag = "Quest2305",
    Title = "Auto Complete Bento Box Quest",
    Desc = "Automatically accept and complete Bento Box quest",
@@ -1988,7 +2061,7 @@ local StarDropdown = StarTab:Dropdown({
 })
 
 -- Auto Open Star Toggle
-StarTab:Toggle({
+local AutoOpenStarToggle = StarTab:Toggle({
     Flag = "AutoOpenStar1",
     Title = "Auto Open Star",
     Desc = "Automatically Open Max Selected Star",
@@ -2366,7 +2439,7 @@ getgenv().AutoBankaiRunning = false
 getgenv().AutoChakraRunning = false
 getgenv().AutoScytheRunning = false
 
-WeaponsTab:Toggle({
+local AutoBreathingsToggle = WeaponsTab:Toggle({
     Flag = "AutoBreathings1",
     Title = "Auto Roll Breathings",
     Desc = "Automatically Roll Breathings Using Selected Weapon",
@@ -2399,7 +2472,7 @@ WeaponsTab:Toggle({
     end,
 })
 
-WeaponsTab:Toggle({
+local AutoBankaiToggle = WeaponsTab:Toggle({
     Flag = "AutoBankai1",
     Title = "Auto Roll Bankai",
     Desc = "Automatically Roll Bankai Using Selected Weapon",
@@ -2431,7 +2504,7 @@ WeaponsTab:Toggle({
     end,
 })
 
-WeaponsTab:Toggle({
+local AutoChakraToggle = WeaponsTab:Toggle({
     Flag = "AutoChakra1",
     Title = "Auto Roll Chakra Infusion",
     Desc = "Automatically Roll Chakra Infusion Using Selected Weapon",
@@ -2463,7 +2536,7 @@ WeaponsTab:Toggle({
     end,
 })
 
-WeaponsTab:Toggle({
+local AutoScytheToggle = WeaponsTab:Toggle({
     Flag = "AutoScythe1",
     Title = "Auto Upgrade Scythe Leveling",
     Desc = "Automatically Upgrade Scythe Leveling Using Selected Weapon",
@@ -2747,7 +2820,7 @@ TitansTab:Divider()
 
 getgenv().AutoInjectionRunning = false
 
-TitansTab:Toggle({
+local AutoInjectionTitanToggle = TitansTab:Toggle({
     Flag = "AutoInjection1",
     Title = "Auto Roll Injection",
     Desc = "Automatically Roll Injection Using Selected Titan",
@@ -3033,7 +3106,7 @@ StandsTab:Divider()
 
 getgenv().AutoStandsInjectionRunning = false
 
-StandsTab:Toggle({
+local AutoStandsInjectionToggle = StandsTab:Toggle({
     Flag = "AutoInjection2",
     Title = "Auto Roll Requiem Injection",
     Desc = "Automatically Roll Requiem Injection Using Selected Stand",
@@ -3155,7 +3228,7 @@ local ProgressionMap = { -- Upgrade_Name, Bench_Name, Action
 }
 
 -- Auto Progression Toggle
-ProgressionTab:Toggle({
+local UpgradeProgressionToggle = ProgressionTab:Toggle({
     Flag = "AutoProgression1",
     Title = "Auto Progression",
     Desc = "Automatically Upgrade Selected Progression",
@@ -3245,7 +3318,7 @@ local AutoUpgradeDropdown = UpgradesTab:Dropdown({
 -- 全局控制变量
 getgenv().AutoUpgradeRunning = false
 
-UpgradesTab:Toggle({
+local AutoUpgradesToggle = UpgradesTab:Toggle({
     Flag = "AutoUpgrades1",
     Title = "Auto Upgrades",
     Desc = "Automatically Upgrade Selected Dungeon Upgrades",
@@ -3277,8 +3350,8 @@ UpgradesTab:Toggle({
     end,
 })
 UpgradesTab:Divider()
-UpgradesTab:Toggle({
-    Flag = "AutpupgradeAll1",
+local AutoUpgradeAllToggle = UpgradesTab:Toggle({
+    Flag = "AutoUpgradeAll1",
     Title = "Auto Upgrades ALL",
     Desc = "Automatically Upgrade ALL Dungeon Upgrades",
     Default = false,
