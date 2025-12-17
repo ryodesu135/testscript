@@ -63,7 +63,7 @@ local MainTab = Window:Tab({
 }) 
 
 MainTab:Section({
-        Title = [[Lights Hub - Anime Eternal [Update 29]
+        Title = [[Lights Hub - Anime Eternal [Update 29 P2]
 
 This Script is still in development, so you may encounter bugs.
 More function is coming very soon.
@@ -643,7 +643,6 @@ local redeemCodesButton = CodesTab:Button({
     Locked = false,
     Callback = function()
     local codes = {"SlashX", "Derp", "Heyyyo", 
-    "Update27P2", "765KFav", "770KFav", "Update27P2Code", "255MVisits", "NothanksgivingCode2",
     "Update28", "Update28Code", "775KFav", "260MVisits", "Update28Code2",
     "Update28P2", "Update28P2Code", "405KLikes", "265MVisits", "Update28P2Code2",
     "Update28P3","Update28P2Code","Update28P2Code2","Update28P2Code3","780KFav","Update28P3Code","Update28P3Code2",
@@ -1845,6 +1844,136 @@ local ExchangeShopW2ProductsToggle = ExchangeShopTab:Toggle({
                 end
             end)
         else
+        end
+    end,
+})
+
+local FoodTab = Window:Tab({
+        Title = "Food",
+        Icon = "hamburger",
+    })
+
+getgenv().AutoExchangeFoodRunning = false
+getgenv().AutoExchangeMacaronRunning = false
+
+local ExchangeFoodOptions = {
+    "Chocolate Bar","Cheese Pizza Slice","Milk","Green Gummy Bear","Hot Sauce","Coffee","Doughnut","Fried Egg","Waffle"
+}
+
+local ExchangeFoodMap = {
+    ["Chocolate Bar"] = {Product_Id = "1", Bench_Name = "Food_Shop"},
+    ["Cheese Pizza Slice"] = {Product_Id = "2", Bench_Name = "Food_Shop"},
+    ["Milk"] = {Product_Id = "3", Bench_Name = "Food_Shop"},
+    ["Green Gummy Bear"] = {Product_Id = "4", Bench_Name = "Food_Shop"},
+    ["Hot Sauce"] = {Product_Id = "5", Bench_Name = "Food_Shop"},
+    ["Coffee"] = {Product_Id = "6", Bench_Name = "Food_Shop"},
+    ["Doughnut"] = {Product_Id = "7", Bench_Name = "Food_Shop"},
+    ["Fried Egg"] = {Product_Id = "8", Bench_Name = "Food_Shop"},
+    ["Waffle"] = {Product_Id = "9", Bench_Name = "Food_Shop"},
+}
+
+local ExchangeMacaronOptions = {
+    "Energy Macaron","Coin Macaron","Damage Macaron","Luck Macaron","Exp Macaron","Star Macaron","Soul Macaron","Drop Macaron","Shadow Soul Macaron"
+}
+
+local ExchangeMacaronMap = {
+    ["Energy Macaron"] = {Product_Id = "1", Bench_Name = "Food_Exchanger"},
+    ["Coin Macaron"] = {Product_Id = "2", Bench_Name = "Food_Exchanger"},
+    ["Damage Macaron"] = {Product_Id = "3", Bench_Name = "Food_Exchanger"},
+    ["Luck Macaron"] = {Product_Id = "4", Bench_Name = "Food_Exchanger"},
+    ["Exp Macaron"] = {Product_Id = "5", Bench_Name = "Food_Exchanger"},
+    ["Star Macaron"] = {Product_Id = "6", Bench_Name = "Food_Exchanger"},
+    ["Soul Macaron"] = {Product_Id = "7", Bench_Name = "Food_Exchanger"},
+    ["Drop Macaron"] = {Product_Id = "8", Bench_Name = "Food_Exchanger"},
+    ["Shadow Soul Macaron"] = {Product_Id = "9", Bench_Name = "Food_Exchanger"},
+}
+
+local ExchangeFoodDropdown = FoodTab:Dropdown({
+    Flag = "ExchangeFoodDropdown",
+    Title = "Select Food Shop Items",
+    Values = ExchangeFoodOptions,
+    Value = {},
+    Multi = true,
+    AllowNone = true,
+    Callback = function(option)
+        getgenv().SelectedFood = option
+    end,
+})
+
+local ExchangeFoodToggle = FoodTab:Toggle({
+    Flag = "AutoBuyFoodToggle",
+    Title = "Auto Exchange Coin to Food",
+    Desc = "Automatically Exchange Coin to Selected Food",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoExchangeFoodRunning = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoExchangeFoodRunning do
+                    if getgenv().SelectedFood and #getgenv().SelectedFood > 0 then
+                        for _, FoodName in ipairs(getgenv().SelectedFood) do
+                            local FoodData = ExchangeFoodMap[FoodName]
+                            if FoodData then
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Bench_Name"] = FoodData.Bench_Name,
+                                    ["Product_Id"] = tonumber(FoodData.Product_Id),
+                                    ["Action"] = "Merchant_Purchase",
+                                    ["Amount"] = 1,
+                                })
+                                task.wait(0.1)  -- 等待0.1秒后发送下一个
+                            end
+                        end
+                    end
+                end
+            end)
+        else
+            -- stopped
+        end
+    end,
+})
+
+FoodTab:Divider()
+
+local ExchangeMacaronDropdown = FoodTab:Dropdown({
+    Flag = "ExchangeMacaronDropdown",
+    Title = "Select Macaron",
+    Values = ExchangeMacaronOptions,
+    Value = {},
+    Multi = true,
+    AllowNone = true,
+    Callback = function(option)
+        getgenv().SelectedMacaron = option
+    end,
+})
+
+local ExchangeMacaronToggle = FoodTab:Toggle({
+    Flag = "AutoExchangeMacaronToggle",
+    Title = "Auto Exchange Food to Macaron",
+    Desc = "Automatically Exchange Food to Selected Macaron",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoExchangeMacaronRunning = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoExchangeMacaronRunning do
+                    if getgenv().SelectedMacaron and #getgenv().SelectedMacaron > 0 then
+                        for _, MacaronName in ipairs(getgenv().SelectedMacaron) do
+                            local FoodData = ExchangeMacaronMap[MacaronName]
+                            if FoodData then
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Bench_Name"] = FoodData.Bench_Name,
+                                    ["Product_Id"] = tonumber(FoodData.Product_Id),
+                                    ["Action"] = "Merchant_Purchase",
+                                    ["Amount"] = 1,
+                                })
+                                task.wait(0.1)  -- 等待0.1秒后发送下一个
+                            end
+                        end
+                    end
+                end
+            end)
+        else
+            -- stopped
         end
     end,
 })
