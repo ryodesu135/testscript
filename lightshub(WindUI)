@@ -3964,8 +3964,8 @@ getgenv().WasAutoFarmRunning = false
 getgenv().FarmTargetChanged = false
 
 -- Auto Leave Raid At Wave
-getgenv().AutoLeaveRaidWave = 0
-getgenv().AutoLeaveRaidEnabled = false
+getgenv().AutoLeaveRaidOnWaveEnabled = false
+getgenv().LeaveRaidWave = 0
 
 -- 其他变量
 local player = game:GetService("Players").LocalPlayer
@@ -4388,10 +4388,11 @@ Remote.OnClientEvent:Connect(function(data)
         -- 新增：处理 Wave Cleared 消息并自动离开 Raid
         local waveText = data.Text
         local waveNum = string.match(waveText, "Wave (%d+) Cleared!")
-        if waveNum and tonumber(waveNum) == getgenv().AutoLeaveRaidWave and getgenv().AutoLeaveRaidEnabled and getgenv().InRaid then
+        if waveNum and tonumber(waveNum) == getgenv().LeaveRaidWave and getgenv().AutoLeaveRaidOnWaveEnabled and getgenv().InRaid then
             ToServer:FireServer({
                 ["Action"] = "Dungeon_Leave",
             })
+            print("[DEBUG] Auto left raid at wave", getgenv().LeaveRaidWave)
         end
     end
 end)
@@ -4476,7 +4477,7 @@ local AutoLeaveRaidOnWaveSlider = AutoRaidTab:Slider({
         Default = 0,
     },
     Callback = function(Value)
-        getgenv().AutoLeaveRaidWave = Value
+        getgenv().LeaveRaidWave = Value
     end,
 })
 
@@ -4485,7 +4486,7 @@ local AutoLeaveRaidOnWaveToggle = AutoRaidTab:Toggle({
     Title = "Enable Auto Leave Raid At Selected Wave",
     Default = false,
     Callback = function(state)
-        getgenv().AutoLeaveRaidEnabled = state
+        getgenv().AutoLeaveRaidOnWaveEnabled = state
     end,
 })
 
