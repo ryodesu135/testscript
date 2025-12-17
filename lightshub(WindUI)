@@ -135,6 +135,12 @@ local function RegisterAll(cfg)
     cfg:Register("ExchangeShopW2ProductsDropdown", ExchangeShopW2ProductsDropdown)
     cfg:Register("AutoExchangeShopW2ProductsToggle", ExchangeShopW2ProductsToggle)
 
+    -- Food
+    cfg:Register("ExchangeFoodDropdown", ExchangeFoodDropdown)
+    cfg:Register("AutoExchangeFoodToggle", ExchangeFoodToggle)
+    cfg:Register("ExchangeMacaronDropdown", ExchangeMacaronDropdown)
+    cfg:Register("AutoExchangeMacaronToggle", ExchangeMacaronToggle)
+
     -- Quests
     cfg:Register("AutoDailyQuest", DailyQuestToggle)
     cfg:Register("AutoPunchingMachineQuest", PunchingMachineQuestToggle)
@@ -643,11 +649,11 @@ local redeemCodesButton = CodesTab:Button({
     Locked = false,
     Callback = function()
     local codes = {"SlashX", "Derp", "Heyyyo", 
-    "Update28", "Update28Code", "775KFav", "260MVisits", "Update28Code2",
     "Update28P2", "Update28P2Code", "405KLikes", "265MVisits", "Update28P2Code2",
     "Update28P3","Update28P2Code","Update28P2Code2","Update28P2Code3","780KFav","Update28P3Code","Update28P3Code2",
     "Update29","Update29Code","270MVisits","Update29Code2","Update29Code3","ChristmasSoon?!","Update29RestartCode",
-    "Update29P2","Update29P2Code","Update29P2Code2","IsChristmasComing?!","785KFav","SuperUPD29Code"
+    "Update29P2","Update29P2Code","Update29P2Code2","IsChristmasComing?!","785KFav","SuperUPD29Code",
+    "Update29P3","Update29P3Code","Update29P3Code2","ChristmasPart1?","410KLikes"
 
 }
     for _, code in ipairs(codes) do
@@ -3472,7 +3478,9 @@ local ProgressionTab = Window:Tab({
 local ProgressionDropdown = ProgressionTab:Dropdown({
     Flag = "ProgressionDropdown",
    Title = "Progression List",
-   Values = {"[W2] Haki Upgrade",
+   Values = {
+    "[W1] Christmas Materials","[W1] Christmas Damage",
+    "[W2] Haki Upgrade",
     "[W3] Spiritual Pressure",
     "[W4] Cursed Progression",
     "[W5] Slayer Energy Progression",
@@ -3502,6 +3510,8 @@ local ProgressionDropdown = ProgressionTab:Dropdown({
 })
 
 local ProgressionMap = { -- Upgrade_Name, Bench_Name, Action
+    ["[W1] Christmas Materials"] = {"Christmas_Materials", "Christmas_Materials_Upgrade", "_Progression"},
+    ["[W1] Christmas Damage"] = {"Christmas_Damage", "Christmas_Damage_Upgrade", "_Progression"},
     ["[W2] Haki Upgrade"] = {"Haki_Upgrade", "Haki_Upgrade", "_Upgrades"},
     ["[W3] Spiritual Pressure"] = {"Spiritual_Pressure", "Spiritual_Pressure", "_Upgrades"},
     ["[W4] Cursed Progression"] = {"Curse", "Cursed_Progression", "_Upgrades"},
@@ -3854,7 +3864,7 @@ local RaidOptions = {
     "Ghoul Raid","Chainsaw Defense","Netherworld Defense","Green Planet Raid",
     "Hollow Raid","One Hero Raid","Tomb Arena Raid","Halloween Raid","Graveyard Raid",
     "Dungeon Suffering","Dungeon Adventure","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3","Maze Level 4","Dungeon Labyrinth","Crimson Canyon",
-    "Body Improvement Challenge","Breathing Raid","Mugen Dungeon"
+    "Body Improvement Challenge","Breathing Raid","Mugen Dungeon","Ice Raid"
 
 }
 
@@ -3922,7 +3932,8 @@ local RaidNameMap = {
     ["One Hero Raid"] = "One_Hero_Raid",
     ["Body Improvement Challenge"] = "Body_Improvement_Challenge",
     ["Breathing Raid"] = "Breathing_Raid",
-    ["Mugen Dungeon"] = "Mugen_Dungeon"
+    ["Mugen Dungeon"] = "Mugen_Dungeon",
+    ["Ice Raid"] = "Ice_Raid",
 
 }
 
@@ -3951,6 +3962,10 @@ getgenv().IsEnteringRaid = false
 getgenv().AutoFarmRunning = false
 getgenv().WasAutoFarmRunning = false
 getgenv().FarmTargetChanged = false
+
+-- Auto Leave Raid At Wave
+getgenv().AutoLeaveRaidWave = 0
+getgenv().AutoLeaveRaidEnabled = false
 
 -- 其他变量
 local player = game:GetService("Players").LocalPlayer
@@ -4369,6 +4384,15 @@ Remote.OnClientEvent:Connect(function(data)
                 EnterNextRaid()
             end
         end
+    elseif data.Action == "Message" and data.Type == "Normal" and data.Color == "Green" then
+        -- 新增：处理 Wave Cleared 消息并自动离开 Raid
+        local waveText = data.Text
+        local waveNum = string.match(waveText, "Wave (%d+) Cleared!")
+        if waveNum and tonumber(waveNum) == getgenv().AutoLeaveRaidWave and getgenv().AutoLeaveRaidEnabled and getgenv().InRaid then
+            ToServer:FireServer({
+                ["Action"] = "Dungeon_Leave",
+            })
+        end
     end
 end)
 
@@ -4439,6 +4463,29 @@ local AutoRaidSpeedDropdown = AutoRaidTab:Dropdown({
     Multi = false,
     Callback = function(option)
         getgenv().SelectedRaidSpeed = option
+    end,
+})
+
+local AutoLeaveRaidOnWaveSlider = AutoRaidTab:Slider({
+    Flag = "AutoLeaveRaidOnWaveSlider1",
+    Title = "Leave Raid At Wave",
+    Step = 1,
+    Value = {
+        Min = 0,
+        Max = 999,
+        Default = 0,
+    },
+    Callback = function(Value)
+        getgenv().AutoLeaveRaidWave = Value
+    end,
+})
+
+local AutoLeaveRaidOnWaveToggle = AutoRaidTab:Toggle({
+    Flag = "AutoLeaveRaidOnWaveToggle1",
+    Title = "Enable Auto Leave Raid At Selected Wave",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoLeaveRaidEnabled = state
     end,
 })
 
