@@ -1,3 +1,5 @@
+if game.PlaceId == 90462358603255 then
+
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local Icons = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/Footagesus/Icons/main/Main.lua"))()
 Icons.SetIconsType("lucide")
@@ -19,26 +21,33 @@ local Window = WindUI:CreateWindow({
     HideSearchBar = true,
     ScrollBarEnabled = false,
     ToggleKey = Enum.KeyCode.K,
+
+    OpenButton = {
+        Title = "Lights Hub",
+        CornerRadius = UDim.new(0,16),
+        StrokeThickness = 2,
+        Enabled = true, -- enable or disable openbutton
+        Draggable = true,
+        OnlyMobile = false,
+        
+        Color = ColorSequence.new( -- gradient
+            Color3.fromHex("AB61FF"), 
+            Color3.fromHex("281140")
+        ),
+    },
 })
 
-Window:EditOpenButton({
-    Title = "Lights Hub",
-    Icon = "monitor",
-    CornerRadius = UDim.new(0,16),
-    StrokeThickness = 2,
-    Color = ColorSequence.new( -- gradient
-        Color3.fromHex("FF0F7B"), 
-        Color3.fromHex("F89B29")
-    ),
-    OnlyMobile = false,
-    Enabled = true,
-    Draggable = true,
+Window:Tag({
+    Title = "Anime Eternal - Update 30",
+    Color = Color3.fromHex("8724FF"),
+    Radius = 0, -- from 0 to 13
 })
 
 -- 🧠 初始化全局变量
 getgenv().UserSetWalkSpeed = nil
 getgenv().UserSetJumpPower = nil
 getgenv().SpeedMonitorRunning = false
+
 
 -- ✅ 捕捉当前角色 WalkSpeed / JumpPower
 local player = game.Players.LocalPlayer
@@ -76,8 +85,10 @@ local MainTab = Window:Tab({
     Icon = "lightbulb",
 }) 
 
-MainTab:Section({
-        Title = [[Lights Hub - Anime Eternal [Update 29 P2]
+MainTab:Select()
+
+local AboutmeSection = MainTab:Section({
+        Title = [[Lights Hub
 
 This Script is still in development, so you may encounter bugs.
 More function is coming very soon.
@@ -88,6 +99,24 @@ Discord Server: https://discord.gg/ryenf7d6C5]],
         TextTransparency = .35,
         FontWeight = Enum.FontWeight.Medium,
     })
+
+local DiscordServerParagraph = MainTab:Paragraph({
+            Title = "Join our Discord Server!",
+            Buttons = {
+                {
+                    Title = "Copy link",
+                    Icon = "link",
+                    Callback = function()
+                        setclipboard("https://discord.gg/ryenf7d6C5")
+                        WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Copied to Clipboard!",
+                        Duration = 2,
+                        })
+                    end
+                }
+            }
+        })
 
 -- Config Tab
 local configTab = Window:Tab({ 
@@ -663,7 +692,7 @@ local redeemCodesButton = CodesTab:Button({
     Locked = false,
     Callback = function()
     local codes = {"SlashX", "Derp", "Heyyyo", 
-    "Update28P2", "Update28P2Code", "405KLikes", "265MVisits", "Update28P2Code2",
+    "Update28P2Code","Update28P2Code2",
     "Update28P3","Update28P2Code","Update28P2Code2","Update28P2Code3","780KFav","Update28P3Code","Update28P3Code2",
     "Update29","Update29Code","270MVisits","Update29Code2","Update29Code3","ChristmasSoon?!","Update29RestartCode",
     "Update29P2","Update29P2Code","Update29P2Code2","IsChristmasComing?!","785KFav","SuperUPD29Code",
@@ -3881,7 +3910,7 @@ local RaidOptions = {
     "Sin Raid","Kaiju Dungeon","Dragon Room Raid","Gleam Raid","Progression Raid 2",
     "Ghoul Raid","Chainsaw Defense","Netherworld Defense","Green Planet Raid",
     "Hollow Raid","One Hero Raid","Tomb Arena Raid","Halloween Raid","Graveyard Defense",
-    "Dungeon Suffering","Dungeon Adventure","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3","Maze Level 4","Dungeon Labyrinth","Crimson Canyon",
+    "Dungeon Suffering","Dungeon Adventurer","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3","Maze Level 4","Dungeon Labyrinth","Crimson Canyon",
     "Body Improvement Challenge","Breathing Raid","Mugen Dungeon","Ice Raid"
 
 }
@@ -3904,7 +3933,7 @@ local RaidSpeedOptions = {"1x Speed", "2x Speed", "3x Speed"}
 -- 需要 Auto Farm 的 Dungeon 和 Maze（来自 DungeonOptions 和 RaidOptions）
 local AutoFarmDungeons = {
     "Dungeon Easy", "Dungeon Medium", "Dungeon Hard", "Dungeon Insane", "Dungeon Crazy", "Dungeon Nightmare",
-    "Kaiju Dungeon", "Dungeon Suffering", "Dungeon Adventure", "Dungeon Torment", "Dungeon Labyrinth", "Crimson Canyon", "Maze Level 1", "Maze Level 2", "Maze Level 3", "Maze Level 4",
+    "Kaiju Dungeon", "Dungeon Suffering", "Dungeon Adventurer", "Dungeon Torment", "Dungeon Labyrinth", "Crimson Canyon", "Maze Level 1", "Maze Level 2", "Maze Level 3", "Maze Level 4",
     "Body Improvement Challenge","Mugen Dungeon"
 
 }
@@ -3940,7 +3969,7 @@ local RaidNameMap = {
     ["Halloween Raid"] = "Halloween_Raid",
     ["Graveyard Defense"] = "Graveyard_Defense",
     ["Dungeon Suffering"] = "Dungeon_Suffering",
-    ["Dungeon Adventure"] = "Dungeon_Adventure",
+    ["Dungeon Adventurer"] = "Dungeon_Adventurer",
     ["Dungeon Torment"] = "Dungeon_Torment",
     ["Maze Level 1"] = "Maze_Level_1",
     ["Maze Level 2"] = "Maze_Level_2",
@@ -4374,7 +4403,15 @@ Remote.OnClientEvent:Connect(function(data)
                     ["Name"] = signalName,
                 })
                 getgenv().CurrentDungeonName = dungeonName
-                break  -- 假设一次只匹配一个
+
+                task.delay(1, function()
+                    local currentName = getgenv().CurrentDungeonName or getgenv().CurrentRaidName
+                    if getgenv().InDungeon and currentName and IsAutoFarmDungeon(currentName) then
+                        StartDungeonAutoFarm()
+                    end
+                end)
+                
+                break
             end
         end
     elseif data.Action == "Dungeon" and data.Type == "Outlines" then
@@ -4468,6 +4505,7 @@ local AutoRaidDropdown = AutoRaidTab:Dropdown({
     Values = RaidOptions,
     Value = {},
     Multi = true,
+    AllowNone = true,
     Callback = function(option)
         getgenv().SelectedRaids = option
         getgenv().CurrentRaidIndex = 1
@@ -4520,3 +4558,113 @@ local AutoRaidToggle = AutoRaidTab:Toggle({
         getgenv().AutoRaidEnabled = state
     end,
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+elseif game.PlaceId == 75992362647444 then
+
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+local Icons = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/Footagesus/Icons/main/Main.lua"))()
+Icons.SetIconsType("lucide")
+
+local Window = WindUI:CreateWindow({
+    Title = "Lights Hub",
+    Author = "by Ryo",
+    Folder = "LightsHub",
+    
+    -- ↓ This all is Optional. You can remove it.
+    Size = UDim2.fromOffset(580, 460),
+    MinSize = Vector2.new(560, 350),
+    MaxSize = Vector2.new(850, 560),
+    Transparent = true,
+    Theme = "Dark",
+    Resizable = true,
+    SideBarWidth = 200,
+    BackgroundImageTransparency = 0.42,
+    HideSearchBar = true,
+    ScrollBarEnabled = false,
+    ToggleKey = Enum.KeyCode.K,
+
+    OpenButton = {
+        Title = "Lights Hub",
+        CornerRadius = UDim.new(0,16),
+        StrokeThickness = 2,
+        Enabled = true, -- enable or disable openbutton
+        Draggable = true,
+        OnlyMobile = false,
+        
+        Color = ColorSequence.new( -- gradient
+            Color3.fromHex("AB61FF"), 
+            Color3.fromHex("281140")
+        ),
+    },
+})
+
+Window:Tag({
+    Title = "Tap Simulator - Update 4",
+    Color = Color3.fromHex("8724FF"),
+    Radius = 0, -- from 0 to 13
+})
+
+else
+    warn("不支持的游戏 PlaceId: " .. tostring(game.PlaceId))
+end
