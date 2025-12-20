@@ -19,7 +19,21 @@ local Window = WindUI:CreateWindow({
     HideSearchBar = true,
     ScrollBarEnabled = false,
     ToggleKey = Enum.KeyCode.K,
-})                                                                                                          
+})
+
+Window:EditOpenButton({
+    Title = "Lights Hub",
+    Icon = "monitor",
+    CornerRadius = UDim.new(0,16),
+    StrokeThickness = 2,
+    Color = ColorSequence.new( -- gradient
+        Color3.fromHex("FF0F7B"), 
+        Color3.fromHex("F89B29")
+    ),
+    OnlyMobile = false,
+    Enabled = true,
+    Draggable = true,
+})
 
 -- 🧠 初始化全局变量
 getgenv().UserSetWalkSpeed = nil
@@ -653,7 +667,8 @@ local redeemCodesButton = CodesTab:Button({
     "Update28P3","Update28P2Code","Update28P2Code2","Update28P2Code3","780KFav","Update28P3Code","Update28P3Code2",
     "Update29","Update29Code","270MVisits","Update29Code2","Update29Code3","ChristmasSoon?!","Update29RestartCode",
     "Update29P2","Update29P2Code","Update29P2Code2","IsChristmasComing?!","785KFav","SuperUPD29Code",
-    "Update29P3","Update29P3Code","Update29P3Code2","ChristmasPart1?","410KLikes"
+    "Update29P3","Update29P3Code","Update29P3Code2","ChristmasPart1?","410KLikes","ChristmasPart1!","Update30Late",
+    "Update30","Update30Code","790KFav","Update30Code2","Update30Code3","275MVisits","Update30Late2","Update30Late3"
 
 }
     for _, code in ipairs(codes) do
@@ -2382,7 +2397,7 @@ local StarDropdown = StarTab:Dropdown({
 
     "[W26] Amusement Park","[W27] Re:Manor","[W28] Asfordo Academy","[W29] Science Village","[W30] Sand Village",
 
-    "[W31] Night Raid Base","[W32] Salty School","[W33] Mugen District"
+    "[W31] Night Raid Base","[W32] Salty School","[W33] Mugen District","[W34] Easton Academy"
 },
     Value = "[W1] Earth City",
     Callback = function(option)
@@ -2430,7 +2445,9 @@ local RollTab = Window:Tab({
 local RollDropdown = RollTab:Dropdown({
     Flag = "RollDropdown",
    Title = "Roll List",
-   Values = {"[W1] Dragon Race","[W1] Saiyan Evolution",
+   Values = {
+    "[W1] Christmas Glove",
+    "[W1] Dragon Race","[W1] Saiyan Evolution",
     "[W2] Pirate Crew","[W2] Demon Fruits","[W2] Swords",
     "[W3] Reiatsu Color","[W3] Zanpakuto",
     "[W4] Curses",
@@ -2462,7 +2479,8 @@ local RollDropdown = RollTab:Dropdown({
     "[W30] Shinobi Clan","[W30] Kekkei Genkai","[W30] Power Eyes 2",
     "[W31] Energy Teigu","[W31] Damage Teigu",
     "[W32] Psycho Flow","[W32] Psycho Destruction",
-    "[W33] Slayer Marks","[W33] Demon Bloodline"
+    "[W33] Slayer Marks","[W33] Demon Bloodline",
+    "[W34] Magic Type","[W34] The Muscle"
 },
     Value = "[W1] Dragon Race",
     Callback = function(option)
@@ -3862,7 +3880,7 @@ local RaidOptions = {
     "Restaurant Raid","Cursed Raid","Progression Raid","Titan Defense",
     "Sin Raid","Kaiju Dungeon","Dragon Room Raid","Gleam Raid","Progression Raid 2",
     "Ghoul Raid","Chainsaw Defense","Netherworld Defense","Green Planet Raid",
-    "Hollow Raid","One Hero Raid","Tomb Arena Raid","Halloween Raid","Graveyard Raid",
+    "Hollow Raid","One Hero Raid","Tomb Arena Raid","Halloween Raid","Graveyard Defense",
     "Dungeon Suffering","Dungeon Adventure","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3","Maze Level 4","Dungeon Labyrinth","Crimson Canyon",
     "Body Improvement Challenge","Breathing Raid","Mugen Dungeon","Ice Raid"
 
@@ -3899,6 +3917,7 @@ local DungeonNameMap = {
     ["Dungeon Insane"] = "Dungeon_Insane",
     ["Dungeon Crazy"] = "Dungeon_Crazy",
     ["Dungeon Nightmare"] = "Dungeon_Nightmare",
+    ["Leaf Raid"] = "Leaf_Raid",
 }
 
 -- Raid 名称映射到信号中的 Name（例如 Kaiju Dungeon -> Kaiju_Dungeon）
@@ -3919,7 +3938,7 @@ local RaidNameMap = {
     ["Hollow Raid"] = "Hollow_Raid",
     ["Tomb Arena Raid"] = "Tomb_Arena_Raid",
     ["Halloween Raid"] = "Halloween_Raid",
-    ["Graveyard Raid"] = "Graveyard_Raid",
+    ["Graveyard Defense"] = "Graveyard_Defense",
     ["Dungeon Suffering"] = "Dungeon_Suffering",
     ["Dungeon Adventure"] = "Dungeon_Adventure",
     ["Dungeon Torment"] = "Dungeon_Torment",
@@ -4392,7 +4411,6 @@ Remote.OnClientEvent:Connect(function(data)
             ToServer:FireServer({
                 ["Action"] = "Dungeon_Leave",
             })
-            print("[DEBUG] Auto left raid at wave", getgenv().LeaveRaidWave)
         end
     end
 end)
@@ -4467,13 +4485,15 @@ local AutoRaidSpeedDropdown = AutoRaidTab:Dropdown({
     end,
 })
 
+AutoRaidTab:Divider()
+
 local AutoLeaveRaidOnWaveSlider = AutoRaidTab:Slider({
     Flag = "AutoLeaveRaidOnWaveSlider1",
     Title = "Leave Raid At Wave",
-    Step = 1,
+    Step = 5,
     Value = {
         Min = 0,
-        Max = 999,
+        Max = 995,
         Default = 0,
     },
     Callback = function(Value)
@@ -4489,6 +4509,8 @@ local AutoLeaveRaidOnWaveToggle = AutoRaidTab:Toggle({
         getgenv().AutoLeaveRaidOnWaveEnabled = state
     end,
 })
+
+AutoRaidTab:Divider()
 
 local AutoRaidToggle = AutoRaidTab:Toggle({
     Flag = "AutoJoinRaid1",
