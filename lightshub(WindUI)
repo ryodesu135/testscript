@@ -3674,178 +3674,84 @@ local AutoLevelChristmasGloveToggle = LevelingTab:Toggle({
         if state then
             getgenv().AutoLevelChristmasGloveRunning = true
             task.spawn(function()
-                while getgenv().AutoLevelChristmasGloveRunning and task.wait(1) do  -- 添加等待时间避免太快
-                    print("=== 开始查找圣诞手套 ===")
-                    
+                while getgenv().AutoLevelChristmasGloveRunning and task.wait(1) do
                     -- 获取玩家背包
                     local player = game:GetService("Players").LocalPlayer
-                    print("玩家:", player.Name)
-                    
                     local playerGui = player:FindFirstChild("PlayerGui")
-                    if not playerGui then
-                        print("❌ 未找到 PlayerGui")
-                        continue
-                    end
-                    print("✅ 找到 PlayerGui")
                     
-                    if not playerGui:IsA("PlayerGui") then
-                        print("❌ PlayerGui 不是 PlayerGui 类型")
+                    if not playerGui or not playerGui:IsA("PlayerGui") then
                         continue
                     end
                     
                     local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if not inventoryGui then
-                        print("❌ 未找到 Inventory_1")
-                        continue
-                    end
-                    print("✅ 找到 Inventory_1")
-                    
-                    if not inventoryGui:IsA("ScreenGui") then
-                        print("❌ Inventory_1 不是 ScreenGui 类型")
+                    if not inventoryGui or not inventoryGui:IsA("ScreenGui") then
                         continue
                     end
                     
                     local hub = inventoryGui:FindFirstChild("Hub")
-                    if not hub then
-                        print("❌ 未找到 Hub")
-                        continue
-                    end
-                    print("✅ 找到 Hub")
-                    
-                    if not hub:IsA("Frame") then
-                        print("❌ Hub 不是 Frame 类型")
+                    if not hub or not hub:IsA("Frame") then
                         continue
                     end
                     
                     local powers = hub:FindFirstChild("Powers")
-                    if not powers then
-                        print("❌ 未找到 Powers，正在检查其他可能的容器...")
-                        -- 检查是否有其他可能的容器名称
-                        for _, child in pairs(hub:GetChildren()) do
-                            print("Hub 子项:", child.Name, "类型:", child.ClassName)
-                        end
-                        continue
-                    end
-                    print("✅ 找到 Powers")
-                    
-                    if not powers:IsA("Frame") then
-                        print("❌ Powers 不是 Frame 类型")
+                    if not powers or not powers:IsA("Frame") then
                         continue
                     end
                     
                     local listFrame = powers:FindFirstChild("List_Frame")
-                    if not listFrame then
-                        print("❌ 未找到 List_Frame，正在检查 Powers 的子项...")
-                        for _, child in pairs(powers:GetChildren()) do
-                            print("Powers 子项:", child.Name, "类型:", child.ClassName)
-                        end
-                        continue
-                    end
-                    print("✅ 找到 List_Frame")
-                    
-                    if not listFrame:IsA("Frame") then
-                        print("❌ List_Frame 不是 Frame 类型")
+                    if not listFrame or not listFrame:IsA("Frame") then
                         continue
                     end
                     
                     local list = listFrame:FindFirstChild("List")
-                    if not list then
-                        print("❌ 未找到 List，正在检查 List_Frame 的子项...")
-                        for _, child in pairs(listFrame:GetChildren()) do
-                            print("List_Frame 子项:", child.Name, "类型:", child.ClassName)
-                        end
-                        continue
-                    end
-                    print("✅ 找到 List")
-                    
-                    if not list:IsA("ScrollingFrame") then
-                        print("❌ List 不是 ScrollingFrame 类型，实际类型:", list.ClassName)
+                    if not list or not list:IsA("ScrollingFrame") then
                         continue
                     end
                     
                     local christmasGloveId = nil
-                    local foundItems = 0
                     
-                    print("开始遍历物品列表...")
                     -- 遍历所有子项
                     for _, itemButton in pairs(list:GetChildren()) do
                         if itemButton:IsA("ImageButton") then
-                            print("找到 ImageButton:", itemButton.Name)
-                            
                             local inside = itemButton:FindFirstChild("Inside")
-                            if inside then
-                                print("  ✅ 找到 Inside")
-                                
-                                if inside:IsA("CanvasGroup") then
-                                    local title = inside:FindFirstChild("Title")
-                                    if title then
-                                        print("  ✅ 找到 Title")
-                                        
-                                        if title:IsA("TextLabel") then
-                                            local itemName = title.Text
-                                            print("  物品名称:", itemName)
-                                            foundItems = foundItems + 1
-                                            
-                                            if itemName == "Exotic Christmas Glove" then
-                                                christmasGloveId = itemButton.Name
-                                                print("🎉 找到圣诞手套! ID:", christmasGloveId)
-                                                break
-                                            end
-                                        else
-                                            print("  ❌ Title 不是 TextLabel 类型，实际类型:", title.ClassName)
-                                        end
-                                    else
-                                        print("  ❌ 未找到 Title，Inside 的子项:")
-                                        for _, insideChild in pairs(inside:GetChildren()) do
-                                            print("    ", insideChild.Name, "类型:", insideChild.ClassName)
-                                        end
+                            if inside and inside:IsA("CanvasGroup") then
+                                local title = inside:FindFirstChild("Title")
+                                if title and title:IsA("TextLabel") then
+                                    local itemName = title.Text
+                                    if itemName == "Exotic Christmas Glove" then
+                                        christmasGloveId = itemButton.Name
+                                        break
                                     end
-                                else
-                                    print("  ❌ Inside 不是 CanvasGroup 类型，实际类型:", inside.ClassName)
-                                end
-                            else
-                                print("  ❌ 未找到 Inside，ImageButton 的子项:")
-                                for _, buttonChild in pairs(itemButton:GetChildren()) do
-                                    print("    ", buttonChild.Name, "类型:", buttonChild.ClassName)
                                 end
                             end
                         end
                     end
                     
-                    print("总共找到", foundItems, "个物品")
-                    
                     -- 如果找到了圣诞手套，发送升级请求
                     if christmasGloveId then
-                        print("发送升级请求...")
                         game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                             ["Upgrade_Name"] = "Level",
                             ["UniqueId"] = christmasGloveId,
                             ["Action"] = "Prog_Lv_Items",
                             ["Bench_Name"] = "Christmas_Glove_Leveling",
                         })
-                        print("升级请求已发送")
                     else
-                        print("❌ 无法找到圣诞手套")
-                        print("请检查:")
-                        print("1. 确保物品名称为 'Exotic Christmas Glove'")
-                        print("2. 确保物品在 Powers 标签页中")
-                        print("3. 检查物品的实际UI结构")
+                        getgenv().AutoLevelChristmasGloveRunning = false
+                        AutoLevelChristmasGloveToggle:Set(false)
+                        WindUI:Notify({
+                            Title = "Lights Hub",
+                            Content = "Unable to find [Exotic] Christmas Glove in your inventory. Auto Leveling Stopped.",
+                            Duration = 3,
+                        })
                     end
-                    
-                    print("=== 查找完成 ===\n")
-                end
+                end    
             end)
         else
             getgenv().AutoLevelChristmasGloveRunning = false
-            print("自动升级已停止")
         end
     end
 })
 
---                        WindUI:Notify({
---                        Title = "Lights Hub",
-  --                      Content = "Unable to find [Exotic] Christmas Glove in your inventory. Auto Leveling Stopped.",
-    --                    Duration = 3,--
 
 local UpgradesTab = Window:Tab({
         Title = "Upgrades",
