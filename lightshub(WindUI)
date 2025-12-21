@@ -3676,39 +3676,60 @@ local AutoLevelChristmasGloveToggle = LevelingTab:Toggle({
             task.spawn(function()
                 while getgenv().AutoLevelChristmasGloveRunning and task.wait() do
                     -- 获取玩家背包
-                    local playerGui = game:GetService("Players").LocalPlayer.PlayerGui
-                    local inventory = playerGui.Inventory_1.Hub.Powers.List_Frame.List
+                    local player = game:GetService("Players").LocalPlayer
+                    local playerGui = player:FindFirstChild("PlayerGui")
                     
-                    -- 查找圣诞手套
-                    local christmasGloveId = nil
-                    
-                    -- 遍历所有子项
-                    for _, child in ipairs(inventory:GetChildren()) do
-                        if child:IsA("ImageButton") then
-                            -- 查找Title对象
-                            local title = child:FindFirstChild("Title")
-                            if title and title:IsA("TextLabel") and title.Text == "Exotic Christmas Glove" then
-                                christmasGloveId = child.Name
-                                break
+                    if playerGui and playerGui:IsA("PlayerGui") then
+                        local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+                        if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                            local hub = inventoryGui:FindFirstChild("Hub")
+                            if hub and hub:IsA("Frame") then
+                                local powers = hub:FindFirstChild("Powers")
+                                if powers and powers:IsA("Frame") then
+                                    local listFrame = powers:FindFirstChild("List_Frame")
+                                    if listFrame and listFrame:IsA("Frame") then
+                                        local list = listFrame:FindFirstChild("List")
+                                        if list and list:IsA("ScrollingFrame") then
+                                            local christmasGloveId = nil
+                                            
+                                            -- 遍历所有子项
+                                            for _, itemButton in pairs(list:GetChildren()) do
+                                                if itemButton:IsA("ImageButton") and itemButton:FindFirstChild("Inside") then
+                                                    local inside = itemButton.Inside
+                                                    if inside:IsA("CanvasGroup") and inside:FindFirstChild("Title") then
+                                                        local title = inside.Title
+                                                        if title:IsA("TextLabel") then
+                                                            local itemName = title.Text
+                                                            if itemName == "Exotic Christmas Glove" then
+                                                                christmasGloveId = itemButton.Name
+                                                                break
+                                                            end
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                            
+                                            -- 如果找到了圣诞手套，发送升级请求
+                                            if christmasGloveId then
+                                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                                    ["Upgrade_Name"] = "Level",
+                                                    ["UniqueId"] = christmasGloveId,
+                                                    ["Action"] = "Prog_Lv_Items",
+                                                    ["Bench_Name"] = "Christmas_Glove_Leveling",
+                                                })
+                                            else
+                                                getgenv().AutoLevelChristmasGloveRunning = false
+                                                WindUI:Notify({
+                                                Title = "Lights Hub",
+                                                Content = "Unable to find [Exotic] Christmas Glove in your inventory. Auto Leveling Stopped.",
+                                                Duration = 3,
+                                                })
+                                            end
+                                        end
+                                    end
+                                end
                             end
                         end
-                    end
-                    
-                    -- 如果找到了圣诞手套，发送升级请求
-                    if christmasGloveId then
-                        game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-                            ["Upgrade_Name"] = "Level",
-                            ["UniqueId"] = christmasGloveId,
-                            ["Action"] = "Prog_Lv_Items",
-                            ["Bench_Name"] = "Christmas_Glove_Leveling",
-                        })
-                    else
-                        getgenv().AutoLevelChristmasGloveRunning = false
-                        WindUI:Notify({
-                        Title = "Lights Hub",
-                        Content = "Unable to find [Exotic] Christmas Glove in your inventory. Auto Leveling Stopped.",
-                        Duration = 3,
-                    })
                     end
                 end
             end)
@@ -3717,6 +3738,12 @@ local AutoLevelChristmasGloveToggle = LevelingTab:Toggle({
         end
     end
 })
+
+
+WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Unable to find [Exotic] Christmas Glove in your inventory. Auto Leveling Stopped.",
+                        Duration = 3,
 
 local UpgradesTab = Window:Tab({
         Title = "Upgrades",
