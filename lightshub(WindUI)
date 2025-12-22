@@ -38,7 +38,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "Anime Eternal - Update 30",
+    Title = "Anime Eternal - Update 30 P2",
     Color = Color3.fromHex("8724FF"),
     Radius = 0, -- from 0 to 13
 })
@@ -226,6 +226,9 @@ local function RegisterAll(cfg)
     -- Progression
     cfg:Register("ProgressionDropdown", ProgressionDropdown)
     cfg:Register("AutoProgression", UpgradeProgressionToggle)
+
+    -- Leveling
+    cfg:Register("LevelingSelect", AutoLevelingDropdown)
 
     -- Upgrades
     cfg:Register("UpgradesSelect", AutoUpgradeDropdown)
@@ -692,11 +695,11 @@ local redeemCodesButton = CodesTab:Button({
     Locked = false,
     Callback = function()
     local codes = {"SlashX", "Derp", "Heyyyo", 
-    "Update29","Update29Code","270MVisits","Update29Code2","Update29Code3","ChristmasSoon?!","Update29RestartCode",
+    "Update29","Update29Code","270MVisits","Update29Code2","Update29Code3","ChristmasSoon?!",
     "Update29P2","Update29P2Code","Update29P2Code2","IsChristmasComing?!","785KFav","SuperUPD29Code",
     "Update29P3","Update29P3Code","Update29P3Code2","ChristmasPart1?","410KLikes","ChristmasPart1!","Update30Late",
     "Update30","Update30Code","790KFav","Update30Code2","Update30Code3","275MVisits","Update30Late2","Update30Late3",
-    "Update30P2","415KLikes","795KFav","Update30P2Code","280MVisits"
+    "Update30P2","415KLikes","795KFav","Update30P2Code","280MVisits","Update30P2Super"
 
 }
     for _, code in ipairs(codes) do
@@ -3741,6 +3744,124 @@ local AutoLevelChristmasGloveToggle = LevelingTab:Toggle({
     end
 })
 
+LevelingTab:Divider()
+
+local KaguneListDropdown = LevelingTab:Dropdown({
+    Flag = "KaguneDropdown1",
+    Title = "Select Kagune to Level Up",
+    Values = {
+        "[Supreme] Koumyaku",
+        "[Phantom] Mukade",
+        "[Mythical] Hakuja",
+        "[Legendary] Shidare",
+        "[Epic] Tetsuba",
+        "[Rare] Shinku",
+        "[Uncommon] Hakuro",
+        "[Common] Retto"
+    },
+    Value = {"[Supreme] Koumyaku"},
+    Callback = function(option)
+        getgenv().SelectedKagune = option
+    end,
+})
+
+local AutoLevelKaguneToggle = LevelingTab:Toggle({
+    Flag = "AutoLevelKagune1",
+    Title = "Auto Level Up Kagune",
+    Desc = "Will works only if you have the selected [Powers] Kagune in your inventory",
+    Default = false,
+    Callback = function(state)
+        if state then
+            if not getgenv().SelectedKagune then
+                WindUI:Notify({
+                    Title = "Lights Hub",
+                    Content = "Please select a Kagune from the dropdown first.",
+                    Duration = 3,
+                })
+                return
+            end
+            
+            getgenv().AutoLevelKaguneRunning = true
+            task.spawn(function()
+                -- 提取选中的Kagune名称（去掉前缀，如 [Phantom] Mukade -> Mukade）
+                local selectedKagune = getgenv().SelectedKagune
+                local kaguneName = string.match(selectedKagune, "%] (.+)")  -- 提取 ] 后的部分
+                
+                if not kaguneName then
+                    getgenv().AutoLevelKaguneRunning = false
+                    WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Invalid Kagune selection. Auto Leveling Stopped.",
+                        Duration = 3,
+                    })
+                    return
+                end
+                
+                -- 先查找一次选中的Kagune，获取ID
+                local kaguneId = nil
+                
+                -- 获取玩家背包
+                local player = game:GetService("Players").LocalPlayer
+                local playerGui = player:FindFirstChild("PlayerGui")
+                
+                if playerGui and playerGui:IsA("PlayerGui") then
+                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                        local hub = inventoryGui:FindFirstChild("Hub")
+                        if hub and hub:IsA("Frame") then
+                            local powers = hub:FindFirstChild("Powers")
+                            if powers and powers:IsA("Frame") then
+                                local listFrame = powers:FindFirstChild("List_Frame")
+                                if listFrame and listFrame:IsA("Frame") then
+                                    local list = listFrame:FindFirstChild("List")
+                                    if list and list:IsA("ScrollingFrame") then
+                                        -- 遍历所有子项查找选中的Kagune
+                                        for _, itemButton in pairs(list:GetChildren()) do
+                                            if itemButton:IsA("ImageButton") then
+                                                local inside = itemButton:FindFirstChild("Inside")
+                                                if inside and inside:IsA("CanvasGroup") then
+                                                    local title = inside:FindFirstChild("Title")
+                                                    if title and title:IsA("TextLabel") then
+                                                        local itemName = title.Text
+                                                        if itemName == kaguneName then
+                                                            kaguneId = itemButton.Name
+                                                            break
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                
+                if not kaguneId then
+                    getgenv().AutoLevelKaguneRunning = false
+                    WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Unable to find [" .. selectedKagune .. "] in your inventory. Auto Leveling Stopped.",
+                        Duration = 3,
+                    })
+                    return
+                end
+                
+                -- 找到了Kagune，开始每0.1秒发送升级请求
+                while getgenv().AutoLevelKaguneRunning and task.wait(0.1) do
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["UniqueId"] = kaguneId,
+                        ["Action"] = "Leveling_Items",
+                        ["Bench_Name"] = "Kagune_Leveling",
+                    })
+                end    
+            end)
+        else
+            getgenv().AutoLevelKaguneRunning = false
+        end
+    end
+})
 
 local UpgradesTab = Window:Tab({
         Title = "Upgrades",
