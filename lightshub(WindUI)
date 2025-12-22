@@ -3759,7 +3759,7 @@ local KaguneListDropdown = LevelingTab:Dropdown({
         "[Uncommon] Hakuro",
         "[Common] Retto"
     },
-    Value = {"[Supreme] Koumyaku"},
+    Value = "[Supreme] Koumyaku",
     Callback = function(option)
         getgenv().SelectedKagune = option
     end,
