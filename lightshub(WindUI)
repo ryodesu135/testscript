@@ -3842,7 +3842,7 @@ local AutoLevelKaguneToggle = LevelingTab:Toggle({
                     getgenv().AutoLevelKaguneRunning = false
                     WindUI:Notify({
                         Title = "Lights Hub",
-                        Content = "Unable to find [" .. selectedKagune .. "] in your inventory. Auto Leveling Stopped.",
+                        Content = "Unable to find Kagune in your inventory. Auto Leveling Stopped.",
                         Duration = 3,
                     })
                     return
