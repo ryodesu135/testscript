@@ -3863,6 +3863,125 @@ local AutoLevelKaguneToggle = LevelingTab:Toggle({
     end
 })
 
+LevelingTab:Divider()
+
+local PokitaListDropdown = LevelingTab:Dropdown({
+    Flag = "PokitaDropdown1",
+    Title = "Select Pokita to Level Up",
+    Values = {
+        "Supreme Pokita",
+        "Phantom Pokita",
+        "Mythical Pokita",
+        "Legendary Pokita",
+        "Epic Pokita",
+        "Rare Pokita",
+        "Uncommon Pokita",
+        "Common Pokita"
+    },
+    Value = "Supreme Pokita",
+    Callback = function(option)
+        getgenv().SelectedPokita = option
+    end,
+})
+
+local AutoLevelPokitaToggle = LevelingTab:Toggle({
+    Flag = "AutoLevelPokita1",
+    Title = "Auto Level Up Pokita",
+    Desc = "Will works only if you have the selected [Powers] Pokita in your inventory",
+    Default = false,
+    Callback = function(state)
+        if state then
+            if not getgenv().SelectedPokita then
+                WindUI:Notify({
+                    Title = "Lights Hub",
+                    Content = "Please select a Pokita from the dropdown first.",
+                    Duration = 3,
+                })
+                return
+            end
+            
+            getgenv().AutoLevelPokitaRunning = true
+            task.spawn(function()
+                -- 提取选中的Pokita名称（去掉前缀，如 [Phantom] Mukade -> Mukade）
+                local selectedPokita = getgenv().SelectedPokita
+                local pokitaName = string.match(selectedPokita)
+                
+                if not pokitaName then
+                    getgenv().AutoLevelPokitaRunning = false
+                    WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Invalid Pokita selection. Auto Leveling Stopped.",
+                        Duration = 3,
+                    })
+                    return
+                end
+
+                -- 先查找一次选中的Pokita，获取ID
+                local pokitaId = nil
+                
+                -- 获取玩家背包
+                local player = game:GetService("Players").LocalPlayer
+                local playerGui = player:FindFirstChild("PlayerGui")
+                
+                if playerGui and playerGui:IsA("PlayerGui") then
+                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                        local hub = inventoryGui:FindFirstChild("Hub")
+                        if hub and hub:IsA("Frame") then
+                            local powers = hub:FindFirstChild("Powers")
+                            if powers and powers:IsA("Frame") then
+                                local listFrame = powers:FindFirstChild("List_Frame")
+                                if listFrame and listFrame:IsA("Frame") then
+                                    local list = listFrame:FindFirstChild("List")
+                                    if list and list:IsA("ScrollingFrame") then
+                                        -- 遍历所有子项查找选中的Pokita
+                                        for _, itemButton in pairs(list:GetChildren()) do
+                                            if itemButton:IsA("ImageButton") then
+                                                local inside = itemButton:FindFirstChild("Inside")
+                                                if inside and inside:IsA("CanvasGroup") then
+                                                    local title = inside:FindFirstChild("Title")
+                                                    if title and title:IsA("TextLabel") then
+                                                        local itemName = title.Text
+                                                        if itemName == pokitaName then
+                                                            pokitaId = itemButton.Name
+                                                            break
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                
+                if not pokitaId then
+                    getgenv().AutoLevelPokitaRunning = false
+                    WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Unable to find Pokita in your inventory. Auto Leveling Stopped.",
+                        Duration = 3,
+                    })
+                    return
+                end
+
+                -- 找到了Pokita，开始每0.1秒发送升级请求
+                while getgenv().AutoLevelPokitaRunning and task.wait(0.1) do
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["UniqueId"] = pokitaId,
+                        ["Action"] = "Leveling_Items",
+                        ["Bench_Name"] = "Pokita_Leveling",
+                    })
+                end    
+            end)
+        else
+            getgenv().AutoLevelPokitaRunning = false
+        end
+    end
+})
+
 local UpgradesTab = Window:Tab({
         Title = "Upgrades",
         Icon = "square-plus",
