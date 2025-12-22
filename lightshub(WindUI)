@@ -3904,7 +3904,7 @@ local AutoLevelPokitaToggle = LevelingTab:Toggle({
             task.spawn(function()
                 -- 提取选中的Pokita名称（去掉前缀，如 [Phantom] Mukade -> Mukade）
                 local selectedPokita = getgenv().SelectedPokita
-                local pokitaName = string.match(selectedPokita)
+                local pokitaName = selectedPokita
                 
                 if not pokitaName then
                     getgenv().AutoLevelPokitaRunning = false
