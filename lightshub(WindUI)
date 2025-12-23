@@ -4068,17 +4068,17 @@ local AutoLevelIceSwordToggle = LevelingTab:Toggle({
                     if inventoryGui and inventoryGui:IsA("ScreenGui") then
                         local hub = inventoryGui:FindFirstChild("Hub")
                         if hub and hub:IsA("Frame") then
-                            local powers = hub:FindFirstChild("Powers")
-                            if powers and powers:IsA("Frame") then
-                                local listFrame = powers:FindFirstChild("List_Frame")
+                            local wepons = hub:FindFirstChild("Weapons")
+                            if wepons and wepons:IsA("Frame") then
+                                local listFrame = wepons:FindFirstChild("List_Frame")
                                 if listFrame and listFrame:IsA("Frame") then
                                     local list = listFrame:FindFirstChild("List")
                                     if list and list:IsA("ScrollingFrame") then
-                                        -- 遍历所有子项查找圣诞手套
+                                        -- 遍历所有子项查找冰剑
                                         for _, itemButton in pairs(list:GetChildren()) do
                                             if itemButton:IsA("ImageButton") then
                                                 local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("CanvasGroup") then
+                                                if inside and inside:IsA("Frame") then
                                                     local title = inside:FindFirstChild("Title")
                                                     if title and title:IsA("TextLabel") then
                                                         local itemName = title.Text
