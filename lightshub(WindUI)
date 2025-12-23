@@ -699,7 +699,8 @@ local redeemCodesButton = CodesTab:Button({
     "Update29P2","Update29P2Code","Update29P2Code2","IsChristmasComing?!","785KFav","SuperUPD29Code",
     "Update29P3","Update29P3Code","Update29P3Code2","ChristmasPart1?","410KLikes","ChristmasPart1!","Update30Late",
     "Update30","Update30Code","790KFav","Update30Code2","Update30Code3","275MVisits","Update30Late2","Update30Late3",
-    "Update30P2","415KLikes","795KFav","Update30P2Code","280MVisits","Update30P2Super"
+    "Update30P2","415KLikes","795KFav","Update30P2Code","280MVisits","Update30P2Super",
+    "Update30P3","Update30P3Code","ChristmasPart2or3?","Part3ChristmasOR2?","800KFav"
 
 }
     for _, code in ipairs(codes) do
@@ -1639,6 +1640,23 @@ local ExchangeShopW2ProductsMap = {
     ["Drop Potion"] = {Product_Id = "20", Bench_Name = "Maze_Merchant"},
 }
 
+local ExchangeShopChristmasProductsOptions = {
+    "Ice Sword","Snowman Coins Potion","Snowman Damage Potion","Snowman Energy Potion","Snowman Luck Potion","Snowman Exp Potion","Snowman Soul Potion","Snowman Shadow Soul Potion","Snowman Drop Potion"
+}
+
+local ExchangeShopW2ProductsMap = {
+    --Maze Products
+    ["Ice Sword"] = {Product_Id = "1", Bench_Name = "Christmas_Shop"},
+    ["Snowman Coins Potion"] = {Product_Id = "2", Bench_Name = "Christmas_Shop"},
+    ["Snowman Damage Potion"] = {Product_Id = "3", Bench_Name = "Christmas_Shop"},
+    ["Snowman Energy Potion"] = {Product_Id = "4", Bench_Name = "Christmas_Shop"},
+    ["Snowman Luck Potion"] = {Product_Id = "5", Bench_Name = "Christmas_Shop"},
+    ["Snowman Exp Potion"] = {Product_Id = "6", Bench_Name = "Christmas_Shop"},
+    ["Snowman Soul Potion"] = {Product_Id = "7", Bench_Name = "Christmas_Shop"},
+    ["Snowman Shadow Soul Potion"] = {Product_Id = "8", Bench_Name = "Christmas_Shop"},
+    ["Snowman Drop Potion"] = {Product_Id = "9", Bench_Name = "Christmas_Shop"},
+}
+
 local ExchangeShopW1Dropdown = ExchangeShopTab:Dropdown({
     Flag = "ExchangeShopW1Dropdown",
     Title = "Select W1 TO W19 Token",
@@ -1907,6 +1925,53 @@ local ExchangeShopW2ProductsToggle = ExchangeShopTab:Toggle({
         end
     end,
 })
+
+ExchangeShopTab:Divider()
+
+local ExchangeShopChristmasProductsDropdown = ExchangeShopTab:Dropdown({
+    Flag = "ExchangeShopChristmasProductsDropdown",
+    Title = "Select Christmas Products to Buy",
+    Values = ExchangeShopChristmasProductsOptions,
+    Value = {},
+    Multi = true,
+    AllowNone = true,
+    Callback = function(option)
+        getgenv().SelectedChristmasShopProducts = option
+    end,
+})
+
+local ExchangeShopChristmasProductsToggle = ExchangeShopTab:Toggle({
+    Flag = "AutoExchangeShopChristmasProductsToggle",
+    Title = "Auto Exchange Candy Cane to Christmas Products",
+    Desc = "Automatically Exchange Candy Cane to Selected Christmas Products",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoExchangeShopChristmasProductsRunning = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoExchangeShopChristmasProductsRunning do
+                    if getgenv().SelectedChristmasShopProducts and #getgenv().SelectedChristmasShopProducts > 0 then
+                        for _, ShopProductsName in ipairs(getgenv().SelectedChristmasShopProducts) do
+                            local ShopProductsData = ExchangeShopChristmasProductsMap[ShopProductsName]
+                            if ShopProductsData then
+                                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                                    ["Bench_Name"] = ShopProductsData.Bench_Name,
+                                    ["Product_Id"] = tonumber(ShopProductsData.Product_Id),
+                                    ["Action"] = "Merchant_Purchase",
+                                    ["Amount"] = 1,
+                                })
+                                task.wait(0.1)  -- 等待0.1秒后发送下一个
+                            end
+                        end
+                    end
+                end
+            end)
+        else
+        end
+    end,
+})
+
+
 
 local FoodTab = Window:Tab({
         Title = "Food",
@@ -3981,6 +4046,86 @@ local AutoLevelPokitaToggle = LevelingTab:Toggle({
         end
     end
 })
+
+LevelingTab:Divider()
+
+local AutoLevelIceSwordToggle = LevelingTab:Toggle({
+    Flag = "AutoLevelIceSword",
+    Title = "Auto Level Up Ice Sword",
+    Desc = "Will works only if you have [Weapon] Ice Sword in your inventory *Do not change weapon name!*",
+    Default = false,
+    Callback = function(state)
+        if state then
+            getgenv().AutoLevelIceSwordRunning = true
+            task.spawn(function()
+                -- 先查找一次冰剑，获取ID
+                local iceSwordId = nil
+                
+                -- 获取玩家背包
+                local player = game:GetService("Players").LocalPlayer
+                local playerGui = player:FindFirstChild("PlayerGui")
+                
+                if playerGui and playerGui:IsA("PlayerGui") then
+                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                        local hub = inventoryGui:FindFirstChild("Hub")
+                        if hub and hub:IsA("Frame") then
+                            local powers = hub:FindFirstChild("Powers")
+                            if powers and powers:IsA("Frame") then
+                                local listFrame = powers:FindFirstChild("List_Frame")
+                                if listFrame and listFrame:IsA("Frame") then
+                                    local list = listFrame:FindFirstChild("List")
+                                    if list and list:IsA("ScrollingFrame") then
+                                        -- 遍历所有子项查找圣诞手套
+                                        for _, itemButton in pairs(list:GetChildren()) do
+                                            if itemButton:IsA("ImageButton") then
+                                                local inside = itemButton:FindFirstChild("Inside")
+                                                if inside and inside:IsA("CanvasGroup") then
+                                                    local title = inside:FindFirstChild("Title")
+                                                    if title and title:IsA("TextLabel") then
+                                                        local itemName = title.Text
+                                                        if itemName == "Ice Sword" then
+                                                            iceSwordId = itemButton.Name
+                                                            break
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                
+                if not iceSwordId then
+                    getgenv().AutoLevelIceSwordRunning = false
+                    WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Unable to find [Weapon] Ice Sword in your inventory. Auto Leveling Stopped.",
+                        Duration = 3,
+                    })
+                    return
+                end
+
+                -- 找到了冰剑，开始每0.1秒发送升级请求
+                while getgenv().AutoLevelIceSwordRunning and task.wait(0.1) do
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Upgrade_Name"] = "Level",
+                        ["UniqueId"] = iceSwordId,
+                        ["Action"] = "Prog_Lv_Items",
+                        ["Bench_Name"] = "Ice_Sword_Leveling",
+                    })
+                end    
+            end)
+        else
+            getgenv().AutoLevelIceSwordRunning = false
+        end
+    end
+})
+
+
 
 local UpgradesTab = Window:Tab({
         Title = "Upgrades",
