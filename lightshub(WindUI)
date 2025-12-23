@@ -695,8 +695,6 @@ local redeemCodesButton = CodesTab:Button({
     Locked = false,
     Callback = function()
     local codes = {"SlashX", "Derp", "Heyyyo", 
-    "Update29","Update29Code","270MVisits","Update29Code2","Update29Code3","ChristmasSoon?!",
-    "Update29P2","Update29P2Code","Update29P2Code2","IsChristmasComing?!","785KFav","SuperUPD29Code",
     "Update29P3","Update29P3Code","Update29P3Code2","ChristmasPart1?","410KLikes","ChristmasPart1!","Update30Late",
     "Update30","Update30Code","790KFav","Update30Code2","Update30Code3","275MVisits","Update30Late2","Update30Late3",
     "Update30P2","415KLikes","795KFav","Update30P2Code","280MVisits","Update30P2Super",
@@ -1644,7 +1642,7 @@ local ExchangeShopChristmasProductsOptions = {
     "Ice Sword","Snowman Coins Potion","Snowman Damage Potion","Snowman Energy Potion","Snowman Luck Potion","Snowman Exp Potion","Snowman Soul Potion","Snowman Shadow Soul Potion","Snowman Drop Potion"
 }
 
-local ExchangeShopW2ProductsMap = {
+local ExchangeShopChristmasProductsMap = {
     --Maze Products
     ["Ice Sword"] = {Product_Id = "1", Bench_Name = "Christmas_Shop"},
     ["Snowman Coins Potion"] = {Product_Id = "2", Bench_Name = "Christmas_Shop"},
