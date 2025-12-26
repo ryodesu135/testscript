@@ -38,7 +38,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "Anime Eternal - Update 30 P2",
+    Title = "Anime Eternal - Update 31",
     Color = Color3.fromHex("8724FF"),
     Radius = 0, -- from 0 to 13
 })
@@ -434,7 +434,7 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                         local char = player.Character
                         local hrp = char and char:FindFirstChild("HumanoidRootPart")
                         if not hrp then 
-                            task.wait(0.01)
+                            task.wait(0.05)
                             return 
                         end
                         local playerPos = hrp.Position
@@ -496,7 +496,7 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                             end
                         end
                     end)
-                    task.wait(0.01)
+                    task.wait(0.05)
                 end
             end)
         end
@@ -698,7 +698,10 @@ local redeemCodesButton = CodesTab:Button({
     "Update29P3","Update29P3Code","Update29P3Code2","ChristmasPart1?","410KLikes","ChristmasPart1!","Update30Late",
     "Update30","Update30Code","790KFav","Update30Code2","Update30Code3","275MVisits","Update30Late2","Update30Late3",
     "Update30P2","415KLikes","795KFav","Update30P2Code","280MVisits","Update30P2Super",
-    "Update30P3","Update30P3Code","ChristmasPart2or3?","Part3ChristmasOR2?","800KFav"
+    "Update30P3","Update30P3Code","ChristmasPart2or3?","Part3ChristmasOR2?","800KFav",
+    "Update30P4","Update30P4Code","ChristmasToday!","MerryChristmas!","MerryChristmas!2","ChristmasPot","MerryChristmas!3",
+    "Update31","Update31Code","Update31Code2","Update31Code3","MerryChristmas!4","Update31Late"
+
 
 }
     for _, code in ipairs(codes) do
@@ -706,7 +709,7 @@ local redeemCodesButton = CodesTab:Button({
             ["Action"] = "_Redeem_Code", 
 			["Text"] = code,
          })
-                task.wait(0.20)
+                task.wait(0.1)
             end
    end,
 })
@@ -1083,7 +1086,7 @@ local ExchangeW1Map = {
 local ExchangeW2Options = {
     "Frost Demon Token","Grand Elder Token","Saiyan Lvl Token","Dragon Race Lvl Token","Eternal Dragon Token","Dragon Blessing Token","Scythe Token","Baikai Token","Espada Token","Reiatsu Lvl Token","Zanpakuto Lvl Token","Shadow Garden Token","Shadow Arts Token","Garden Lvl Token","Arts Lvl Token","Threat Level Token","Punch Token","Threat Lvl Token","Punch Lvl Token","Adventurer Token","Magic Tier Token","Mana Growth Token","Ultimate Cast Token","Adventurer Lvl Token","Magic Tier Lvl Token","Thriller Zombie Token","Nightmare Evo Token","Special Zombie Token","Zombie Booster Token",
     "Assassin Grade Token","Assassin Skill Token","Assassin Energy Token","Assassin Damage Token","Spirit Pact Token","Witch Factor Token","Artificial Spirit Token","Gospel Cursed Token","Geass Potential Token","Geass Perception Token","Geass Soul Token","Geass Creation Token","Geass Precognition Token","Geass Time Token","Geass Telepathic Token","Geass Manipulation Token","Geass Obedience Token","Knightmare Token","IQ Token","Scientific Token","Eye Token 2","Shinobi Clan Token","Genkai Token","Chakra Infusion Token","Energy Teigu Token","Damage Teigu Token","Psycho Flow Token","Psycho Destruction Token",
-    "Slayer Mark Token","Demon Bloodline Token","Magic Type Token","The Muscule Token"
+    "Slayer Mark Token","Demon Bloodline Token","Magic Type Token","The Muscule Token","Eagle Token","Whale Token","Wolf Token","DxD Species Token","Sacred Gear Token"
 }
 
 local ExchangeW2Map = {
@@ -1151,6 +1154,11 @@ local ExchangeW2Map = {
     ["Demon Bloodline Token"] = {Product_Id = "30", Bench_Name = "Token_Exchange_World_26_to_30"},
     ["Magic Type Token"] = {Product_Id = "31", Bench_Name = "Token_Exchange_World_26_to_30"},
     ["The Muscule Token"] = {Product_Id = "32", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Eagle Token"] = {Product_Id = "33", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Whale Token"] = {Product_Id = "34", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Wolf Token"] = {Product_Id = "35", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["DxD Species Token"] = {Product_Id = "36", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Sacred Gear Token"] = {Product_Id = "37", Bench_Name = "Token_Exchange_World_26_to_30"},
 }
 
 local ExchangeCoinsOptions = {
@@ -1523,7 +1531,7 @@ local ExchangeShopW1ProductsMap = {
 local ExchangeShopW2Options = {
     "Exchange Coin","Frost Demon Token","Grand Elder Token","Saiyan Lvl Token","Dragon Race Lvl Token","Eternal Dragon Token","Dragon Blessing Token","Scythe Token","Baikai Token","Espada Token","Reiatsu Lvl Token","Zanpakuto Lvl Token","Shadow Garden Token","Shadow Arts Token","Garden Lvl Token","Arts Lvl Token","Threat Level Token","Punch Token","Threat Lvl Token","Punch Lvl Token","Adventurer Token","Magic Tier Token","Mana Growth Token","Ultimate Cast Token","Adventurer Lvl Token","Magic Tier Lvl Token","Thriller Zombie Token","Nightmare Evo Token","Special Zombie Token","Zombie Booster Token",
     "Assassin Grade Token","Assassin Skill Token","Assassin Energy Token","Assassin Damage Token","Spirit Pact Token","Witch Factor Token","Artificial Spirit Token","Gospel Cursed Token","Geass Potential Token","Geass Perception Token","Geass Soul Token","Geass Creation Token","Geass Precognition Token","Geass Time Token","Geass Telepathic Token","Geass Manipulation Token","Knightmare Token","IQ Token","Scientific Token","Eye Token 2","Shinobi Clan Token","Genkai Token","Chakra Infusion Token","Energy Teigu Token","Damage Teigu Token","Psycho Flow Token","Psycho Destruction Token",
-    "Slayer Mark Token","Demon Bloodline Token" --,"Magic Type Token","The Muscule Token"
+    "Slayer Mark Token","Demon Bloodline Token","Magic Type Token","The Muscule Token","Eagle Token","Whale Token","Wolf Token"
 }
 
 local ExchangeShopW2Map = {
@@ -1589,6 +1597,11 @@ local ExchangeShopW2Map = {
     ["Psycho Destruction Token"] = {Product_Id = "27", Bench_Name = "Exchange_Shop_World_26_to_30"},
     ["Slayer Mark Token"] = {Product_Id = "28", Bench_Name = "Exchange_Shop_World_26_to_30"},
     ["Demon Bloodline Token"] = {Product_Id = "29", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["Magic Type Token"] = {Product_Id = "30", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["The Muscule Token"] = {Product_Id = "31", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["Eagle Token"] = {Product_Id = "32", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["Whale Token"] = {Product_Id = "33", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["Wolf Token"] = {Product_Id = "34", Bench_Name = "Exchange_Shop_World_26_to_30"},
 }
 
 local ExchangeShopW2KeysOptions = {
@@ -2499,7 +2512,7 @@ local StarDropdown = StarTab:Dropdown({
 
     "[W26] Amusement Park","[W27] Re:Manor","[W28] Asfordo Academy","[W29] Science Village","[W30] Sand Village",
 
-    "[W31] Night Raid Base","[W32] Salty School","[W33] Mugen District","[W34] Easton Academy"
+    "[W31] Night Raid Base","[W32] Salty School","[W33] Mugen District","[W34] Easton Academy","[W35] Kuo Academy"
 },
     Value = "[W1] Earth City",
     Callback = function(option)
@@ -2582,7 +2595,8 @@ local RollDropdown = RollTab:Dropdown({
     "[W31] Energy Teigu","[W31] Damage Teigu",
     "[W32] Psycho Flow","[W32] Psycho Destruction",
     "[W33] Slayer Marks","[W33] Demon Bloodline",
-    "[W34] Magic Type","[W34] The Muscle"
+    "[W34] Magic Type","[W34] The Muscle",
+    "[W35] DxD Species","[W35] Sacred Gear"
 },
     Value = "[W1] Dragon Race",
     Callback = function(option)
@@ -3599,7 +3613,7 @@ local ProgressionDropdown = ProgressionTab:Dropdown({
     Flag = "ProgressionDropdown",
    Title = "Progression List",
    Values = {
-    "[W1] Christmas Materials","[W1] Christmas Damage","[W1] Christmas Damage 2",
+    "[W1] Christmas Materials","[W1] Christmas Damage","[W1] Christmas Damage 2","[W1] Christmas Damage 3","[W1] Christmas Damage 4",
     "[W2] Haki Upgrade",
     "[W3] Spiritual Pressure",
     "[W4] Cursed Progression",
@@ -3634,6 +3648,8 @@ local ProgressionMap = { -- Upgrade_Name, Bench_Name, Action
     ["[W1] Christmas Materials"] = {"Christmas_Materials", "Christmas_Materials_Upgrade", "_Progression"},
     ["[W1] Christmas Damage"] = {"Christmas_Damage", "Christmas_Damage_Upgrade", "_Progression"},
     ["[W1] Christmas Damage 2"] = {"Christmas_Damage", "Christmas_Damage_Upgrade_2", "_Progression"},
+    ["[W1] Christmas Damage 3"] = {"Christmas_Damage", "Christmas_Damage_Upgrade_3", "_Progression"},
+    ["[W1] Christmas Damage 4"] = {"Christmas_Damage", "Christmas_Damage_Upgrade_4", "_Progression"},
     ["[W2] Haki Upgrade"] = {"Haki_Upgrade", "Haki_Upgrade", "_Upgrades"},
     ["[W3] Spiritual Pressure"] = {"Spiritual_Pressure", "Spiritual_Pressure", "_Upgrades"},
     ["[W4] Cursed Progression"] = {"Curse", "Cursed_Progression", "_Upgrades"},
@@ -3730,6 +3746,84 @@ local LevelingTab = Window:Tab({
     Title = "Leveling",
     Icon = "arrow-big-up",
 })
+
+local AutoLevelIceSwordToggle = LevelingTab:Toggle({
+    Flag = "AutoLevelIceSword",
+    Title = "Auto Level Up Ice Sword",
+    Desc = "Will works only if you have [Weapon] Ice Sword in your inventory *Do not change weapon name!*",
+    Default = false,
+    Callback = function(state)
+        if state then
+            getgenv().AutoLevelIceSwordRunning = true
+            task.spawn(function()
+                -- 先查找一次冰剑，获取ID
+                local iceSwordId = nil
+                
+                -- 获取玩家背包
+                local player = game:GetService("Players").LocalPlayer
+                local playerGui = player:FindFirstChild("PlayerGui")
+                
+                if playerGui and playerGui:IsA("PlayerGui") then
+                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                        local hub = inventoryGui:FindFirstChild("Hub")
+                        if hub and hub:IsA("Frame") then
+                            local wepons = hub:FindFirstChild("Weapons")
+                            if wepons and wepons:IsA("Frame") then
+                                local listFrame = wepons:FindFirstChild("List_Frame")
+                                if listFrame and listFrame:IsA("Frame") then
+                                    local list = listFrame:FindFirstChild("List")
+                                    if list and list:IsA("ScrollingFrame") then
+                                        -- 遍历所有子项查找冰剑
+                                        for _, itemButton in pairs(list:GetChildren()) do
+                                            if itemButton:IsA("ImageButton") then
+                                                local inside = itemButton:FindFirstChild("Inside")
+                                                if inside and inside:IsA("Frame") then
+                                                    local title = inside:FindFirstChild("Title")
+                                                    if title and title:IsA("TextLabel") then
+                                                        local itemName = title.Text
+                                                        if itemName == "Ice Sword" then
+                                                            iceSwordId = itemButton.Name
+                                                            break
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                
+                if not iceSwordId then
+                    getgenv().AutoLevelIceSwordRunning = false
+                    WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Unable to find [Weapon] Ice Sword in your inventory. Auto Leveling Stopped.",
+                        Duration = 3,
+                    })
+                    return
+                end
+
+                -- 找到了冰剑，开始每0.1秒发送升级请求
+                while getgenv().AutoLevelIceSwordRunning and task.wait(0.1) do
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Upgrade_Name"] = "Level",
+                        ["UniqueId"] = iceSwordId,
+                        ["Action"] = "Prog_Lv_Items",
+                        ["Bench_Name"] = "Ice_Sword_Leveling",
+                    })
+                end    
+            end)
+        else
+            getgenv().AutoLevelIceSwordRunning = false
+        end
+    end
+})
+
+LevelingTab:Divider()
 
 local AutoLevelChristmasGloveToggle = LevelingTab:Toggle({
     Flag = "AutoLevelChristmasGlove1",
@@ -4045,84 +4139,6 @@ local AutoLevelPokitaToggle = LevelingTab:Toggle({
     end
 })
 
-LevelingTab:Divider()
-
-local AutoLevelIceSwordToggle = LevelingTab:Toggle({
-    Flag = "AutoLevelIceSword",
-    Title = "Auto Level Up Ice Sword",
-    Desc = "Will works only if you have [Weapon] Ice Sword in your inventory *Do not change weapon name!*",
-    Default = false,
-    Callback = function(state)
-        if state then
-            getgenv().AutoLevelIceSwordRunning = true
-            task.spawn(function()
-                -- 先查找一次冰剑，获取ID
-                local iceSwordId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local wepons = hub:FindFirstChild("Weapons")
-                            if wepons and wepons:IsA("Frame") then
-                                local listFrame = wepons:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-                                        -- 遍历所有子项查找冰剑
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("Frame") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == "Ice Sword" then
-                                                            iceSwordId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-                
-                if not iceSwordId then
-                    getgenv().AutoLevelIceSwordRunning = false
-                    WindUI:Notify({
-                        Title = "Lights Hub",
-                        Content = "Unable to find [Weapon] Ice Sword in your inventory. Auto Leveling Stopped.",
-                        Duration = 3,
-                    })
-                    return
-                end
-
-                -- 找到了冰剑，开始每0.1秒发送升级请求
-                while getgenv().AutoLevelIceSwordRunning and task.wait(0.1) do
-                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-                        ["Upgrade_Name"] = "Level",
-                        ["UniqueId"] = iceSwordId,
-                        ["Action"] = "Prog_Lv_Items",
-                        ["Bench_Name"] = "Ice_Sword_Leveling",
-                    })
-                end    
-            end)
-        else
-            getgenv().AutoLevelIceSwordRunning = false
-        end
-    end
-})
-
 
 
 local UpgradesTab = Window:Tab({
@@ -4387,7 +4403,7 @@ local RaidOptions = {
     "Ghoul Raid","Chainsaw Defense","Netherworld Defense","Green Planet Raid",
     "Hollow Raid","One Hero Raid","Tomb Arena Raid","Halloween Raid","Graveyard Defense",
     "Dungeon Suffering","Dungeon Adventurer","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3","Maze Level 4","Dungeon Labyrinth","Crimson Canyon",
-    "Body Improvement Challenge","Breathing Raid","Mugen Dungeon","Ice Raid"
+    "Body Improvement Challenge","Breathing Raid","Mugen Dungeon","Ice Raid","Santa Raid"
 
 }
 
@@ -4458,6 +4474,7 @@ local RaidNameMap = {
     ["Breathing Raid"] = "Breathing_Raid",
     ["Mugen Dungeon"] = "Mugen_Dungeon",
     ["Ice Raid"] = "Ice_Raid",
+    ["Santa Raid"] = "Santa_Raid"
 
 }
 
