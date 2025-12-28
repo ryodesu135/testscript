@@ -38,7 +38,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "Anime Eternal - Update 31",
+    Title = "Anime Eternal - Update 31 P2",
     Color = Color3.fromHex("8724FF"),
     Radius = 0, -- from 0 to 13
 })
@@ -695,12 +695,13 @@ local redeemCodesButton = CodesTab:Button({
     Locked = false,
     Callback = function()
     local codes = {"SlashX", "Derp", "Heyyyo", 
-    "Update29P3","Update29P3Code","Update29P3Code2","ChristmasPart1?","410KLikes","ChristmasPart1!","Update30Late",
+    "ChristmasPart1!","Update30Late",
     "Update30","Update30Code","790KFav","Update30Code2","Update30Code3","275MVisits","Update30Late2","Update30Late3",
     "Update30P2","415KLikes","795KFav","Update30P2Code","280MVisits","Update30P2Super",
     "Update30P3","Update30P3Code","ChristmasPart2or3?","Part3ChristmasOR2?","800KFav",
     "Update30P4","Update30P4Code","ChristmasToday!","MerryChristmas!","MerryChristmas!2","ChristmasPot","MerryChristmas!3",
-    "Update31","Update31Code","Update31Code2","Update31Code3","MerryChristmas!4","Update31Late"
+    "Update31","Update31Code","Update31Code2","Update31Code3","MerryChristmas!4","Update31Late",
+    "Update31P2","Update31P2Code","Update31P2Code2","Update31P2Code3","MerryChristmas!5"
 
 
 }
@@ -4402,7 +4403,7 @@ local RaidOptions = {
     "Sin Raid","Kaiju Dungeon","Dragon Room Raid","Gleam Raid","Progression Raid 2",
     "Ghoul Raid","Chainsaw Defense","Netherworld Defense","Green Planet Raid",
     "Hollow Raid","One Hero Raid","Tomb Arena Raid","Halloween Raid","Graveyard Defense",
-    "Dungeon Suffering","Dungeon Adventurer","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3","Maze Level 4","Dungeon Labyrinth","Crimson Canyon",
+    "Dungeon Suffering","Dungeon Adventurer","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3","Maze Level 4","Maze Level 5","Dungeon Labyrinth","Crimson Canyon",
     "Body Improvement Challenge","Breathing Raid","Mugen Dungeon","Ice Raid","Santa Raid"
 
 }
@@ -4417,6 +4418,7 @@ local SpeedRaids = {
     ["Maze Level 2"] = true,
     ["Maze Level 3"] = true,
     ["Maze Level 4"] = true,
+    ["Maze Level 5"] = true,
     ["One Hero Raid"] = true
 }
 
@@ -4425,7 +4427,7 @@ local RaidSpeedOptions = {"1x Speed", "2x Speed", "3x Speed"}
 -- 需要 Auto Farm 的 Dungeon 和 Maze（来自 DungeonOptions 和 RaidOptions）
 local AutoFarmDungeons = {
     "Dungeon Easy", "Dungeon Medium", "Dungeon Hard", "Dungeon Insane", "Dungeon Crazy", "Dungeon Nightmare",
-    "Kaiju Dungeon", "Dungeon Suffering", "Dungeon Adventurer", "Dungeon Torment", "Dungeon Labyrinth", "Crimson Canyon", "Maze Level 1", "Maze Level 2", "Maze Level 3", "Maze Level 4",
+    "Kaiju Dungeon", "Dungeon Suffering", "Dungeon Adventurer", "Dungeon Torment", "Dungeon Labyrinth", "Crimson Canyon", "Maze Level 1", "Maze Level 2", "Maze Level 3", "Maze Level 4", "Maze Level 5",
     "Body Improvement Challenge","Mugen Dungeon"
 
 }
@@ -4467,6 +4469,7 @@ local RaidNameMap = {
     ["Maze Level 2"] = "Maze_Level_2",
     ["Maze Level 3"] = "Maze_Level_3",
     ["Maze Level 4"] = "Maze_Level_4",
+    ["Maze Level 5"] = "Maze_Level_5",
     ["Dungeon Labyrinth"] = "Dungeon_Labyrinth",
     ["Crimson Canyon"] = "Crimson_Canyon",
     ["One Hero Raid"] = "One_Hero_Raid",
