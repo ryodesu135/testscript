@@ -4622,7 +4622,7 @@ local function StartDungeonAutoFarm()
                     local openedDoor = false
                     -- 循环workspace.Dungeons的所有raid
                     for _, dungeon in pairs(workspace.Dungeons:GetChildren()) do
-                        if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3") or dungeon.Name:find("Maze_Level_4")) then
+                        if dungeon:IsA("Folder") and (dungeon.Name:find("Dungeon_Labyrinth") or dungeon.Name:find("Maze_Level_1") or dungeon.Name:find("Maze_Level_2") or dungeon.Name:find("Maze_Level_3") or dungeon.Name:find("Maze_Level_4") or dungeon.Name:find("Maze_Level_5")) then
                             -- 保存Door位置，按类型分组（raid结束后local变量清除）
                             local Monster_Room_Doors = {}
                             local Treasure_Room_Doors = {}
