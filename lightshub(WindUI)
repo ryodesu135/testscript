@@ -4140,6 +4140,82 @@ local AutoLevelPokitaToggle = LevelingTab:Toggle({
     end
 })
 
+LevelingTab:Divider()
+
+local AutoLevelDemonArtsToggle = LevelingTab:Toggle({
+    Flag = "AutoLevelDemonArts1",
+    Title = "Auto Level Up [Phantom] Demon Arts",
+    Desc = "Will works only if you have [Phantom] Blood Control (Demon Arts) in your inventory",
+    Default = false,
+    Callback = function(state)
+        if state then
+            getgenv().AutoLevelDemonArtsRunning = true
+            task.spawn(function()
+                local demonArtsId = nil
+                
+                -- 获取玩家背包
+                local player = game:GetService("Players").LocalPlayer
+                local playerGui = player:FindFirstChild("PlayerGui")
+                
+                if playerGui and playerGui:IsA("PlayerGui") then
+                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                        local hub = inventoryGui:FindFirstChild("Hub")
+                        if hub and hub:IsA("Frame") then
+                            local powers = hub:FindFirstChild("Powers")
+                            if powers and powers:IsA("Frame") then
+                                local listFrame = powers:FindFirstChild("List_Frame")
+                                if listFrame and listFrame:IsA("Frame") then
+                                    local list = listFrame:FindFirstChild("List")
+                                    if list and list:IsA("ScrollingFrame") then
+
+                                        for _, itemButton in pairs(list:GetChildren()) do
+                                            if itemButton:IsA("ImageButton") then
+                                                local inside = itemButton:FindFirstChild("Inside")
+                                                if inside and inside:IsA("CanvasGroup") then
+                                                    local title = inside:FindFirstChild("Title")
+                                                    if title and title:IsA("TextLabel") then
+                                                        local itemName = title.Text
+                                                        if itemName == "Blood Control" then
+                                                            demonArtsId = itemButton.Name
+                                                            break
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                
+                if not demonArtsId then
+                    getgenv().AutoLevelDemonArtsRunning = false
+                    WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Unable to find [Phantom] Blood Control (Demon Arts) in your inventory. Auto Leveling Stopped.",
+                        Duration = 3,
+                    })
+                    return
+                end
+
+                -- 找到了[Phantom] Demon Arts，开始每0.1秒发送升级请求
+                while getgenv().AutoLevelDemonArtsRunning and task.wait(0.1) do
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Upgrade_Name"] = "Level",
+                        ["UniqueId"] = demonArtsId,
+                        ["Action"] = "Prog_Lv_Items",
+                        ["Bench_Name"] = "Demon_Arts_Leveling",
+                    })
+                end    
+            end)
+        else
+            getgenv().AutoLevelDemonArtsRunning = false
+        end
+    end
+})
 
 
 local UpgradesTab = Window:Tab({
