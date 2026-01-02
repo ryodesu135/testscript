@@ -2607,7 +2607,7 @@ local RollDropdown = RollTab:Dropdown({
     "[W31] Energy Teigu","[W31] Damage Teigu",
     "[W32] Psycho Flow","[W32] Psycho Destruction",
     "[W33] Slayer Marks","[W33] Demon Bloodline",
-    "[W34] Magic Type","[W34] The Muscle",
+    "[W34] Magic Type","[W34] The Muscule",
     "[W35] DxD Species","[W35] Sacred Gear",
     "[W36] Mage Class","[W36] Dragon Evolution"
 },
