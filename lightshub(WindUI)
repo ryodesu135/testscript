@@ -38,7 +38,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "Anime Eternal - Update 31 P2",
+    Title = "Anime Eternal - Update 32",
     Color = Color3.fromHex("8724FF"),
     Radius = 0, -- from 0 to 13
 })
@@ -695,13 +695,10 @@ local redeemCodesButton = CodesTab:Button({
     Locked = false,
     Callback = function()
     local codes = {"SlashX", "Derp", "Heyyyo", 
-    "ChristmasPart1!","Update30Late",
-    "Update30","Update30Code","790KFav","Update30Code2","Update30Code3","275MVisits","Update30Late2","Update30Late3",
-    "Update30P2","415KLikes","795KFav","Update30P2Code","280MVisits","Update30P2Super",
-    "Update30P3","Update30P3Code","ChristmasPart2or3?","Part3ChristmasOR2?","800KFav",
-    "Update30P4","Update30P4Code","ChristmasToday!","MerryChristmas!","MerryChristmas!2","ChristmasPot","MerryChristmas!3",
     "Update31","Update31Code","Update31Code2","Update31Code3","MerryChristmas!4","Update31Late",
-    "Update31P2","Update31P2Code","Update31P2Code2","Update31P2Code3","MerryChristmas!5"
+    "Update31P2","Update31P2Code","Update31P2Code2","Update31P2Code3","MerryChristmas!5",
+    "Update31P3","805KFav","810KFav","Update31P3Code","420KLikes","HappyNewYear!","HappyNewYear!2","HappyNewYear!3",
+    "Update32","Update32Code","Update32Code2","Update32Code3","295MVisits","Update32SuperCode"
 
 
 }
@@ -1087,7 +1084,7 @@ local ExchangeW1Map = {
 local ExchangeW2Options = {
     "Frost Demon Token","Grand Elder Token","Saiyan Lvl Token","Dragon Race Lvl Token","Eternal Dragon Token","Dragon Blessing Token","Scythe Token","Baikai Token","Espada Token","Reiatsu Lvl Token","Zanpakuto Lvl Token","Shadow Garden Token","Shadow Arts Token","Garden Lvl Token","Arts Lvl Token","Threat Level Token","Punch Token","Threat Lvl Token","Punch Lvl Token","Adventurer Token","Magic Tier Token","Mana Growth Token","Ultimate Cast Token","Adventurer Lvl Token","Magic Tier Lvl Token","Thriller Zombie Token","Nightmare Evo Token","Special Zombie Token","Zombie Booster Token",
     "Assassin Grade Token","Assassin Skill Token","Assassin Energy Token","Assassin Damage Token","Spirit Pact Token","Witch Factor Token","Artificial Spirit Token","Gospel Cursed Token","Geass Potential Token","Geass Perception Token","Geass Soul Token","Geass Creation Token","Geass Precognition Token","Geass Time Token","Geass Telepathic Token","Geass Manipulation Token","Geass Obedience Token","Knightmare Token","IQ Token","Scientific Token","Eye Token 2","Shinobi Clan Token","Genkai Token","Chakra Infusion Token","Energy Teigu Token","Damage Teigu Token","Psycho Flow Token","Psycho Destruction Token",
-    "Slayer Mark Token","Demon Bloodline Token","Magic Type Token","The Muscule Token","Eagle Token","Whale Token","Wolf Token","DxD Species Token","Sacred Gear Token"
+    "Slayer Mark Token","Demon Bloodline Token","Magic Type Token","The Muscule Token","Eagle Token","Whale Token","Wolf Token","DxD Species Token","Sacred Gear Token","Dragon Arms Token","Dragon Torso Token","Dragon Wings Token","Dragon Helmet Token","Dragon Rank Token","Mage Rank Token"
 }
 
 local ExchangeW2Map = {
@@ -1160,6 +1157,12 @@ local ExchangeW2Map = {
     ["Wolf Token"] = {Product_Id = "35", Bench_Name = "Token_Exchange_World_26_to_30"},
     ["DxD Species Token"] = {Product_Id = "36", Bench_Name = "Token_Exchange_World_26_to_30"},
     ["Sacred Gear Token"] = {Product_Id = "37", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Dragon Arms Token"] = {Product_Id = "38", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Dragon Torso Token"] = {Product_Id = "39", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Dragon Wings Token"] = {Product_Id = "40", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Dragon Helmet Token"] = {Product_Id = "41", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Dragon Rank Token"] = {Product_Id = "42", Bench_Name = "Token_Exchange_World_26_to_30"},
+    ["Mage Rank Token"] = {Product_Id = "43", Bench_Name = "Token_Exchange_World_26_to_30"},
 }
 
 local ExchangeCoinsOptions = {
@@ -1532,7 +1535,7 @@ local ExchangeShopW1ProductsMap = {
 local ExchangeShopW2Options = {
     "Exchange Coin","Frost Demon Token","Grand Elder Token","Saiyan Lvl Token","Dragon Race Lvl Token","Eternal Dragon Token","Dragon Blessing Token","Scythe Token","Baikai Token","Espada Token","Reiatsu Lvl Token","Zanpakuto Lvl Token","Shadow Garden Token","Shadow Arts Token","Garden Lvl Token","Arts Lvl Token","Threat Level Token","Punch Token","Threat Lvl Token","Punch Lvl Token","Adventurer Token","Magic Tier Token","Mana Growth Token","Ultimate Cast Token","Adventurer Lvl Token","Magic Tier Lvl Token","Thriller Zombie Token","Nightmare Evo Token","Special Zombie Token","Zombie Booster Token",
     "Assassin Grade Token","Assassin Skill Token","Assassin Energy Token","Assassin Damage Token","Spirit Pact Token","Witch Factor Token","Artificial Spirit Token","Gospel Cursed Token","Geass Potential Token","Geass Perception Token","Geass Soul Token","Geass Creation Token","Geass Precognition Token","Geass Time Token","Geass Telepathic Token","Geass Manipulation Token","Knightmare Token","IQ Token","Scientific Token","Eye Token 2","Shinobi Clan Token","Genkai Token","Chakra Infusion Token","Energy Teigu Token","Damage Teigu Token","Psycho Flow Token","Psycho Destruction Token",
-    "Slayer Mark Token","Demon Bloodline Token","Magic Type Token","The Muscule Token","Eagle Token","Whale Token","Wolf Token"
+    "Slayer Mark Token","Demon Bloodline Token","Magic Type Token","The Muscule Token","Eagle Token","Whale Token","Wolf Token","DxD Species Token","Sacred Gear Token","Dragon Arms Token","Dragon Torso Token","Dragon Wings Token","Dragon Helmet Token"
 }
 
 local ExchangeShopW2Map = {
@@ -1603,6 +1606,12 @@ local ExchangeShopW2Map = {
     ["Eagle Token"] = {Product_Id = "32", Bench_Name = "Exchange_Shop_World_26_to_30"},
     ["Whale Token"] = {Product_Id = "33", Bench_Name = "Exchange_Shop_World_26_to_30"},
     ["Wolf Token"] = {Product_Id = "34", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["DxD Species Token"] = {Product_Id = "35", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["Sacred Gear Token"] = {Product_Id = "36", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["Dragon Arms Token"] = {Product_Id = "37", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["Dragon Torso Token"] = {Product_Id = "38", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["Dragon Wings Token"] = {Product_Id = "39", Bench_Name = "Exchange_Shop_World_26_to_30"},
+    ["Dragon Helmet Token"] = {Product_Id = "40", Bench_Name = "Exchange_Shop_World_26_to_30"},
 }
 
 local ExchangeShopW2KeysOptions = {
@@ -2513,7 +2522,9 @@ local StarDropdown = StarTab:Dropdown({
 
     "[W26] Amusement Park","[W27] Re:Manor","[W28] Asfordo Academy","[W29] Science Village","[W30] Sand Village",
 
-    "[W31] Night Raid Base","[W32] Salty School","[W33] Mugen District","[W34] Easton Academy","[W35] Kuo Academy"
+    "[W31] Night Raid Base","[W32] Salty School","[W33] Mugen District","[W34] Easton Academy","[W35] Kuo Academy",
+
+    "[W36] Magnoli Town"
 },
     Value = "[W1] Earth City",
     Callback = function(option)
@@ -2597,7 +2608,8 @@ local RollDropdown = RollTab:Dropdown({
     "[W32] Psycho Flow","[W32] Psycho Destruction",
     "[W33] Slayer Marks","[W33] Demon Bloodline",
     "[W34] Magic Type","[W34] The Muscle",
-    "[W35] DxD Species","[W35] Sacred Gear"
+    "[W35] DxD Species","[W35] Sacred Gear",
+    "[W36] Mage Class","[W36] Dragon Evolution"
 },
     Value = "[W1] Dragon Race",
     Callback = function(option)
@@ -2620,7 +2632,7 @@ RollTab:Toggle({
                         -- 生成 Name：移除 "[W X] " 前缀，并将空格替换为下划线
                         local name = string.gsub(getgenv().selectedRolls, "^%[W%d+%] ", ""):gsub(" ", "_")
                         game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-                            ["Open_Amount"] = 5,
+                            ["Open_Amount"] = 6,
                             ["Name"] = name,
                             ["Action"] = "_Gacha_Activate",
                         })
@@ -3637,7 +3649,8 @@ local ProgressionDropdown = ProgressionTab:Dropdown({
     "[W24] Mana Growth","[W24] Ultimate Cast",
     "[W26] Assassin Energy","[W26] Assassin Damage","[W26] Assassin Critical Energy","[W26] Assassin Critical Damage",
     "[W29] Science Materials Upgrade","[W29] Science Upgrades (Energy)","[W29] Science Upgrades (Damage)",
-    "[W34] House of Eagle","[W34] House of Killer Whale","[W34] House of Wolf"
+    "[W34] House of Eagle","[W34] House of Killer Whale","[W34] House of Wolf",
+    "[W35] Dragon Booster"
 },
     Value = "[W2] Haki Upgrade",
     Callback = function(option)
@@ -3701,6 +3714,7 @@ local ProgressionMap = { -- Upgrade_Name, Bench_Name, Action
     ["[W34] House of Eagle"] = {"Coins_and_Luck", "House_of_Eagle", "_Progression"},
     ["[W34] House of Killer Whale"] = {"Energy", "House_of_Killer_Whale", "_Progression"},
     ["[W34] House of Wolf"] = {"Damage", "House_of_Wolf", "_Progression"},
+    ["[W35] Dragon Booster"] = {"Damage", "Dragon_Booster", "_Progression"},
 }
 
 -- Auto Progression Toggle
