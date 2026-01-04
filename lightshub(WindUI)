@@ -695,11 +695,10 @@ local redeemCodesButton = CodesTab:Button({
     Locked = false,
     Callback = function()
     local codes = {"SlashX", "Derp", "Heyyyo", 
-    "Update31","Update31Code","Update31Code2","Update31Code3","MerryChristmas!4","Update31Late",
     "Update31P2","Update31P2Code","Update31P2Code2","Update31P2Code3","MerryChristmas!5",
     "Update31P3","805KFav","810KFav","Update31P3Code","420KLikes","HappyNewYear!","HappyNewYear!2","HappyNewYear!3",
     "Update32","Update32Code","Update32Code2","Update32Code3","295MVisits","Update32SuperCode",
-    "Update32P2","Update32P2Code","Update32P2Code2","Update32P2Code3","815KFav"
+    "Update32P2","Update32P2Code","Update32P2Code2","Update32P2Code3","815KFav","Update32Part2RestartCode"
 
 
 }
@@ -4340,6 +4339,7 @@ local AutoLevelMagicItemToggle = LevelingTab:Toggle({
                 -- 找到了Magic Item，开始每0.1秒发送升级请求
                 while getgenv().AutoLevelMagicItemRunning and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Upgrade_Name"] = "Level",
                         ["UniqueId"] = magicItemId,
                         ["Action"] = "Prog_Lv_Items",
                         ["Bench_Name"] = "Magic_Items_Evolve",
