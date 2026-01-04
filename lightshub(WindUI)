@@ -38,7 +38,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-    Title = "Anime Eternal - Update 32",
+    Title = "Anime Eternal - Update 32 P2",
     Color = Color3.fromHex("8724FF"),
     Radius = 0, -- from 0 to 13
 })
@@ -698,7 +698,8 @@ local redeemCodesButton = CodesTab:Button({
     "Update31","Update31Code","Update31Code2","Update31Code3","MerryChristmas!4","Update31Late",
     "Update31P2","Update31P2Code","Update31P2Code2","Update31P2Code3","MerryChristmas!5",
     "Update31P3","805KFav","810KFav","Update31P3Code","420KLikes","HappyNewYear!","HappyNewYear!2","HappyNewYear!3",
-    "Update32","Update32Code","Update32Code2","Update32Code3","295MVisits","Update32SuperCode"
+    "Update32","Update32Code","Update32Code2","Update32Code3","295MVisits","Update32SuperCode",
+    "Update32P2","Update32P2Code","Update32P2Code2","Update32P2Code3","815KFav"
 
 
 }
@@ -4227,6 +4228,126 @@ local AutoLevelDemonArtsToggle = LevelingTab:Toggle({
             end)
         else
             getgenv().AutoLevelDemonArtsRunning = false
+        end
+    end
+})
+
+LevelingTab:Divider()
+
+local MagicItemsListDropdown = LevelingTab:Dropdown({
+    Flag = "MagicItemsListDropdown",
+    Title = "Select Magic Item to Level Up",
+    Values = {
+        "[Exotic] Judgment Field",
+        "[Supreme] Celestial Spirit Banishment",
+        "[Phantom] Magic Stone",
+        "[Mythical] Light Pen",
+        "[Legendary] Ice Cutting Pen",
+        "[Epic] Memory Days Book",
+        "[Rare] Magic Power Finder",
+        "[Uncommon] ColorS",
+        "[Common] X-Balls"
+    },
+    Value = "[Common] X-Balls",
+    Callback = function(option)
+        getgenv().SelectedMagicItem = option
+    end,
+})
+
+local AutoLevelMagicItemToggle = LevelingTab:Toggle({
+    Flag = "AutoLevelMagicItem1",
+    Title = "Auto Level Up Magic Item",
+    Desc = "Will works only if you have the selected [Powers] Magic Item in your inventory",
+    Default = false,
+    Callback = function(state)
+        if state then
+            if not getgenv().SelectedMagicItem then
+                WindUI:Notify({
+                    Title = "Lights Hub",
+                    Content = "Please select a Magic Item from the dropdown first.",
+                    Duration = 3,
+                })
+                return
+            end
+
+            getgenv().AutoLevelMagicItemRunning = true
+            task.spawn(function()
+                -- 提取选中的Magic Item名称（去掉前缀，如 [Phantom] Magic Stone -> Magic Stone）
+                local selectedMagicItem = getgenv().SelectedMagicItem
+                local magicItemName = string.match(selectedMagicItem, "%] (.+)")  -- 提取 ] 后的部分
+                
+                if not magicItemName then
+                    getgenv().AutoLevelMagicItemRunning = false
+                    WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Invalid Magic Item selection. Auto Leveling Stopped.",
+                        Duration = 3,
+                    })
+                    return
+                end
+
+                -- 先查找一次选中的Magic Item，获取ID
+                local magicItemId = nil
+                
+                -- 获取玩家背包
+                local player = game:GetService("Players").LocalPlayer
+                local playerGui = player:FindFirstChild("PlayerGui")
+                
+                if playerGui and playerGui:IsA("PlayerGui") then
+                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                        local hub = inventoryGui:FindFirstChild("Hub")
+                        if hub and hub:IsA("Frame") then
+                            local powers = hub:FindFirstChild("Powers")
+                            if powers and powers:IsA("Frame") then
+                                local listFrame = powers:FindFirstChild("List_Frame")
+                                if listFrame and listFrame:IsA("Frame") then
+                                    local list = listFrame:FindFirstChild("List")
+                                    if list and list:IsA("ScrollingFrame") then
+                                        -- 遍历所有子项查找选中的Kagune
+                                        for _, itemButton in pairs(list:GetChildren()) do
+                                            if itemButton:IsA("ImageButton") then
+                                                local inside = itemButton:FindFirstChild("Inside")
+                                                if inside and inside:IsA("CanvasGroup") then
+                                                    local title = inside:FindFirstChild("Title")
+                                                    if title and title:IsA("TextLabel") then
+                                                        local itemName = title.Text
+                                                        if itemName == magicItemName then
+                                                            magicItemId = itemButton.Name
+                                                            break
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+
+                if not magicItemId then
+                    getgenv().AutoLevelMagicItemRunning = false
+                    WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Unable to find Magic Item in your inventory. Auto Leveling Stopped.",
+                        Duration = 3,
+                    })
+                    return
+                end
+                
+                -- 找到了Magic Item，开始每0.1秒发送升级请求
+                while getgenv().AutoLevelMagicItemRunning and task.wait(0.1) do
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["UniqueId"] = magicItemId,
+                        ["Action"] = "Prog_Lv_Items",
+                        ["Bench_Name"] = "Magic_Items_Evolve",
+                    })
+                end    
+            end)
+        else
+            getgenv().AutoLevelMagicItemRunning = false
         end
     end
 })
