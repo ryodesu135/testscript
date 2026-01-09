@@ -790,6 +790,8 @@ while not getgenv().SCRIPT_KEY do
     task.wait(0.1)
 end
 
+end
+
 if game.PlaceId == 90462358603255 then
 
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
