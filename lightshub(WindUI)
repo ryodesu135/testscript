@@ -4441,6 +4441,83 @@ local AutoLevelLegendaryShieldToggle = LevelingTab:Toggle({
     end
 })
 
+local AutoEnchantLegendaryShieldToggle = LevelingTab:Toggle({
+    Flag = "AutoEnchantLegendaryShield",
+    Title = "Auto Enchant [Exotic] Legendary Shield",
+    Desc = "Will works only if you have [Exotic] Legendary Shield in your inventory",
+    Default = false,
+    Callback = function(state)
+        if state then
+            getgenv().AutoEnchantLegendaryShieldRunning = true
+            task.spawn(function()
+                local legendaryShieldId = nil
+                
+                -- 获取玩家背包
+                local player = game:GetService("Players").LocalPlayer
+                local playerGui = player:FindFirstChild("PlayerGui")
+                
+                if playerGui and playerGui:IsA("PlayerGui") then
+                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                        local hub = inventoryGui:FindFirstChild("Hub")
+                        if hub and hub:IsA("Frame") then
+                            local powers = hub:FindFirstChild("Powers")
+                            if powers and powers:IsA("Frame") then
+                                local listFrame = powers:FindFirstChild("List_Frame")
+                                if listFrame and listFrame:IsA("Frame") then
+                                    local list = listFrame:FindFirstChild("List")
+                                    if list and list:IsA("ScrollingFrame") then
+
+                                        for _, itemButton in pairs(list:GetChildren()) do
+                                            if itemButton:IsA("ImageButton") then
+                                                local inside = itemButton:FindFirstChild("Inside")
+                                                if inside and inside:IsA("CanvasGroup") then
+                                                    local title = inside:FindFirstChild("Title")
+                                                    if title and title:IsA("TextLabel") then
+                                                        local itemName = title.Text
+                                                        if itemName == "Legendary Shield" then
+                                                            legendaryShieldId = itemButton.Name
+                                                            break
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                
+                if not legendaryShieldId then
+                    getgenv().AutoEnchantLegendaryShieldRunning = false
+                    WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Unable to find [Exotic] Legendary Shield in your inventory. Auto Enchant Stopped.",
+                        Duration = 3,
+                    })
+                    return
+                end
+
+                -- 找到了[Exotic] Legendary Shield，开始每0.1秒发送升级请求
+                while getgenv().AutoEnchantLegendaryShieldRunning and task.wait(0.1) do
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Type"] = "Enchant",
+                        ["UniqueId"] = legendaryShieldId,
+                        ["Action"] = "Enchantment",
+                        ["Enchantment_Name"] = "Legendary_Shield_Blessing",
+                    })
+                end    
+            end)
+        else
+            getgenv().AutoEnchantLegendaryShieldRunning = false
+        end
+    end
+})
+
+LevelingTab:Divider()
+
 local AutoLevelLegendarySpearToggle = LevelingTab:Toggle({
     Flag = "AutoLevelLegendarySpear",
     Title = "Auto Level Up [Exotic] Legendary Spear",
@@ -4516,6 +4593,8 @@ local AutoLevelLegendarySpearToggle = LevelingTab:Toggle({
     end
 })
 
+LevelingTab:Divider()
+
 local AutoLevelLegendarySwordToggle = LevelingTab:Toggle({
     Flag = "AutoLevelLegendarySword",
     Title = "Auto Level Up [Exotic] Legendary Sword",
@@ -4590,6 +4669,8 @@ local AutoLevelLegendarySwordToggle = LevelingTab:Toggle({
         end
     end
 })
+
+LevelingTab:Divider()
 
 local AutoLevelLegendaryBowToggle = LevelingTab:Toggle({
     Flag = "AutoLevelLegendaryBow",
