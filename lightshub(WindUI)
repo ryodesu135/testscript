@@ -2660,7 +2660,7 @@ local AutoRollToggle = RollTab:Toggle({
 
 local EnchantTab = Window:Tab({
         Title = "Enchant",
-        Icon = "book-up-2",
+        Icon = "book",
     })
 
 local AutoEnchantLegendaryShieldToggle = EnchantTab:Toggle({
