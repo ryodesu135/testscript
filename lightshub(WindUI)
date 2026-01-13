@@ -2630,7 +2630,7 @@ local RollDropdown = RollTab:Dropdown({
 })
 
 -- Auto Roll Toggle
-RollTab:Toggle({
+local AutoRollToggle = RollTab:Toggle({
     Flag = "AutoRoll1",
     Title = "Auto Roll",
     Desc = "Automatically Roll Max Selected Roll",
