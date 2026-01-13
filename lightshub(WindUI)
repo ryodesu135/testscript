@@ -1,3 +1,5 @@
+if game.PlaceId == 90462358603255 then
+
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local Icons = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/Footagesus/Icons/main/Main.lua"))()
 Icons.SetIconsType("lucide")
@@ -2572,6 +2574,90 @@ local AutoOpenStarToggle = StarTab:Toggle({
     end,
 })
 
+local RollTab = Window:Tab({
+        Title = "Roll",
+        Icon = "dices",
+    })
+
+--Auto Roll
+local RollDropdown = RollTab:Dropdown({
+    Flag = "RollDropdown",
+   Title = "Roll List",
+   Values = {
+    "[W1] Christmas Glove",
+    "[W1] Dragon Race","[W1] Saiyan Evolution",
+    "[W2] Pirate Crew","[W2] Demon Fruits","[W2] Swords",
+    "[W3] Reiatsu Color","[W3] Zanpakuto",
+    "[W4] Curses",
+    "[W5] Demon Arts",
+    "[W6] Solo Hunter Rank",
+    "[W7] Grimoire",
+    "[W8] Power Eyes",
+    "[W9] Psychic Mayhem",
+    "[W10] Energy Card Shop","[W10] Damage Card Shop",
+    "[W11] Families","[W11] Titans",
+    "[W12] Sins","[W12] Commandments",
+    "[W13] Kaiju Powers","[W13] Power of Exchange",
+    "[W14] Ultimate Skills","[W14] Species",
+    "[W15] Power Energy Runes",
+    "[W16] Stands","[W16] Onomatopoeia",
+    "[W17] Investigators","[W17] Kagune",
+    "[W18] Debiru Hunter","[W18] Akuma Powers",
+    "[W19] Special Fire Force", "[W19] Mushi Bite",
+    "[W20] Grand Elder Power", "[W20] Frost Demon Evolution", "[W20] Power of Friendship",
+    "[W21] Scythes","[W21] Espada",
+    "[W22] Shadow Garden","[W22] Shadow Arts",
+    "[W23] Energy Threat Level","[W23] Punch Power","[W23] Exchange of Power",
+    "[W24] Adventurer Rank","[W24] Magic Tier",
+    "[W25] Thriller Zombie","[W25] Nightmare Evolution","[W25] Special Zombie",
+    "[W26] Assassin Grade","[W26] Assassin Skills",
+    "[W27] Spirit Pact","[W27] Witch Factor","[W27] Re:Spirit Pact","[W27] Re:Witch Factor","[W27] Witch Authority",
+    "[W28] Geass Potential","[W28] Knightmare Frames",
+    "[W29] IQ","[W29] Scientific Weapons",
+    "[W30] Shinobi Clan","[W30] Kekkei Genkai","[W30] Power Eyes 2",
+    "[W31] Energy Teigu","[W31] Damage Teigu",
+    "[W32] Psycho Flow","[W32] Psycho Destruction",
+    "[W33] Slayer Marks","[W33] Demon Bloodline",
+    "[W34] Magic Type","[W34] The Muscule",
+    "[W35] DxD Species","[W35] Sacred Gear",
+    "[W36] Mage Class","[W36] Dragon Evolution",
+    "[W37] Magic Shield","[W37] Vassal Weapons"
+},
+    Value = "[W1] Dragon Race",
+    Callback = function(option)
+        getgenv().selectedRolls = option
+    end,
+})
+
+-- Auto Roll Toggle
+RollTab:Toggle({
+    Flag = "AutoRoll1",
+    Title = "Auto Roll",
+    Desc = "Automatically Roll Max Selected Roll",
+    Default = false,
+    Callback = function(state)
+        if state then
+            getgenv().AutoRoll = true
+            task.spawn(function()
+                while getgenv().AutoRoll do
+                    pcall(function()
+                        -- 生成 Name：移除 "[W X] " 前缀，并将空格替换为下划线
+                        local name = string.gsub(getgenv().selectedRolls, "^%[W%d+%] ", ""):gsub(" ", "_")
+                        game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                            ["Open_Amount"] = 6,
+                            ["Name"] = name,
+                            ["Action"] = "_Gacha_Activate",
+                        })
+                        task.wait(0.05)
+                    end)
+                end
+            end)
+        else
+            getgenv().AutoRoll = false
+        end
+    end,
+})
+
 local EnchantTab = Window:Tab({
         Title = "Enchant",
         Icon = "book-up-2",
@@ -2725,91 +2811,6 @@ local AutoEnchantLegendarySwordToggle = EnchantTab:Toggle({
             getgenv().AutoEnchantLegendarySwordRunning = false
         end
     end
-})
-
-
-local RollTab = Window:Tab({
-        Title = "Roll",
-        Icon = "dices",
-    })
-
---Auto Roll
-local RollDropdown = RollTab:Dropdown({
-    Flag = "RollDropdown",
-   Title = "Roll List",
-   Values = {
-    "[W1] Christmas Glove",
-    "[W1] Dragon Race","[W1] Saiyan Evolution",
-    "[W2] Pirate Crew","[W2] Demon Fruits","[W2] Swords",
-    "[W3] Reiatsu Color","[W3] Zanpakuto",
-    "[W4] Curses",
-    "[W5] Demon Arts",
-    "[W6] Solo Hunter Rank",
-    "[W7] Grimoire",
-    "[W8] Power Eyes",
-    "[W9] Psychic Mayhem",
-    "[W10] Energy Card Shop","[W10] Damage Card Shop",
-    "[W11] Families","[W11] Titans",
-    "[W12] Sins","[W12] Commandments",
-    "[W13] Kaiju Powers","[W13] Power of Exchange",
-    "[W14] Ultimate Skills","[W14] Species",
-    "[W15] Power Energy Runes",
-    "[W16] Stands","[W16] Onomatopoeia",
-    "[W17] Investigators","[W17] Kagune",
-    "[W18] Debiru Hunter","[W18] Akuma Powers",
-    "[W19] Special Fire Force", "[W19] Mushi Bite",
-    "[W20] Grand Elder Power", "[W20] Frost Demon Evolution", "[W20] Power of Friendship",
-    "[W21] Scythes","[W21] Espada",
-    "[W22] Shadow Garden","[W22] Shadow Arts",
-    "[W23] Energy Threat Level","[W23] Punch Power","[W23] Exchange of Power",
-    "[W24] Adventurer Rank","[W24] Magic Tier",
-    "[W25] Thriller Zombie","[W25] Nightmare Evolution","[W25] Special Zombie",
-    "[W26] Assassin Grade","[W26] Assassin Skills",
-    "[W27] Spirit Pact","[W27] Witch Factor","[W27] Re:Spirit Pact","[W27] Re:Witch Factor","[W27] Witch Authority",
-    "[W28] Geass Potential","[W28] Knightmare Frames",
-    "[W29] IQ","[W29] Scientific Weapons",
-    "[W30] Shinobi Clan","[W30] Kekkei Genkai","[W30] Power Eyes 2",
-    "[W31] Energy Teigu","[W31] Damage Teigu",
-    "[W32] Psycho Flow","[W32] Psycho Destruction",
-    "[W33] Slayer Marks","[W33] Demon Bloodline",
-    "[W34] Magic Type","[W34] The Muscule",
-    "[W35] DxD Species","[W35] Sacred Gear",
-    "[W36] Mage Class","[W36] Dragon Evolution",
-    "[W37] Magic Shield","[W37] Vassal Weapons"
-},
-    Value = "[W1] Dragon Race",
-    Callback = function(option)
-        getgenv().selectedRolls = option
-    end,
-})
-
--- Auto Roll Toggle
-RollTab:Toggle({
-    Flag = "AutoRoll1",
-    Title = "Auto Roll",
-    Desc = "Automatically Roll Max Selected Roll",
-    Default = false,
-    Callback = function(state)
-        if state then
-            getgenv().AutoRoll = true
-            task.spawn(function()
-                while getgenv().AutoRoll do
-                    pcall(function()
-                        -- 生成 Name：移除 "[W X] " 前缀，并将空格替换为下划线
-                        local name = string.gsub(getgenv().selectedRolls, "^%[W%d+%] ", ""):gsub(" ", "_")
-                        game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-                            ["Open_Amount"] = 6,
-                            ["Name"] = name,
-                            ["Action"] = "_Gacha_Activate",
-                        })
-                        task.wait(0.05)
-                    end)
-                end
-            end)
-        else
-            getgenv().AutoRoll = false
-        end
-    end,
 })
 
 
@@ -5759,3 +5760,74 @@ local AutoRaidToggle = AutoRaidTab:Toggle({
         getgenv().AutoRaidEnabled = state
     end,
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+elseif game.PlaceId == 75992362647444 then
+
+
+
+
+    
+else
+    warn("Not Supported This Game ! : " .. tostring(game.PlaceId))
+end
