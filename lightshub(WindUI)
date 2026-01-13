@@ -4670,6 +4670,81 @@ local AutoLevelLegendarySwordToggle = LevelingTab:Toggle({
     end
 })
 
+local AutoEnchantLegendarySwordToggle = LevelingTab:Toggle({
+    Flag = "AutoEnchantLegendarySword",
+    Title = "Auto Enchant [Exotic] Legendary Sword",
+    Desc = "Will works only if you have [Exotic] Legendary Sword in your inventory",
+    Default = false,
+    Callback = function(state)
+        if state then
+            getgenv().AutoEnchantLegendarySwordRunning = true
+            task.spawn(function()
+                local legendarySwordId = nil
+                
+                -- 获取玩家背包
+                local player = game:GetService("Players").LocalPlayer
+                local playerGui = player:FindFirstChild("PlayerGui")
+                
+                if playerGui and playerGui:IsA("PlayerGui") then
+                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                        local hub = inventoryGui:FindFirstChild("Hub")
+                        if hub and hub:IsA("Frame") then
+                            local powers = hub:FindFirstChild("Powers")
+                            if powers and powers:IsA("Frame") then
+                                local listFrame = powers:FindFirstChild("List_Frame")
+                                if listFrame and listFrame:IsA("Frame") then
+                                    local list = listFrame:FindFirstChild("List")
+                                    if list and list:IsA("ScrollingFrame") then
+
+                                        for _, itemButton in pairs(list:GetChildren()) do
+                                            if itemButton:IsA("ImageButton") then
+                                                local inside = itemButton:FindFirstChild("Inside")
+                                                if inside and inside:IsA("CanvasGroup") then
+                                                    local title = inside:FindFirstChild("Title")
+                                                    if title and title:IsA("TextLabel") then
+                                                        local itemName = title.Text
+                                                        if itemName == "Legendary Sword" then
+                                                            legendarySwordId = itemButton.Name
+                                                            break
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                
+                if not legendarySwordId then
+                    getgenv().AutoEnchantLegendarySwordRunning = false
+                    WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Unable to find [Exotic] Legendary Sword in your inventory. Auto Enchant Stopped.",
+                        Duration = 3,
+                    })
+                    return
+                end
+
+                -- 找到了[Exotic] Legendary Sword，开始每0.1秒发送升级请求
+                while getgenv().AutoEnchantLegendarySwordRunning and task.wait(0.1) do
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Type"] = "Enchant",
+                        ["UniqueId"] = legendarySwordId,
+                        ["Action"] = "Enchantment",
+                        ["Enchantment_Name"] = "Legendary_Sword_Blessing",
+                    })
+                end    
+            end)
+        else
+            getgenv().AutoEnchantLegendarySwordRunning = false
+        end
+    end
+})
+
 LevelingTab:Divider()
 
 local AutoLevelLegendaryBowToggle = LevelingTab:Toggle({
