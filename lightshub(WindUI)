@@ -5275,9 +5275,12 @@ local AutoLevelDamageSpellCardToggle = LevelingTab:Toggle({
     end
 })
 
-LevelingTab:Divider()
+local RuneTab = Window:Tab({
+        Title = "Runes",
+        Icon = "book",
+    })
 
-local RuneDropdown = LevelingTab:Dropdown({
+local RuneDropdown = RuneTab:Dropdown({
     Flag = "RunesDropdown1",
     Title = "Select Runes to Level Up (Currently only support Damage Runes)",
     Values = {},  -- 初始为空
@@ -5289,7 +5292,7 @@ local RuneDropdown = LevelingTab:Dropdown({
     end,
 })
 
-local RuneRefreshButton = LevelingTab:Button({
+local RuneRefreshButton = RuneTab:Button({
     Flag = "RefreshButton5",
     Title = "Refresh Runes List",
     Callback = function()
