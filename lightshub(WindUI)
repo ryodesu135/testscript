@@ -5320,14 +5320,14 @@ end
 getgenv().InRaidManual = false
 
 -- 监听 Dungeon Opened 信号（用于自动进入 Dungeon）
-Remote.OnClientEvent:Connect(function(data)
+game:GetService("ReplicatedStorage").Events.To_Client.OnClientEvent:Connect(function(data)  -- 内联Remote
     if data.Action == "System_Message" and data.Text and data.Text.Type == "Dungeon_Message" then
-        local text = data.Text.Text
+        local text = data.Text.Text  -- 保留必要local（用于循环）
         for dungeonName, signalName in pairs(DungeonNameMap) do
             if string.find(text, dungeonName) and getgenv().AutoDungeonEnabled and table.find(getgenv().SelectedDungeons, dungeonName) then
                 StopNormalAutoFarm()  -- 在进入 Dungeon 之前停止普通 Auto Farm
                 -- 发送进入 Dungeon 的信号
-                ToServer:FireServer({
+                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({  -- 内联ToServer
                     ["Action"] = "_Enter_Dungeon",
                     ["Name"] = signalName,
                 })
@@ -5355,17 +5355,17 @@ Remote.OnClientEvent:Connect(function(data)
                 getgenv().InRaidManual = true
             end
             
-            local currentName = getgenv().CurrentDungeonName or getgenv().CurrentRaidName
+            local currentName = getgenv().CurrentDungeonName or getgenv().CurrentRaidName  -- 保留必要local
             if currentName and IsAutoFarmDungeon(currentName) then
                 StartDungeonAutoFarm()
             end
         else
             -- 离开 Dungeon/Raid
-            local wasRaid = getgenv().InRaid or getgenv().InRaidManual
-            local previousName = getgenv().CurrentDungeonName or getgenv().CurrentRaidName
+            local wasRaid = getgenv().InRaid or getgenv().InRaidManual  -- 保留必要local
+            local previousName = getgenv().CurrentDungeonName or getgenv().CurrentRaidName  -- 保留必要local
             
             -- 检查是否是从Raid进入Dungeon的转换
-            local isTransition = wasRaid and getgenv().CurrentDungeonName
+            local isTransition = wasRaid and getgenv().CurrentDungeonName  -- 保留必要local
             
             if isTransition then
                 -- 保持 CurrentDungeonName 不变，只清除Raid相关状态
@@ -5391,10 +5391,10 @@ Remote.OnClientEvent:Connect(function(data)
         end
     elseif data.Action == "Message" and data.Type == "Normal" and data.Color == "Green" then
         -- 新增：处理 Wave Cleared 消息并自动离开 Raid
-        local waveText = data.Text
-        local waveNum = string.match(waveText, "Wave (%d+) Cleared!")
+        local waveText = data.Text  -- 保留必要local
+        local waveNum = string.match(waveText, "Wave (%d+) Cleared!")  -- 保留必要local
         if waveNum and tonumber(waveNum) == getgenv().LeaveRaidWave and getgenv().AutoLeaveRaidOnWaveEnabled and (getgenv().InRaid or getgenv().InRaidManual) then
-            ToServer:FireServer({
+            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({  -- 内联ToServer
                 ["Action"] = "Dungeon_Leave",
             })
         end
@@ -5410,7 +5410,6 @@ task.spawn(function()
         task.wait(1)  -- 检查间隔
     end
 end)
-
 -------------------------------------------------
 -- UI: Dungeon Tab
 -------------------------------------------------
