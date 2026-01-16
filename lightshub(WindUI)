@@ -3770,6 +3770,38 @@ local UpgradeProgressionToggle = ProgressionTab:Toggle({
     end,
 })
 
+-- 全局变量：存储ID和运行状态，避免局部声明
+getgenv().ItemIDs = {}  -- e.g., ItemIDs.IceSword = "id"
+getgenv().RunningStates = {}  -- e.g., RunningStates.IceSword = true
+
+-- 公共函数：查找物品ID，避免重复代码
+local function findItemID(itemName, category)
+    local playerGui = game:GetService("Players").LocalPlayer.PlayerGui  -- 内联：删除local player
+    if not (playerGui and playerGui:IsA("PlayerGui")) then return nil end
+    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+    if not (inventoryGui and inventoryGui:IsA("ScreenGui")) then return nil end
+    local hub = inventoryGui:FindFirstChild("Hub")
+    if not (hub and hub:IsA("Frame")) then return nil end
+    local targetCategory = hub:FindFirstChild(category)  -- "Powers" 或 "Weapons"
+    if not (targetCategory and targetCategory:IsA("Frame")) then return nil end
+    local listFrame = targetCategory:FindFirstChild("List_Frame")
+    if not (listFrame and listFrame:IsA("Frame")) then return nil end
+    local list = listFrame:FindFirstChild("List")
+    if not (list and list:IsA("ScrollingFrame")) then return nil end
+    for _, itemButton in pairs(list:GetChildren()) do
+        if itemButton:IsA("ImageButton") then
+            local inside = itemButton:FindFirstChild("Inside")
+            if inside and (inside:IsA("CanvasGroup") or inside:IsA("Frame")) then  -- 支持不同类型
+                local title = inside:FindFirstChild("Title")
+                if title and title:IsA("TextLabel") and title.Text == itemName then
+                    return itemButton.Name
+                end
+            end
+        end
+    end
+    return nil
+end
+
 local LevelingTab = Window:Tab({
     Title = "Leveling",
     Icon = "arrow-big-up",
@@ -3781,52 +3813,12 @@ local AutoLevelIceSwordToggle = LevelingTab:Toggle({
     Desc = "Will works only if you have [Weapon] Ice Sword in your inventory *Do not change weapon name!*",
     Default = false,
     Callback = function(state)
+        getgenv().RunningStates.IceSword = state
         if state then
-            getgenv().AutoLevelIceSwordRunning = true
             task.spawn(function()
-                -- 先查找一次冰剑，获取ID
-                local iceSwordId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local wepons = hub:FindFirstChild("Weapons")
-                            if wepons and wepons:IsA("Frame") then
-                                local listFrame = wepons:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-                                        -- 遍历所有子项查找冰剑
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("Frame") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == "Ice Sword" then
-                                                            iceSwordId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-                
-                if not iceSwordId then
-                    getgenv().AutoLevelIceSwordRunning = false
+                getgenv().ItemIDs.IceSword = findItemID("Ice Sword", "Weapons")  -- 使用公共函数
+                if not getgenv().ItemIDs.IceSword then
+                    getgenv().RunningStates.IceSword = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Unable to find [Weapon] Ice Sword in your inventory. Auto Leveling Stopped.",
@@ -3834,19 +3826,15 @@ local AutoLevelIceSwordToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-
-                -- 找到了冰剑，开始每0.1秒发送升级请求
-                while getgenv().AutoLevelIceSwordRunning and task.wait(0.1) do
+                while getgenv().RunningStates.IceSword and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                         ["Upgrade_Name"] = "Level",
-                        ["UniqueId"] = iceSwordId,
+                        ["UniqueId"] = getgenv().ItemIDs.IceSword,
                         ["Action"] = "Prog_Lv_Items",
                         ["Bench_Name"] = "Ice_Sword_Leveling",
                     })
-                end    
+                end
             end)
-        else
-            getgenv().AutoLevelIceSwordRunning = false
         end
     end
 })
@@ -3859,52 +3847,12 @@ local AutoLevelChristmasGloveToggle = LevelingTab:Toggle({
     Desc = "Will works only if you have [Exotic] Christmas Glove in your inventory",
     Default = false,
     Callback = function(state)
+        getgenv().RunningStates.ChristmasGlove = state
         if state then
-            getgenv().AutoLevelChristmasGloveRunning = true
             task.spawn(function()
-                -- 先查找一次圣诞手套，获取ID
-                local christmasGloveId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local powers = hub:FindFirstChild("Powers")
-                            if powers and powers:IsA("Frame") then
-                                local listFrame = powers:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-                                        -- 遍历所有子项查找圣诞手套
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("CanvasGroup") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == "Exotic Christmas Glove" then
-                                                            christmasGloveId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-                
-                if not christmasGloveId then
-                    getgenv().AutoLevelChristmasGloveRunning = false
+                getgenv().ItemIDs.ChristmasGlove = findItemID("Exotic Christmas Glove", "Powers")
+                if not getgenv().ItemIDs.ChristmasGlove then
+                    getgenv().RunningStates.ChristmasGlove = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Unable to find [Exotic] Christmas Glove in your inventory. Auto Leveling Stopped.",
@@ -3912,19 +3860,15 @@ local AutoLevelChristmasGloveToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-                
-                -- 找到了圣诞手套，开始每0.1秒发送升级请求
-                while getgenv().AutoLevelChristmasGloveRunning and task.wait(0.1) do
+                while getgenv().RunningStates.ChristmasGlove and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                         ["Upgrade_Name"] = "Level",
-                        ["UniqueId"] = christmasGloveId,
+                        ["UniqueId"] = getgenv().ItemIDs.ChristmasGlove,
                         ["Action"] = "Prog_Lv_Items",
                         ["Bench_Name"] = "Christmas_Glove_Leveling",
                     })
-                end    
+                end
             end)
-        else
-            getgenv().AutoLevelChristmasGloveRunning = false
         end
     end
 })
@@ -3965,15 +3909,11 @@ local AutoLevelKaguneToggle = LevelingTab:Toggle({
                 })
                 return
             end
-            
-            getgenv().AutoLevelKaguneRunning = true
+            getgenv().RunningStates.Kagune = state
             task.spawn(function()
-                -- 提取选中的Kagune名称（去掉前缀，如 [Phantom] Mukade -> Mukade）
-                local selectedKagune = getgenv().SelectedKagune
-                local kaguneName = string.match(selectedKagune, "%] (.+)")  -- 提取 ] 后的部分
-                
+                local kaguneName = string.match(getgenv().SelectedKagune, "%] (.+)")  -- 保留必要local
                 if not kaguneName then
-                    getgenv().AutoLevelKaguneRunning = false
+                    getgenv().RunningStates.Kagune = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Invalid Kagune selection. Auto Leveling Stopped.",
@@ -3981,50 +3921,9 @@ local AutoLevelKaguneToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-                
-                -- 先查找一次选中的Kagune，获取ID
-                local kaguneId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local powers = hub:FindFirstChild("Powers")
-                            if powers and powers:IsA("Frame") then
-                                local listFrame = powers:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-                                        -- 遍历所有子项查找选中的Kagune
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("CanvasGroup") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == kaguneName then
-                                                            kaguneId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-                
-                if not kaguneId then
-                    getgenv().AutoLevelKaguneRunning = false
+                getgenv().ItemIDs.Kagune = findItemID(kaguneName, "Powers")
+                if not getgenv().ItemIDs.Kagune then
+                    getgenv().RunningStates.Kagune = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Unable to find Kagune in your inventory. Auto Leveling Stopped.",
@@ -4032,18 +3931,16 @@ local AutoLevelKaguneToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-                
-                -- 找到了Kagune，开始每0.1秒发送升级请求
-                while getgenv().AutoLevelKaguneRunning and task.wait(0.1) do
+                while getgenv().RunningStates.Kagune and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-                        ["UniqueId"] = kaguneId,
+                        ["UniqueId"] = getgenv().ItemIDs.Kagune,
                         ["Action"] = "Leveling_Items",
                         ["Bench_Name"] = "Kagune_Leveling",
                     })
-                end    
+                end
             end)
         else
-            getgenv().AutoLevelKaguneRunning = false
+            getgenv().RunningStates.Kagune = false
         end
     end
 })
@@ -4084,66 +3981,11 @@ local AutoLevelPokitaToggle = LevelingTab:Toggle({
                 })
                 return
             end
-            
-            getgenv().AutoLevelPokitaRunning = true
+            getgenv().RunningStates.Pokita = state
             task.spawn(function()
-                -- 提取选中的Pokita名称（去掉前缀，如 [Phantom] Mukade -> Mukade）
-                local selectedPokita = getgenv().SelectedPokita
-                local pokitaName = selectedPokita
-                
-                if not pokitaName then
-                    getgenv().AutoLevelPokitaRunning = false
-                    WindUI:Notify({
-                        Title = "Lights Hub",
-                        Content = "Invalid Pokita selection. Auto Leveling Stopped.",
-                        Duration = 3,
-                    })
-                    return
-                end
-
-                -- 先查找一次选中的Pokita，获取ID
-                local pokitaId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local powers = hub:FindFirstChild("Powers")
-                            if powers and powers:IsA("Frame") then
-                                local listFrame = powers:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-                                        -- 遍历所有子项查找选中的Pokita
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("CanvasGroup") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == pokitaName then
-                                                            pokitaId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-                
-                if not pokitaId then
-                    getgenv().AutoLevelPokitaRunning = false
+                getgenv().ItemIDs.Pokita = findItemID(getgenv().SelectedPokita, "Powers")  -- 内联pokitaName
+                if not getgenv().ItemIDs.Pokita then
+                    getgenv().RunningStates.Pokita = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Unable to find Pokita in your inventory. Auto Leveling Stopped.",
@@ -4151,18 +3993,16 @@ local AutoLevelPokitaToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-
-                -- 找到了Pokita，开始每0.1秒发送升级请求
-                while getgenv().AutoLevelPokitaRunning and task.wait(0.1) do
+                while getgenv().RunningStates.Pokita and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-                        ["UniqueId"] = pokitaId,
+                        ["UniqueId"] = getgenv().ItemIDs.Pokita,
                         ["Action"] = "Leveling_Items",
                         ["Bench_Name"] = "Pokita_Leveling",
                     })
-                end    
+                end
             end)
         else
-            getgenv().AutoLevelPokitaRunning = false
+            getgenv().RunningStates.Pokita = false
         end
     end
 })
@@ -4175,51 +4015,12 @@ local AutoLevelDemonArtsToggle = LevelingTab:Toggle({
     Desc = "Will works only if you have [Phantom] Blood Control (Demon Arts) in your inventory",
     Default = false,
     Callback = function(state)
+        getgenv().RunningStates.DemonArts = state
         if state then
-            getgenv().AutoLevelDemonArtsRunning = true
             task.spawn(function()
-                local demonArtsId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local powers = hub:FindFirstChild("Powers")
-                            if powers and powers:IsA("Frame") then
-                                local listFrame = powers:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("CanvasGroup") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == "Blood Control" then
-                                                            demonArtsId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-                
-                if not demonArtsId then
-                    getgenv().AutoLevelDemonArtsRunning = false
+                getgenv().ItemIDs.DemonArts = findItemID("Blood Control", "Powers")
+                if not getgenv().ItemIDs.DemonArts then
+                    getgenv().RunningStates.DemonArts = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Unable to find [Phantom] Blood Control (Demon Arts) in your inventory. Auto Leveling Stopped.",
@@ -4227,19 +4028,15 @@ local AutoLevelDemonArtsToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-
-                -- 找到了[Phantom] Demon Arts，开始每0.1秒发送升级请求
-                while getgenv().AutoLevelDemonArtsRunning and task.wait(0.1) do
+                while getgenv().RunningStates.DemonArts and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                         ["Upgrade_Name"] = "Level",
-                        ["UniqueId"] = demonArtsId,
+                        ["UniqueId"] = getgenv().ItemIDs.DemonArts,
                         ["Action"] = "Prog_Lv_Items",
                         ["Bench_Name"] = "Demon_Arts_Leveling",
                     })
-                end    
+                end
             end)
-        else
-            getgenv().AutoLevelDemonArtsRunning = false
         end
     end
 })
@@ -4281,15 +4078,11 @@ local AutoLevelMagicItemToggle = LevelingTab:Toggle({
                 })
                 return
             end
-
-            getgenv().AutoLevelMagicItemRunning = true
+            getgenv().RunningStates.MagicItem = state
             task.spawn(function()
-                -- 提取选中的Magic Item名称（去掉前缀，如 [Phantom] Magic Stone -> Magic Stone）
-                local selectedMagicItem = getgenv().SelectedMagicItem
-                local magicItemName = string.match(selectedMagicItem, "%] (.+)")  -- 提取 ] 后的部分
-                
+                local magicItemName = string.match(getgenv().SelectedMagicItem, "%] (.+)")  -- 保留必要local
                 if not magicItemName then
-                    getgenv().AutoLevelMagicItemRunning = false
+                    getgenv().RunningStates.MagicItem = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Invalid Magic Item selection. Auto Leveling Stopped.",
@@ -4297,50 +4090,9 @@ local AutoLevelMagicItemToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-
-                -- 先查找一次选中的Magic Item，获取ID
-                local magicItemId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local powers = hub:FindFirstChild("Powers")
-                            if powers and powers:IsA("Frame") then
-                                local listFrame = powers:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-                                        -- 遍历所有子项查找选中的Kagune
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("CanvasGroup") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == magicItemName then
-                                                            magicItemId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-
-                if not magicItemId then
-                    getgenv().AutoLevelMagicItemRunning = false
+                getgenv().ItemIDs.MagicItem = findItemID(magicItemName, "Powers")
+                if not getgenv().ItemIDs.MagicItem then
+                    getgenv().RunningStates.MagicItem = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Unable to find Magic Item in your inventory. Auto Leveling Stopped.",
@@ -4348,19 +4100,17 @@ local AutoLevelMagicItemToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-                
-                -- 找到了Magic Item，开始每0.1秒发送升级请求
-                while getgenv().AutoLevelMagicItemRunning and task.wait(0.1) do
+                while getgenv().RunningStates.MagicItem and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                         ["Upgrade_Name"] = "Level",
-                        ["UniqueId"] = magicItemId,
+                        ["UniqueId"] = getgenv().ItemIDs.MagicItem,
                         ["Action"] = "Prog_Lv_Items",
                         ["Bench_Name"] = "Magic_Items_Evolve",
                     })
-                end    
+                end
             end)
         else
-            getgenv().AutoLevelMagicItemRunning = false
+            getgenv().RunningStates.MagicItem = false
         end
     end
 })
@@ -4373,51 +4123,12 @@ local AutoLevelLegendaryShieldToggle = LevelingTab:Toggle({
     Desc = "Will works only if you have [Exotic] Legendary Shield in your inventory",
     Default = false,
     Callback = function(state)
+        getgenv().RunningStates.LegendaryShield = state
         if state then
-            getgenv().AutoLevelLegendaryShieldRunning = true
             task.spawn(function()
-                local legendaryShieldId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local powers = hub:FindFirstChild("Powers")
-                            if powers and powers:IsA("Frame") then
-                                local listFrame = powers:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("CanvasGroup") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == "Legendary Shield" then
-                                                            legendaryShieldId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-                
-                if not legendaryShieldId then
-                    getgenv().AutoLevelLegendaryShieldRunning = false
+                getgenv().ItemIDs.LegendaryShield = findItemID("Legendary Shield", "Powers")
+                if not getgenv().ItemIDs.LegendaryShield then
+                    getgenv().RunningStates.LegendaryShield = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Unable to find [Exotic] Legendary Shield in your inventory. Auto Leveling Stopped.",
@@ -4425,19 +4136,15 @@ local AutoLevelLegendaryShieldToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-
-                -- 找到了[Exotic] Legendary Shield，开始每0.1秒发送升级请求
-                while getgenv().AutoLevelLegendaryShieldRunning and task.wait(0.1) do
+                while getgenv().RunningStates.LegendaryShield and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                         ["Upgrade_Name"] = "Level",
-                        ["UniqueId"] = legendaryShieldId,
+                        ["UniqueId"] = getgenv().ItemIDs.LegendaryShield,
                         ["Action"] = "Prog_Lv_Items",
                         ["Bench_Name"] = "Legendary_Shield_Leveling",
                     })
-                end    
+                end
             end)
-        else
-            getgenv().AutoLevelLegendaryShieldRunning = false
         end
     end
 })
@@ -4448,51 +4155,12 @@ local AutoEnchantLegendaryShieldToggle = LevelingTab:Toggle({
     Desc = "Will works only if you have [Exotic] Legendary Shield in your inventory",
     Default = false,
     Callback = function(state)
+        getgenv().RunningStates.EnchantLegendaryShield = state
         if state then
-            getgenv().AutoEnchantLegendaryShieldRunning = true
             task.spawn(function()
-                local legendaryShieldId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local powers = hub:FindFirstChild("Powers")
-                            if powers and powers:IsA("Frame") then
-                                local listFrame = powers:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("CanvasGroup") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == "Legendary Shield" then
-                                                            legendaryShieldId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-                
-                if not legendaryShieldId then
-                    getgenv().AutoEnchantLegendaryShieldRunning = false
+                getgenv().ItemIDs.EnchantLegendaryShield = findItemID("Legendary Shield", "Powers")
+                if not getgenv().ItemIDs.EnchantLegendaryShield then
+                    getgenv().RunningStates.EnchantLegendaryShield = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Unable to find [Exotic] Legendary Shield in your inventory. Auto Enchant Stopped.",
@@ -4500,19 +4168,15 @@ local AutoEnchantLegendaryShieldToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-
-                -- 找到了[Exotic] Legendary Shield，开始每0.1秒发送升级请求
-                while getgenv().AutoEnchantLegendaryShieldRunning and task.wait(0.1) do
+                while getgenv().RunningStates.EnchantLegendaryShield and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                         ["Type"] = "Enchant",
-                        ["UniqueId"] = legendaryShieldId,
+                        ["UniqueId"] = getgenv().ItemIDs.EnchantLegendaryShield,
                         ["Action"] = "Enchantment",
                         ["Enchantment_Name"] = "Legendary_Shield_Blessing",
                     })
-                end    
+                end
             end)
-        else
-            getgenv().AutoEnchantLegendaryShieldRunning = false
         end
     end
 })
@@ -4525,71 +4189,28 @@ local AutoLevelLegendarySpearToggle = LevelingTab:Toggle({
     Desc = "Will works only if you have [Exotic] Legendary Spear in your inventory",
     Default = false,
     Callback = function(state)
+        getgenv().RunningStates.LegendarySpear = state
         if state then
-            getgenv().AutoLevelLegendarySpearRunning = true
             task.spawn(function()
-                local legendarySpearId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local powers = hub:FindFirstChild("Powers")
-                            if powers and powers:IsA("Frame") then
-                                local listFrame = powers:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("CanvasGroup") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == "Legendary Spear" then
-                                                            legendarySpearId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-
-                if not legendarySpearId then
-                    getgenv().AutoLevelLegendarySpearRunning = false
+                getgenv().ItemIDs.LegendarySpear = findItemID("Legendary Spear", "Powers")
+                if not getgenv().ItemIDs.LegendarySpear then
+                    getgenv().RunningStates.LegendarySpear = false
                     WindUI:Notify({
-                        Title = "Lights Hub",
-                        Content = "Unable to find [Exotic] Legendary Spear in your inventory. Auto Leveling Stopped.",
-                        Duration = 3,
+                    Title = "Lights Hub",
+                    Content = "Unable to find [Exotic] Legendary Spear in your inventory. Auto Leveling Stopped.",
+                    Duration = 3,
                     })
                     return
                 end
-
-                -- 找到了[Exotic] Legendary Spear，开始每0.1秒发送升级请求
-                while getgenv().AutoLevelLegendarySpearRunning and task.wait(0.1) do
+                while getgenv().RunningStates.LegendarySpear and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                         ["Upgrade_Name"] = "Level",
-                        ["UniqueId"] = legendarySpearId,
+                        ["UniqueId"] = getgenv().ItemIDs.LegendarySpear,
                         ["Action"] = "Prog_Lv_Items",
                         ["Bench_Name"] = "Legendary_Spear_Leveling",
                     })
-                end    
+                end
             end)
-        else
-            getgenv().AutoLevelLegendarySpearRunning = false
         end
     end
 })
@@ -4602,51 +4223,12 @@ local AutoLevelLegendarySwordToggle = LevelingTab:Toggle({
     Desc = "Will works only if you have [Exotic] Legendary Sword in your inventory",
     Default = false,
     Callback = function(state)
+        getgenv().RunningStates.LegendarySword = state
         if state then
-            getgenv().AutoLevelLegendarySwordRunning = true
             task.spawn(function()
-                local legendarySwordId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local powers = hub:FindFirstChild("Powers")
-                            if powers and powers:IsA("Frame") then
-                                local listFrame = powers:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("CanvasGroup") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == "Legendary Sword" then
-                                                            legendarySwordId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-
-                if not legendarySwordId then
-                    getgenv().AutoLevelLegendarySwordRunning = false
+                getgenv().ItemIDs.LegendarySword = findItemID("Legendary Sword", "Powers")
+                if not getgenv().ItemIDs.LegendarySword then
+                    getgenv().RunningStates.LegendarySword = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Unable to find [Exotic] Legendary Sword in your inventory. Auto Leveling Stopped.",
@@ -4654,19 +4236,15 @@ local AutoLevelLegendarySwordToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-
-                -- 找到了[Exotic] Legendary Sword，开始每0.1秒发送升级请求
-                while getgenv().AutoLevelLegendarySwordRunning and task.wait(0.1) do
+                while getgenv().RunningStates.LegendarySword and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                         ["Upgrade_Name"] = "Level",
-                        ["UniqueId"] = legendarySwordId,
+                        ["UniqueId"] = getgenv().ItemIDs.LegendarySword,
                         ["Action"] = "Prog_Lv_Items",
                         ["Bench_Name"] = "Legendary_Sword_Leveling",
                     })
-                end    
+                end
             end)
-        else
-            getgenv().AutoLevelLegendarySwordRunning = false
         end
     end
 })
@@ -4677,51 +4255,12 @@ local AutoEnchantLegendarySwordToggle = LevelingTab:Toggle({
     Desc = "Will works only if you have [Exotic] Legendary Sword in your inventory",
     Default = false,
     Callback = function(state)
+        getgenv().RunningStates.EnchantLegendarySword = state
         if state then
-            getgenv().AutoEnchantLegendarySwordRunning = true
             task.spawn(function()
-                local legendarySwordId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local powers = hub:FindFirstChild("Powers")
-                            if powers and powers:IsA("Frame") then
-                                local listFrame = powers:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("CanvasGroup") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == "Legendary Sword" then
-                                                            legendarySwordId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-                
-                if not legendarySwordId then
-                    getgenv().AutoEnchantLegendarySwordRunning = false
+                getgenv().ItemIDs.EnchantLegendarySword = findItemID("Legendary Sword", "Powers")
+                if not getgenv().ItemIDs.EnchantLegendarySword then
+                    getgenv().RunningStates.EnchantLegendarySword = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Unable to find [Exotic] Legendary Sword in your inventory. Auto Enchant Stopped.",
@@ -4729,19 +4268,15 @@ local AutoEnchantLegendarySwordToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-
-                -- 找到了[Exotic] Legendary Sword，开始每0.1秒发送升级请求
-                while getgenv().AutoEnchantLegendarySwordRunning and task.wait(0.1) do
+                while getgenv().RunningStates.EnchantLegendarySword and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                         ["Type"] = "Enchant",
-                        ["UniqueId"] = legendarySwordId,
+                        ["UniqueId"] = getgenv().ItemIDs.EnchantLegendarySword,
                         ["Action"] = "Enchantment",
                         ["Enchantment_Name"] = "Legendary_Sword_Blessing",
                     })
-                end    
+                end
             end)
-        else
-            getgenv().AutoEnchantLegendarySwordRunning = false
         end
     end
 })
@@ -4754,51 +4289,12 @@ local AutoLevelLegendaryBowToggle = LevelingTab:Toggle({
     Desc = "Will works only if you have [Exotic] Legendary Bow in your inventory",
     Default = false,
     Callback = function(state)
+        getgenv().RunningStates.LegendaryBow = state
         if state then
-            getgenv().AutoLevelLegendaryBowRunning = true
             task.spawn(function()
-                local legendaryBowId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local powers = hub:FindFirstChild("Powers")
-                            if powers and powers:IsA("Frame") then
-                                local listFrame = powers:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("CanvasGroup") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == "Legendary Bow" then
-                                                            legendaryBowId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-
-                if not legendaryBowId then
-                    getgenv().AutoLevelLegendaryBowRunning = false
+                getgenv().ItemIDs.LegendaryBow = findItemID("Legendary Bow", "Powers")
+                if not getgenv().ItemIDs.LegendaryBow then
+                    getgenv().RunningStates.LegendaryBow = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Unable to find [Exotic] Legendary Bow in your inventory. Auto Leveling Stopped.",
@@ -4806,19 +4302,15 @@ local AutoLevelLegendaryBowToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-
-                -- 找到了[Exotic] Legendary Bow，开始每0.1秒发送升级请求
-                while getgenv().AutoLevelLegendaryBowRunning and task.wait(0.1) do
+                while getgenv().RunningStates.LegendaryBow and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                         ["Upgrade_Name"] = "Level",
-                        ["UniqueId"] = legendaryBowId,
+                        ["UniqueId"] = getgenv().ItemIDs.LegendaryBow,
                         ["Action"] = "Prog_Lv_Items",
                         ["Bench_Name"] = "Legendary_Bow_Leveling",
                     })
-                end    
+                end
             end)
-        else
-            getgenv().AutoLevelLegendaryBowRunning = false
         end
     end
 })
@@ -4831,51 +4323,12 @@ local AutoLevelPirateCrewToggle = LevelingTab:Toggle({
     Desc = "Will works only if you have [Phantom] Pirate Crew in your inventory",
     Default = false,
     Callback = function(state)
+        getgenv().RunningStates.PirateCrew = state
         if state then
-            getgenv().AutoLevelPirateCrewRunning = true
             task.spawn(function()
-                local pirateCrewId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local powers = hub:FindFirstChild("Powers")
-                            if powers and powers:IsA("Frame") then
-                                local listFrame = powers:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("CanvasGroup") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == "Red-Haired Pirates" then
-                                                            pirateCrewId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-
-                if not pirateCrewId then
-                    getgenv().AutoLevelPirateCrewRunning = false
+                getgenv().ItemIDs.PirateCrew = findItemID("Red-Haired Pirates", "Powers")
+                if not getgenv().ItemIDs.PirateCrew then
+                    getgenv().RunningStates.PirateCrew = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Unable to find [Phantom] Pirate Crew in your inventory. Auto Leveling Stopped.",
@@ -4883,19 +4336,15 @@ local AutoLevelPirateCrewToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-
-                -- 找到了[Phantom] Pirate Crew，开始每0.1秒发送升级请求
-                while getgenv().AutoLevelPirateCrewRunning and task.wait(0.1) do
+                while getgenv().RunningStates.PirateCrew and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                         ["Upgrade_Name"] = "Level",
-                        ["UniqueId"] = pirateCrewId,
+                        ["UniqueId"] = getgenv().ItemIDs.PirateCrew,
                         ["Action"] = "Prog_Lv_Items",
                         ["Bench_Name"] = "Pirate_Crew_Leveling",
                     })
-                end    
+                end
             end)
-        else
-            getgenv().AutoLevelPirateCrewRunning = false
         end
     end
 })
@@ -4906,51 +4355,12 @@ local AutoLevelCursesToggle = LevelingTab:Toggle({
     Desc = "Will works only if you have [Phantom] Curses in your inventory",
     Default = false,
     Callback = function(state)
+        getgenv().RunningStates.Curses = state
         if state then
-            getgenv().AutoLevelCursesRunning = true
             task.spawn(function()
-                local cursesId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local powers = hub:FindFirstChild("Powers")
-                            if powers and powers:IsA("Frame") then
-                                local listFrame = powers:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("CanvasGroup") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == "Wandered Mind" then
-                                                            cursesId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-
-                if not cursesId then
-                    getgenv().AutoLevelCursesRunning = false
+                getgenv().ItemIDs.Curses = findItemID("Wandered Mind", "Powers")
+                if not getgenv().ItemIDs.Curses then
+                    getgenv().RunningStates.Curses = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Unable to find [Phantom] Curses in your inventory. Auto Leveling Stopped.",
@@ -4958,19 +4368,15 @@ local AutoLevelCursesToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-
-                -- 找到了[Phantom] Curses，开始每0.1秒发送升级请求
-                while getgenv().AutoLevelCursesRunning and task.wait(0.1) do
+                while getgenv().RunningStates.Curses and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                         ["Upgrade_Name"] = "Level",
-                        ["UniqueId"] = cursesId,
+                        ["UniqueId"] = getgenv().ItemIDs.Curses,
                         ["Action"] = "Prog_Lv_Items",
                         ["Bench_Name"] = "Curses_Leveling",
                     })
-                end    
+                end
             end)
-        else
-            getgenv().AutoLevelCursesRunning = false
         end
     end
 })
@@ -4981,51 +4387,12 @@ local AutoLevelSoloHunterRankToggle = LevelingTab:Toggle({
     Desc = "Will works only if you have [Phantom] Solo Hunter Rank in your inventory",
     Default = false,
     Callback = function(state)
+        getgenv().RunningStates.SoloHunterRank = state
         if state then
-            getgenv().AutoLevelSoloHunterRankRunning = true
             task.spawn(function()
-                local soloHunterRankId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local powers = hub:FindFirstChild("Powers")
-                            if powers and powers:IsA("Frame") then
-                                local listFrame = powers:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("CanvasGroup") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == "National Level Hunter" then
-                                                            soloHunterRankId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-
-                if not soloHunterRankId then
-                    getgenv().AutoLevelSoloHunterRankRunning = false
+                getgenv().ItemIDs.SoloHunterRank = findItemID("National Level Hunter", "Powers")
+                if not getgenv().ItemIDs.SoloHunterRank then
+                    getgenv().RunningStates.SoloHunterRank = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Unable to find [Phantom] Solo Hunter Rank in your inventory. Auto Leveling Stopped.",
@@ -5033,19 +4400,15 @@ local AutoLevelSoloHunterRankToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-
-                -- 找到了[Phantom] Solo Hunter Rank，开始每0.1秒发送升级请求
-                while getgenv().AutoLevelSoloHunterRankRunning and task.wait(0.1) do
+                while getgenv().RunningStates.SoloHunterRank and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                         ["Upgrade_Name"] = "Level",
-                        ["UniqueId"] = soloHunterRankId,
+                        ["UniqueId"] = getgenv().ItemIDs.SoloHunterRank,
                         ["Action"] = "Prog_Lv_Items",
                         ["Bench_Name"] = "Solo_Hunter_Rank_Leveling",
                     })
-                end    
+                end
             end)
-        else
-            getgenv().AutoLevelSoloHunterRankRunning = false
         end
     end
 })
@@ -5056,51 +4419,12 @@ local AutoLevelPsychicMayhemToggle = LevelingTab:Toggle({
     Desc = "Will works only if you have [Phantom] Psychic Mayhem in your inventory",
     Default = false,
     Callback = function(state)
+        getgenv().RunningStates.PsychicMayhem = state
         if state then
-            getgenv().AutoLevelPsychicMayhemRunning = true
             task.spawn(function()
-                local psychicMayhemId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local powers = hub:FindFirstChild("Powers")
-                            if powers and powers:IsA("Frame") then
-                                local listFrame = powers:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("CanvasGroup") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == "Energy Aura Blast" then
-                                                            psychicMayhemId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-
-                if not psychicMayhemId then
-                    getgenv().AutoLevelPsychicMayhemRunning = false
+                getgenv().ItemIDs.PsychicMayhem = findItemID("Energy Aura Blast", "Powers")
+                if not getgenv().ItemIDs.PsychicMayhem then
+                    getgenv().RunningStates.PsychicMayhem = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Unable to find [Phantom] Psychic Mayhem in your inventory. Auto Leveling Stopped.",
@@ -5108,19 +4432,15 @@ local AutoLevelPsychicMayhemToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-
-                -- 找到了[Phantom] Psychic Mayhem，开始每0.1秒发送升级请求
-                while getgenv().AutoLevelPsychicMayhemRunning and task.wait(0.1) do
+                while getgenv().RunningStates.PsychicMayhem and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                         ["Upgrade_Name"] = "Level",
-                        ["UniqueId"] = psychicMayhemId,
+                        ["UniqueId"] = getgenv().ItemIDs.PsychicMayhem,
                         ["Action"] = "Prog_Lv_Items",
                         ["Bench_Name"] = "Psychic_Mayhem_Leveling",
                     })
-                end    
+                end
             end)
-        else
-            getgenv().AutoLevelPsychicMayhemRunning = false
         end
     end
 })
@@ -5131,51 +4451,12 @@ local AutoLevelEnergySpellCardToggle = LevelingTab:Toggle({
     Desc = "Will works only if you have [Phantom] Energy Spell Card in your inventory",
     Default = false,
     Callback = function(state)
+        getgenv().RunningStates.EnergySpellCard = state
         if state then
-            getgenv().AutoLevelEnergySpellCardRunning = true
             task.spawn(function()
-                local energySpellCardId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local powers = hub:FindFirstChild("Powers")
-                            if powers and powers:IsA("Frame") then
-                                local listFrame = powers:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("CanvasGroup") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == "Energy Card VII" then
-                                                            energySpellCardId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-
-                if not energySpellCardId then
-                    getgenv().AutoLevelEnergySpellCardRunning = false
+                getgenv().ItemIDs.EnergySpellCard = findItemID("Energy Card VII", "Powers")
+                if not getgenv().ItemIDs.EnergySpellCard then
+                    getgenv().RunningStates.EnergySpellCard = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Unable to find [Phantom] Energy Spell Card in your inventory. Auto Leveling Stopped.",
@@ -5183,19 +4464,15 @@ local AutoLevelEnergySpellCardToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-
-                -- 找到了[Phantom] Energy Spell Card，开始每0.1秒发送升级请求
-                while getgenv().AutoLevelEnergySpellCardRunning and task.wait(0.1) do
+                while getgenv().RunningStates.EnergySpellCard and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                         ["Upgrade_Name"] = "Level",
-                        ["UniqueId"] = energySpellCardId,
+                        ["UniqueId"] = getgenv().ItemIDs.EnergySpellCard,
                         ["Action"] = "Prog_Lv_Items",
                         ["Bench_Name"] = "Energy_Spell_Card_Leveling",
                     })
-                end    
+                end
             end)
-        else
-            getgenv().AutoLevelEnergySpellCardRunning = false
         end
     end
 })
@@ -5206,51 +4483,12 @@ local AutoLevelDamageSpellCardToggle = LevelingTab:Toggle({
     Desc = "Will works only if you have [Exotic] Damage Spell Card in your inventory",
     Default = false,
     Callback = function(state)
+        getgenv().RunningStates.DamageSpellCard = state
         if state then
-            getgenv().AutoLevelDamageSpellCardRunning = true
             task.spawn(function()
-                local damageSpellCardId = nil
-                
-                -- 获取玩家背包
-                local player = game:GetService("Players").LocalPlayer
-                local playerGui = player:FindFirstChild("PlayerGui")
-                
-                if playerGui and playerGui:IsA("PlayerGui") then
-                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                        local hub = inventoryGui:FindFirstChild("Hub")
-                        if hub and hub:IsA("Frame") then
-                            local powers = hub:FindFirstChild("Powers")
-                            if powers and powers:IsA("Frame") then
-                                local listFrame = powers:FindFirstChild("List_Frame")
-                                if listFrame and listFrame:IsA("Frame") then
-                                    local list = listFrame:FindFirstChild("List")
-                                    if list and list:IsA("ScrollingFrame") then
-
-                                        for _, itemButton in pairs(list:GetChildren()) do
-                                            if itemButton:IsA("ImageButton") then
-                                                local inside = itemButton:FindFirstChild("Inside")
-                                                if inside and inside:IsA("CanvasGroup") then
-                                                    local title = inside:FindFirstChild("Title")
-                                                    if title and title:IsA("TextLabel") then
-                                                        local itemName = title.Text
-                                                        if itemName == "Damage Card VIII" then
-                                                            damageSpellCardId = itemButton.Name
-                                                            break
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-
-                if not damageSpellCardId then
-                    getgenv().AutoLevelDamageSpellCardRunning = false
+                getgenv().ItemIDs.DamageSpellCard = findItemID("Damage Card VIII", "Powers")
+                if not getgenv().ItemIDs.DamageSpellCard then
+                    getgenv().RunningStates.DamageSpellCard = false
                     WindUI:Notify({
                         Title = "Lights Hub",
                         Content = "Unable to find [Exotic] Damage Spell Card in your inventory. Auto Leveling Stopped.",
@@ -5258,19 +4496,15 @@ local AutoLevelDamageSpellCardToggle = LevelingTab:Toggle({
                     })
                     return
                 end
-
-                -- 找到了[Exotic] Damage Spell Card，开始每0.1秒发送升级请求
-                while getgenv().AutoLevelDamageSpellCardRunning and task.wait(0.1) do
+                while getgenv().RunningStates.DamageSpellCard and task.wait(0.1) do
                     game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                         ["Upgrade_Name"] = "Level",
-                        ["UniqueId"] = damageSpellCardId,
+                        ["UniqueId"] = getgenv().ItemIDs.DamageSpellCard,
                         ["Action"] = "Prog_Lv_Items",
                         ["Bench_Name"] = "Damage_Spell_Card_Leveling",
                     })
-                end    
+                end
             end)
-        else
-            getgenv().AutoLevelDamageSpellCardRunning = false
         end
     end
 })
