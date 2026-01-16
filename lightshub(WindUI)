@@ -50,10 +50,10 @@ getgenv().SpeedMonitorRunning = false
 
 
 -- ✅ 捕捉当前角色 WalkSpeed / JumpPower
-local player = game.Players.LocalPlayer
+getgenv().PlayerService = game.Players.LocalPlayer
 
 local function captureCurrentStats()
-    local char = player.Character or player.CharacterAdded:Wait()
+    local char = getgenv().PlayerService.Character or getgenv().PlayerService.CharacterAdded:Wait()
     local humanoid = char:WaitForChild("Humanoid")
     getgenv().CurrentWalkSpeed = humanoid.WalkSpeed
     getgenv().CurrentJumpPower = humanoid.JumpPower
@@ -64,7 +64,7 @@ task.spawn(function()
     getgenv().SpeedMonitorRunning = true
     while getgenv().SpeedMonitorRunning do
         pcall(function()
-            local char = player.Character
+            local char = getgenv().PlayerService.Character
             local humanoid = char and char:FindFirstChild("Humanoid")
             if humanoid then
                 if getgenv().UserSetWalkSpeed and humanoid.WalkSpeed ~= getgenv().UserSetWalkSpeed then
@@ -286,24 +286,24 @@ local configsDropdown = configTab:Dropdown({
 
 -- 刷新按钮：用 AllConfigs() 刷新 dropdown list
 local function RefreshConfigList()
-    local list = {}
+    getgenv().ConfigList = {}
     local all = ConfigManager:AllConfigs("LightsHub - Anime Eternal")
 
     if type(all) == "table" then
         for k, v in pairs(all) do
             if type(k) == "string" then
-                table.insert(list, k)
+                table.insert(getgenv().ConfigList, k)
             elseif type(v) == "string" then
-                table.insert(list, v)
+                table.insert(getgenv().ConfigList, v)
             elseif type(v) == "table" and type(v.Name) == "string" then
-                table.insert(list, v.Name)
+                table.insert(getgenv().ConfigList, v.Name)
             end
         end
     end
 
-    table.sort(list)
-    if #list == 0 then list = {"(none)"} end
-    configsDropdown:Refresh(list)
+    table.sort(getgenv().ConfigList)
+    if #getgenv().ConfigList == 0 then getgenv().ConfigList = {"(none)"} end
+    configsDropdown:Refresh(getgenv().ConfigList)
 end
 
 configTab:Button({
@@ -366,7 +366,7 @@ local WalkspeedSlider = PlayerTab:Slider({
         Default = getgenv().CurrentWalkSpeed or 35,
     },
     Callback = function(Value)
-        local char = player.Character
+        local char = getgenv().PlayerService.Character
         local humanoid = char and char:FindFirstChild("Humanoid")
         if humanoid then
             humanoid.WalkSpeed = Value
@@ -386,7 +386,7 @@ local JumpHeightSlider = PlayerTab:Slider({
         Default = getgenv().CurrentJumpPower or 50,
     },
     Callback = function(Value)
-        local char = player.Character
+        local char = getgenv().PlayerService.Character
         local humanoid = char and char:FindFirstChild("Humanoid")
         if humanoid then
             humanoid.JumpPower = Value
@@ -430,8 +430,7 @@ local FastKillAuraToggle = PlayerTab:Toggle({
             task.spawn(function()
                 while getgenv().FastKillAuraRunning do
                     pcall(function()
-                        local player = game.Players.LocalPlayer
-                        local char = player.Character
+                        local char = getgenv().PlayerService.Character
                         local hrp = char and char:FindFirstChild("HumanoidRootPart")
                         if not hrp then 
                             task.wait(0.05)
@@ -524,8 +523,8 @@ local afkToggle = PlayerTab:Toggle({
                 ["Path"] = {"Settings", "AFK_MODE"},
                 ["Action"] = "Settings",
             })
-            getgenv().afkConnection = game:GetService("Players").LocalPlayer.Idled:Connect(function()  -- 内联player
-                game:service'VirtualUser':CaptureController()  -- 内联bb
+            getgenv().afkConnection = getgenv().PlayerService.Idled:Connect(function()
+                game:service'VirtualUser':CaptureController()
                 game:service'VirtualUser':ClickButton2(Vector2.new())
                 task.wait(2)
             end)
@@ -547,11 +546,10 @@ getgenv().AntiPublicWhitelist = {}
 
 --✨ 将输入框内容 → 表转换
 local function updateWhitelist(text)
-    local list = {}  -- 保留必要local
+    getgenv().AntiPublicWhitelist = {}
     for name in string.gmatch(text, "([^,%s]+)") do
-        table.insert(list, name)
+        table.insert(getgenv().AntiPublicWhitelist, name)
     end
-    getgenv().AntiPublicWhitelist = list
 end
 
 --✨ 主功能：检测是否要 kick 自己
@@ -561,16 +559,15 @@ local function checkServerPlayers()
 
         if not getgenv().AntiPublicEnabled then break end
 
-        local Players = game:GetService("Players")  -- 保留必要local
-        local others = {}  -- 保留必要local
+        local others = {}
         local whitelistFound = false
 
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= game:GetService("Players").LocalPlayer then  -- 内联player
-                local name = p.Name  -- 保留必要local
+        for _, p in ipairs(game:GetService("Players"):GetPlayers()) do
+            if p ~= getgenv().PlayerService then
+                local name = p.Name
 
                 -- 检查是不是 whitelist 人
-                local isWhitelisted = table.find(getgenv().AntiPublicWhitelist, name) ~= nil  -- 内联
+                local isWhitelisted = table.find(getgenv().AntiPublicWhitelist, name) ~= nil
 
                 if isWhitelisted then
                     whitelistFound = true
@@ -587,8 +584,8 @@ local function checkServerPlayers()
 
         -- ❌ 有陌生玩家（others > 0）→ Kick
         if #others > 0 then
-            local reason = "Anti Public Server: Detected Non-Whitelist Player(s): " .. table.concat(others, ", ")  -- 内联
-            game:GetService("Players").LocalPlayer:Kick(reason)  -- 内联player
+            local reason = "Anti Public Server: Detected Non-Whitelist Player(s): " .. table.concat(others, ", ")
+            getgenv().PlayerService:Kick(reason)
             break
         end
     end
@@ -2681,11 +2678,10 @@ local WeaponsEvolveToggle = WeaponsTab:Toggle({
             -- 启动循环：每0.5秒重新检测武器名字和Tier并发送Evolve信号
             task.spawn(function()
                 while getgenv().AutoEvolveRunning do  -- 使用全局变量控制循环
-                    local tier0Groups = {}  -- { ["Weapon Name"] = {list of weapon button names} } for Tier 0 (no Tier Frame)
-                    local tier1Groups = {}  -- { ["Weapon Name"] = {list of weapon button names} } for Tier 1 (Tier Frame with ImageLabel Name = "1" only)
-                    local tier2Groups = {}  -- { ["Weapon Name"] = {list of weapon button names} } for Tier 2 (Tier Frame with ImageLabel Name = "1" and "2" only, no "3")
-                    local player = game:GetService("Players").LocalPlayer
-                    local playerGui = player:FindFirstChild("PlayerGui")
+                    getgenv().tier0Groups = {}
+                    getgenv().tier1Groups = {}
+                    getgenv().tier2Groups = {}
+                    local playerGui = getgenv().PlayerService.PlayerGui
                     if playerGui and playerGui:IsA("PlayerGui") then
                         local inventoryGui = playerGui:FindFirstChild("Inventory_1")
                         if inventoryGui and inventoryGui:IsA("ScreenGui") then
@@ -2756,7 +2752,7 @@ local WeaponsEvolveToggle = WeaponsTab:Toggle({
 
                     -- 发送Evolve信号
                     -- Tier 0: Weapon_Evolve or Scythe_Evolve, 5 or 2 weapons
-                    for weaponName, weaponList in pairs(tier0Groups) do
+                    for weaponName, weaponList in pairs(getgenv().tier0Groups) do
                         local isSpecial = table.find(specialWeapons, weaponName) ~= nil
                         local requiredCount = isSpecial and 2 or 5
                         local benchName = isSpecial and "Scythe_Evolve" or "Weapon_Evolve"
@@ -2775,7 +2771,7 @@ local WeaponsEvolveToggle = WeaponsTab:Toggle({
                     end
 
                     -- Tier 1: Weapon_Evolve_2 or Scythe_Evolve_2, 4 or 2 weapons
-                    for weaponName, weaponList in pairs(tier1Groups) do
+                    for weaponName, weaponList in pairs(getgenv().tier1Groups) do
                         local isSpecial = table.find(specialWeapons, weaponName) ~= nil
                         local requiredCount = isSpecial and 2 or 4
                         local benchName = isSpecial and "Scythe_Evolve_2" or "Weapon_Evolve_2"
@@ -2794,7 +2790,7 @@ local WeaponsEvolveToggle = WeaponsTab:Toggle({
                     end
 
                     -- Tier 2: Weapon_Evolve_3 or Scythe_Evolve_3, 2 weapons
-                    for weaponName, weaponList in pairs(tier2Groups) do
+                    for weaponName, weaponList in pairs(getgenv().tier2Groups) do
                         local isSpecial = table.find(specialWeapons, weaponName) ~= nil
                         local benchName = isSpecial and "Scythe_Evolve_3" or "Weapon_Evolve_3"
                         if #weaponList >= 2 then
@@ -2827,8 +2823,7 @@ WeaponsTab:Divider()
 
 -- 辅助函数：根据weaponName获取UniqueId（button Name）
 local function getWeaponUniqueId(weaponName)
-    local player = game:GetService("Players").LocalPlayer
-    local playerGui = player:FindFirstChild("PlayerGui")
+    local playerGui = getgenv().PlayerService.PlayerGui
     if playerGui and playerGui:IsA("PlayerGui") then
         local inventoryGui = playerGui:FindFirstChild("Inventory_1")
         if inventoryGui and inventoryGui:IsA("ScreenGui") then
@@ -2846,7 +2841,7 @@ local function getWeaponUniqueId(weaponName)
                                     if inside:IsA("Frame") and inside:FindFirstChild("Title") then
                                         local title = inside.Title
                                         if title:IsA("TextLabel") and title.Text == weaponName then
-                                            return weaponButton.Name  -- 返回button的Name作为UniqueId
+                                            return weaponButton.Name
                                         end
                                     end
                                 end
@@ -3073,11 +3068,10 @@ local TitansEvolveToggle = TitansTab:Toggle({
             -- 启动循环：每0.5秒重新检测titan名字和Tier并发送Evolve信号
             task.spawn(function()
                 while getgenv().AutoTitansEvolveRunning do  -- 使用全局变量控制循环
-                    local titantier0Groups = {}  -- { ["Titan Name"] = {list of titan button names} } for Tier 0 (no Tier Frame)
-                    local titantier1Groups = {}  -- { ["Titan Name"] = {list of titan button names} } for Tier 1 (Tier Frame with ImageLabel Name = "1" only)
-                    local titantier2Groups = {}  -- { ["Titan Name"] = {list of titan button names} } for Tier 2 (Tier Frame with ImageLabel Name = "1" and "2" only, no "3")
-                    local player = game:GetService("Players").LocalPlayer
-                    local playerGui = player:FindFirstChild("PlayerGui")
+                    getgenv().titantier0Groups = {}
+                    getgenv().titantier1Groups = {}
+                    getgenv().titantier2Groups = {}
+                    local playerGui = getgenv().PlayerService.PlayerGui
                     if playerGui and playerGui:IsA("PlayerGui") then
                         local inventoryGui = playerGui:FindFirstChild("Inventory_1")
                         if inventoryGui and inventoryGui:IsA("ScreenGui") then
@@ -3153,7 +3147,7 @@ local TitansEvolveToggle = TitansTab:Toggle({
 
                     -- 发送Evolve信号
                     -- Tier 0: Titan_Evolve, 2 titans
-                    for titanName, titanList in pairs(titantier0Groups) do
+                    for titanName, titanList in pairs(getgenv().titantier0Groups) do
                         if #titanList >= 2 then
                             local selected = {}
                             for i = 1, 2 do
@@ -3169,7 +3163,7 @@ local TitansEvolveToggle = TitansTab:Toggle({
                     end
 
                     -- Tier 1: Titan_Evolve_2, 2 titans
-                    for titanName, titanList in pairs(titantier1Groups) do
+                    for titanName, titanList in pairs(getgenv().titantier1Groups) do
                         if #titanList >= 2 then
                             local selected = {}
                             for i = 1, 2 do
@@ -3185,7 +3179,7 @@ local TitansEvolveToggle = TitansTab:Toggle({
                     end
 
                     -- Tier 2: Titan_Evolve_3, 2 titans
-                    for titanName, titanList in pairs(titantier2Groups) do
+                    for titanName, titanList in pairs(getgenv().titantier2Groups) do
                         if #titanList >= 2 then
                             local selected = {}
                             for i = 1, 2 do
@@ -3212,8 +3206,7 @@ local TitansEvolveToggle = TitansTab:Toggle({
 TitansTab:Divider()
 
 local function getTitanUniqueId(titanName)
-    local player = game:GetService("Players").LocalPlayer
-    local playerGui = player:FindFirstChild("PlayerGui")
+    local playerGui = getgenv().PlayerService.PlayerGui
     if playerGui and playerGui:IsA("PlayerGui") then
         local inventoryGui = playerGui:FindFirstChild("Inventory_1")
         if inventoryGui and inventoryGui:IsA("ScreenGui") then
@@ -3231,7 +3224,7 @@ local function getTitanUniqueId(titanName)
                                     if inside:IsA("CanvasGroup") and inside:FindFirstChild("Title") then
                                         local title = inside.Title
                                         if title:IsA("TextLabel") and title.Text == titanName then
-                                            return titanButton.Name  -- 返回button的Name作为UniqueId
+                                            return titanButton.Name
                                         end
                                     end
                                 end
@@ -3359,11 +3352,10 @@ local StandsEvolveToggle = StandsTab:Toggle({
             -- 启动循环：每0.5秒重新检测titan名字和Tier并发送Evolve信号
             task.spawn(function()
                 while getgenv().AutoStandsEvolveRunning do  -- 使用全局变量控制循环
-                    local standtier0Groups = {}  -- { ["Titan Name"] = {list of titan button names} } for Tier 0 (no Tier Frame)
-                    local standtier1Groups = {}  -- { ["Titan Name"] = {list of titan button names} } for Tier 1 (Tier Frame with ImageLabel Name = "1" only)
-                    local standtier2Groups = {}  -- { ["Titan Name"] = {list of titan button names} } for Tier 2 (Tier Frame with ImageLabel Name = "1" and "2" only, no "3")
-                    local player = game:GetService("Players").LocalPlayer
-                    local playerGui = player:FindFirstChild("PlayerGui")
+                    getgenv().standtier0Groups = {}
+                    getgenv().standtier1Groups = {}
+                    getgenv().standtier2Groups = {}
+                    local playerGui = getgenv().PlayerService.PlayerGui
                     if playerGui and playerGui:IsA("PlayerGui") then
                         local inventoryGui = playerGui:FindFirstChild("Inventory_1")
                         if inventoryGui and inventoryGui:IsA("ScreenGui") then
@@ -3439,7 +3431,7 @@ local StandsEvolveToggle = StandsTab:Toggle({
 
                     -- 发送Evolve信号
                     -- Tier 0: Titan_Evolve, 2 titans
-                    for standName, standList in pairs(standtier0Groups) do
+                    for standName, standList in pairs(getgenv().standtier0Groups) do
                         if #standList >= 2 then
                             local selected = {}
                             for i = 1, 2 do
@@ -3455,7 +3447,7 @@ local StandsEvolveToggle = StandsTab:Toggle({
                     end
 
                     -- Tier 1: Titan_Evolve_2, 2 titans
-                    for standName, standList in pairs(standtier1Groups) do
+                    for standName, standList in pairs(getgenv().standtier1Groups) do
                         if #standList >= 2 then
                             local selected = {}
                             for i = 1, 2 do
@@ -3471,7 +3463,7 @@ local StandsEvolveToggle = StandsTab:Toggle({
                     end
 
                     -- Tier 2: Titan_Evolve_3, 2 titans
-                    for standName, standList in pairs(standtier2Groups) do
+                    for standName, standList in pairs(getgenv().standtier2Groups) do
                         if #standList >= 2 then
                             local selected = {}
                             for i = 1, 2 do
@@ -3498,8 +3490,7 @@ local StandsEvolveToggle = StandsTab:Toggle({
 StandsTab:Divider()
 
 local function getStandUniqueId(standName)
-    local player = game:GetService("Players").LocalPlayer
-    local playerGui = player:FindFirstChild("PlayerGui")
+    local playerGui = getgenv().PlayerService.PlayerGui
     if playerGui and playerGui:IsA("PlayerGui") then
         local inventoryGui = playerGui:FindFirstChild("Inventory_1")
         if inventoryGui and inventoryGui:IsA("ScreenGui") then
@@ -3517,7 +3508,7 @@ local function getStandUniqueId(standName)
                                     if inside:IsA("CanvasGroup") and inside:FindFirstChild("Title") then
                                         local title = inside.Title
                                         if title:IsA("TextLabel") and title.Text == standName then
-                                            return standButton.Name  -- 返回button的Name作为UniqueId
+                                            return standButton.Name
                                         end
                                     end
                                 end
@@ -3775,13 +3766,13 @@ getgenv().RunningStates = {}  -- e.g., RunningStates.IceSword = true
 
 -- 公共函数：查找物品ID，避免重复代码
 local function findItemID(itemName, category)
-    local playerGui = game:GetService("Players").LocalPlayer.PlayerGui  -- 内联：删除local player
+    local playerGui = getgenv().PlayerService.PlayerGui
     if not (playerGui and playerGui:IsA("PlayerGui")) then return nil end
     local inventoryGui = playerGui:FindFirstChild("Inventory_1")
     if not (inventoryGui and inventoryGui:IsA("ScreenGui")) then return nil end
     local hub = inventoryGui:FindFirstChild("Hub")
     if not (hub and hub:IsA("Frame")) then return nil end
-    local targetCategory = hub:FindFirstChild(category)  -- "Powers" 或 "Weapons"
+    local targetCategory = hub:FindFirstChild(category)
     if not (targetCategory and targetCategory:IsA("Frame")) then return nil end
     local listFrame = targetCategory:FindFirstChild("List_Frame")
     if not (listFrame and listFrame:IsA("Frame")) then return nil end
@@ -3790,7 +3781,7 @@ local function findItemID(itemName, category)
     for _, itemButton in pairs(list:GetChildren()) do
         if itemButton:IsA("ImageButton") then
             local inside = itemButton:FindFirstChild("Inside")
-            if inside and (inside:IsA("CanvasGroup") or inside:IsA("Frame")) then  -- 支持不同类型
+            if inside and (inside:IsA("CanvasGroup") or inside:IsA("Frame")) then
                 local title = inside:FindFirstChild("Title")
                 if title and title:IsA("TextLabel") and title.Text == itemName then
                     return itemButton.Name
@@ -4514,7 +4505,7 @@ getgenv().RuneList = {}
 -- 公共函数：查找Runes列表，避免重复代码
 local function findRunes()
     local runes = {}
-    local playerGui = game:GetService("Players").LocalPlayer.PlayerGui  -- 内联：删除local player
+    local playerGui = getgenv().PlayerService.PlayerGui
     if not (playerGui and playerGui:IsA("PlayerGui")) then return {} end
     local inventoryGui = playerGui:FindFirstChild("Inventory_1")
     if not (inventoryGui and inventoryGui:IsA("ScreenGui")) then return {} end
@@ -4532,7 +4523,7 @@ local function findRunes()
             if inside:IsA("Frame") and inside:FindFirstChild("Title") then
                 local title = inside.Title
                 if title:IsA("TextLabel") and title.Text and title.Text ~= "" then
-                    table.insert(runes, title.Text)  -- 内联runeName
+                    table.insert(runes, title.Text)
                 end
             end
         end
@@ -5320,14 +5311,14 @@ end
 getgenv().InRaidManual = false
 
 -- 监听 Dungeon Opened 信号（用于自动进入 Dungeon）
-game:GetService("ReplicatedStorage").Events.To_Client.OnClientEvent:Connect(function(data)  -- 内联Remote
+Remote.OnClientEvent:Connect(function(data)
     if data.Action == "System_Message" and data.Text and data.Text.Type == "Dungeon_Message" then
-        local text = data.Text.Text  -- 保留必要local（用于循环）
+        local text = data.Text.Text
         for dungeonName, signalName in pairs(DungeonNameMap) do
             if string.find(text, dungeonName) and getgenv().AutoDungeonEnabled and table.find(getgenv().SelectedDungeons, dungeonName) then
                 StopNormalAutoFarm()  -- 在进入 Dungeon 之前停止普通 Auto Farm
                 -- 发送进入 Dungeon 的信号
-                game:GetService("ReplicatedStorage").Events.To_Server:FireServer({  -- 内联ToServer
+                ToServer:FireServer({
                     ["Action"] = "_Enter_Dungeon",
                     ["Name"] = signalName,
                 })
@@ -5355,17 +5346,17 @@ game:GetService("ReplicatedStorage").Events.To_Client.OnClientEvent:Connect(func
                 getgenv().InRaidManual = true
             end
             
-            local currentName = getgenv().CurrentDungeonName or getgenv().CurrentRaidName  -- 保留必要local
+            local currentName = getgenv().CurrentDungeonName or getgenv().CurrentRaidName
             if currentName and IsAutoFarmDungeon(currentName) then
                 StartDungeonAutoFarm()
             end
         else
             -- 离开 Dungeon/Raid
-            local wasRaid = getgenv().InRaid or getgenv().InRaidManual  -- 保留必要local
-            local previousName = getgenv().CurrentDungeonName or getgenv().CurrentRaidName  -- 保留必要local
+            local wasRaid = getgenv().InRaid or getgenv().InRaidManual
+            local previousName = getgenv().CurrentDungeonName or getgenv().CurrentRaidName
             
             -- 检查是否是从Raid进入Dungeon的转换
-            local isTransition = wasRaid and getgenv().CurrentDungeonName  -- 保留必要local
+            local isTransition = wasRaid and getgenv().CurrentDungeonName
             
             if isTransition then
                 -- 保持 CurrentDungeonName 不变，只清除Raid相关状态
@@ -5391,10 +5382,10 @@ game:GetService("ReplicatedStorage").Events.To_Client.OnClientEvent:Connect(func
         end
     elseif data.Action == "Message" and data.Type == "Normal" and data.Color == "Green" then
         -- 新增：处理 Wave Cleared 消息并自动离开 Raid
-        local waveText = data.Text  -- 保留必要local
-        local waveNum = string.match(waveText, "Wave (%d+) Cleared!")  -- 保留必要local
+        local waveText = data.Text
+        local waveNum = string.match(waveText, "Wave (%d+) Cleared!")
         if waveNum and tonumber(waveNum) == getgenv().LeaveRaidWave and getgenv().AutoLeaveRaidOnWaveEnabled and (getgenv().InRaid or getgenv().InRaidManual) then
-            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({  -- 内联ToServer
+            ToServer:FireServer({
                 ["Action"] = "Dungeon_Leave",
             })
         end
@@ -5410,6 +5401,7 @@ task.spawn(function()
         task.wait(1)  -- 检查间隔
     end
 end)
+
 -------------------------------------------------
 -- UI: Dungeon Tab
 -------------------------------------------------
