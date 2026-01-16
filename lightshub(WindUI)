@@ -509,8 +509,8 @@ PlayerTab:Divider()
 -- 🛡️ Anti AFK
 -------------------------------------------------
 
-local bb = game:service'VirtualUser'
-local afkConnection
+-- 全局变量：存储连接，避免局部声明
+getgenv().afkConnection = nil
 
 local afkToggle = PlayerTab:Toggle({
     Flag = "Toggle1",
@@ -524,15 +524,15 @@ local afkToggle = PlayerTab:Toggle({
                 ["Path"] = {"Settings", "AFK_MODE"},
                 ["Action"] = "Settings",
             })
-            afkConnection = player.Idled:Connect(function()
-                bb:CaptureController()
-                bb:ClickButton2(Vector2.new())
-                wait(2)
+            getgenv().afkConnection = game:GetService("Players").LocalPlayer.Idled:Connect(function()  -- 内联player
+                game:service'VirtualUser':CaptureController()  -- 内联bb
+                game:service'VirtualUser':ClickButton2(Vector2.new())
+                task.wait(2)
             end)
         else
-            if afkConnection then
-                afkConnection:Disconnect()
-                afkConnection = nil
+            if getgenv().afkConnection then
+                getgenv().afkConnection:Disconnect()
+                getgenv().afkConnection = nil
             end
         end
     end,
@@ -547,7 +547,7 @@ getgenv().AntiPublicWhitelist = {}
 
 --✨ 将输入框内容 → 表转换
 local function updateWhitelist(text)
-    local list = {}
+    local list = {}  -- 保留必要local
     for name in string.gmatch(text, "([^,%s]+)") do
         table.insert(list, name)
     end
@@ -561,16 +561,16 @@ local function checkServerPlayers()
 
         if not getgenv().AntiPublicEnabled then break end
 
-        local Players = game:GetService("Players")
-        local others = {}
+        local Players = game:GetService("Players")  -- 保留必要local
+        local others = {}  -- 保留必要local
         local whitelistFound = false
 
         for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= player then
-                local name = p.Name
+            if p ~= game:GetService("Players").LocalPlayer then  -- 内联player
+                local name = p.Name  -- 保留必要local
 
                 -- 检查是不是 whitelist 人
-                local isWhitelisted = table.find(getgenv().AntiPublicWhitelist, name) ~= nil
+                local isWhitelisted = table.find(getgenv().AntiPublicWhitelist, name) ~= nil  -- 内联
 
                 if isWhitelisted then
                     whitelistFound = true
@@ -587,8 +587,8 @@ local function checkServerPlayers()
 
         -- ❌ 有陌生玩家（others > 0）→ Kick
         if #others > 0 then
-            local reason = "Anti Public Server: Detected Non-Whitelist Player(s): " .. table.concat(others, ", ")
-            player:Kick(reason)
+            local reason = "Anti Public Server: Detected Non-Whitelist Player(s): " .. table.concat(others, ", ")  -- 内联
+            game:GetService("Players").LocalPlayer:Kick(reason)  -- 内联player
             break
         end
     end
@@ -622,11 +622,10 @@ local whitelistInput = PlayerTab:Input({
     end,
 })
 
-
 local RankingTab = Window:Tab({
-        Title = "Ranking",
-        Icon = "chart-line",
-    })
+    Title = "Ranking",
+    Icon = "chart-line",
+})
 
 -- ✅ Auto Rank Up
 local autoRankUpToggle = RankingTab:Toggle({
@@ -669,7 +668,7 @@ local autoPrestigeToggle = RankingTab:Toggle({
                     pcall(function()
                         -- ✅ 自动升级声望
                         game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-                        ["Action"] = "Level_Up_Prestige",
+                            ["Action"] = "Level_Up_Prestige",
                         })
                     end)
 
@@ -683,9 +682,19 @@ local autoPrestigeToggle = RankingTab:Toggle({
 })
 
 local CodesTab = Window:Tab({
-        Title = "Codes",
-        Icon = "ticket",
-    })
+    Title = "Codes",
+    Icon = "ticket",
+})
+
+-- 全局变量：存储codes列表，避免局部声明
+getgenv().codes = {"SlashX", "Derp", "Heyyyo", 
+    "Update32","Update32Code","Update32Code2","Update32Code3","295MVisits","Update32SuperCode",
+    "Update32P2","Update32P2Code","Update32P2Code2","Update32P2Code3","815KFav","Update32Part2RestartCode",
+    "Update32P3","Update32P3Code","Update32P3Code2","Update32P3Code3","820KFav","Super32Part3Code","Super32Part3Code2",
+    "Update33","Update33Code","Update33Code2","Update33Code3","825KFav","33UltraCode",
+    "Update33P2","Update33P2Code","Update33P2Code2","Update33P2Code3","825KFav","P2Ultra33Code",
+    "Update33P3","Update33P3Code","Update33P3Code2","Update33P3Code3","300MVisits","Ultra33CodeP3","Update33Part3RobloxBroken"
+}
 
 -- ✅ Redeem Codes Button
 local redeemCodesButton = CodesTab:Button({
@@ -694,24 +703,14 @@ local redeemCodesButton = CodesTab:Button({
     Desc = "Redeem all codes automatically.",
     Locked = false,
     Callback = function()
-    local codes = {"SlashX", "Derp", "Heyyyo", 
-    "Update32","Update32Code","Update32Code2","Update32Code3","295MVisits","Update32SuperCode",
-    "Update32P2","Update32P2Code","Update32P2Code2","Update32P2Code3","815KFav","Update32Part2RestartCode",
-    "Update32P3","Update32P3Code","Update32P3Code2","Update32P3Code3","820KFav","Super32Part3Code","Super32Part3Code2",
-    "Update33","Update33Code","Update33Code2","Update33Code3","825KFav","33UltraCode",
-    "Update33P2","Update33P2Code","Update33P2Code2","Update33P2Code3","825KFav","P2Ultra33Code",
-    "Update33P3","Update33P3Code","Update33P3Code2","Update33P3Code3","300MVisits","Ultra33CodeP3","Update33Part3RobloxBroken"
-
-
-}
-    for _, code in ipairs(codes) do
-         game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
-            ["Action"] = "_Redeem_Code", 
-			["Text"] = code,
-         })
-                task.wait(0.1)
-            end
-   end,
+        for _, code in ipairs(getgenv().codes) do
+            game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                ["Action"] = "_Redeem_Code", 
+                ["Text"] = code,
+            })
+            task.wait(0.1)
+        end
+    end,
 })
 
 -------------------------------------------------
