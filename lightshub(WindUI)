@@ -355,7 +355,7 @@ local PlayerTab = Window:Tab({
 -------------------------------------------------
 -- 玩家设定（WalkSpeed、Jump）
 -------------------------------------------------
-local WalkspeedSlider = PlayerTab:Slider({
+PlayerTab:Slider({
     Flag = "Slider1",
     Title = "Walk Speed",
     Desc = "Adjust Your Walk Speed",
@@ -375,7 +375,7 @@ local WalkspeedSlider = PlayerTab:Slider({
     end,
 })
 
-local JumpHeightSlider = PlayerTab:Slider({
+PlayerTab:Slider({
     Flag = "Slider2",
     Title = "Jump Height",
     Desc = "Adjust Your Jump Height",
@@ -397,19 +397,18 @@ local JumpHeightSlider = PlayerTab:Slider({
 
 PlayerTab:Divider()
 
+getgenv().AttackRangeOptions = {"Low Range", "Medium Range", "High Range"}
 
-local AttackRangeOptions = {"Low Range", "Medium Range", "High Range"}
-
-local rangeValues = {
+getgenv().rangeValues = {
     ["Low Range"] = 50,
     ["Medium Range"] = 60,
     ["High Range"] = 70,
 }
 
-local FastKillAuraDropdown = PlayerTab:Dropdown({
+PlayerTab:Dropdown({
     Flag = "KillAuraRange",
     Title = "Attack Range",
-    Values = AttackRangeOptions,
+    Values = getgenv().AttackRangeOptions,
     Value = "Low Range",
     Multi = false,
     Callback = function(option)
@@ -417,7 +416,7 @@ local FastKillAuraDropdown = PlayerTab:Dropdown({
     end,
 })
 
-local FastKillAuraToggle = PlayerTab:Toggle({
+PlayerTab:Toggle({
     Flag = "FastKillAura1",
     Title = "Fast Kill Aura",
     Desc = "Very Fast Auto Click + More Attack Range",
@@ -438,7 +437,7 @@ local FastKillAuraToggle = PlayerTab:Toggle({
                         end
                         local playerPos = hrp.Position
                         
-                        local rangeNum = rangeValues[getgenv().SelectedAttackRange] or 50
+                        local rangeNum = getgenv().rangeValues[getgenv().SelectedAttackRange] or 50
                         
                         local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
                         local mobsInRange = {}  -- 存储在范围内的怪物
@@ -511,7 +510,7 @@ PlayerTab:Divider()
 -- 全局变量：存储连接，避免局部声明
 getgenv().afkConnection = nil
 
-local afkToggle = PlayerTab:Toggle({
+PlayerTab:Toggle({
     Flag = "Toggle1",
     Title = "Anti AFK",
     Desc = "Prevents you from being kicked for being AFK",
@@ -592,7 +591,7 @@ local function checkServerPlayers()
 end
 
 --🟢 Anti Public Server Toggle
-local antiPublicToggle = PlayerTab:Toggle({
+PlayerTab:Toggle({
     Flag = "Toggle2",
     Title = "Anti Public Server",
     Desc = "Automatically kicks you from public servers when non-whitelisted players are detected.",
@@ -607,7 +606,7 @@ local antiPublicToggle = PlayerTab:Toggle({
 })
 
 --📝 Whitelist 输入框
-local whitelistInput = PlayerTab:Input({
+PlayerTab:Input({
     Flag = "Input1",
     Title = "Whitelist Player",
     Desc = "Enter player username (Not Display Name) separated by commas to whitelist them.",
@@ -625,7 +624,7 @@ local RankingTab = Window:Tab({
 })
 
 -- ✅ Auto Rank Up
-local autoRankUpToggle = RankingTab:Toggle({
+RankingTab:Toggle({
     Flag = "RankUp1",
     Title = "Auto Rank Up",
     Desc = "Automatically rank up",
@@ -652,7 +651,7 @@ local autoRankUpToggle = RankingTab:Toggle({
 })
 
 --Auto Prestige
-local autoPrestigeToggle = RankingTab:Toggle({
+RankingTab:Toggle({
     Flag = "AutoPrestige1",
     Title = "Auto Prestige",
     Desc = "Automatically prestige levels",
@@ -694,7 +693,7 @@ getgenv().codes = {"SlashX", "Derp", "Heyyyo",
 }
 
 -- ✅ Redeem Codes Button
-local redeemCodesButton = CodesTab:Button({
+CodesTab:Button({
     Flag = "RedeemCodes1",
     Title = "Redeem All Codes",
     Desc = "Redeem all codes automatically.",
@@ -1732,7 +1731,7 @@ local ExchangeShopW1Toggle = ExchangeShopTab:Toggle({
 
 ExchangeShopTab:Divider()
 
-local ExchangeShopW1KeysDropdown = ExchangeShopTab:Dropdown({
+ExchangeShopTab:Dropdown({
     Flag = "ExchangeShopW1KeysDropdown",
     Title = "Select W1 TO W19 Keys to Buy",
     Values = ExchangeShopW1KeysOptions,
@@ -1744,7 +1743,7 @@ local ExchangeShopW1KeysDropdown = ExchangeShopTab:Dropdown({
     end,
 })
 
-local ExchangeShopW1KeysToggle = ExchangeShopTab:Toggle({
+ExchangeShopTab:Toggle({
     Flag = "AutoExchangeShopW1KeysToggle",
     Title = "Auto Exchange Coin to W1 TO W19 Keys",
     Desc = "Automatically Exchange Coin to Selected Keys",
@@ -1867,7 +1866,7 @@ local ExchangeShopW2Toggle = ExchangeShopTab:Toggle({
 
 ExchangeShopTab:Divider()
 
-local ExchangeShopW2KeysDropdown = ExchangeShopTab:Dropdown({
+ExchangeShopTab:Dropdown({
     Flag = "ExchangeShopW2KeysDropdown",
     Title = "Select W20 TO W30 Keys to Buy",
     Values = ExchangeShopW2KeysOptions,
@@ -1879,7 +1878,7 @@ local ExchangeShopW2KeysDropdown = ExchangeShopTab:Dropdown({
     end,
 })
 
-local ExchangeShopW2KeysToggle = ExchangeShopTab:Toggle({
+ExchangeShopTab:Toggle({
     Flag = "AutoExchangeShopW2KeysToggle",
     Title = "Auto Exchange Coin to W20 TO W30 Keys",
     Desc = "Automatically Exchange Coin to Selected Keys",
@@ -1912,7 +1911,7 @@ local ExchangeShopW2KeysToggle = ExchangeShopTab:Toggle({
 
 ExchangeShopTab:Divider()
 
-local ExchangeShopW2ProductsDropdown = ExchangeShopTab:Dropdown({
+ExchangeShopTab:Dropdown({
     Flag = "ExchangeShopW2ProductsDropdown",
     Title = "Select W20 TO W30 Products to Buy",
     Values = ExchangeShopW2ProductsOptions,
@@ -1924,7 +1923,7 @@ local ExchangeShopW2ProductsDropdown = ExchangeShopTab:Dropdown({
     end,
 })
 
-local ExchangeShopW2ProductsToggle = ExchangeShopTab:Toggle({
+ExchangeShopTab:Toggle({
     Flag = "AutoExchangeShopW2ProductsToggle",
     Title = "Auto Exchange Coin to W20 TO W30 Products",
     Desc = "Automatically Exchange Coin to Selected Products",
@@ -1957,7 +1956,7 @@ local ExchangeShopW2ProductsToggle = ExchangeShopTab:Toggle({
 
 ExchangeShopTab:Divider()
 
-local ExchangeShopChristmasProductsDropdown = ExchangeShopTab:Dropdown({
+ExchangeShopTab:Dropdown({
     Flag = "ExchangeShopChristmasProductsDropdown",
     Title = "Select Christmas Products to Buy",
     Values = ExchangeShopChristmasProductsOptions,
@@ -1969,7 +1968,7 @@ local ExchangeShopChristmasProductsDropdown = ExchangeShopTab:Dropdown({
     end,
 })
 
-local ExchangeShopChristmasProductsToggle = ExchangeShopTab:Toggle({
+ExchangeShopTab:Toggle({
     Flag = "AutoExchangeShopChristmasProductsToggle",
     Title = "Auto Exchange Candy Cane to Christmas Products",
     Desc = "Automatically Exchange Candy Cane to Selected Christmas Products",
@@ -2025,6 +2024,7 @@ local ExchangeFoodMap = {
     ["Fried Egg"] = {Product_Id = "8", Bench_Name = "Food_Shop"},
     ["Waffle"] = {Product_Id = "9", Bench_Name = "Food_Shop"},
 }
+getgenv().ExchangeFoodMap = ExchangeFoodMap
 
 local ExchangeMacaronOptions = {
     "Energy Macaron","Coin Macaron","Damage Macaron","Luck Macaron","Exp Macaron","Star Macaron","Soul Macaron","Drop Macaron","Shadow Soul Macaron"
@@ -2041,8 +2041,9 @@ local ExchangeMacaronMap = {
     ["Drop Macaron"] = {Product_Id = "8", Bench_Name = "Food_Exchanger"},
     ["Shadow Soul Macaron"] = {Product_Id = "9", Bench_Name = "Food_Exchanger"},
 }
+getgenv().ExchangeMacaronMap = ExchangeMacaronMap
 
-local ExchangeFoodDropdown = FoodTab:Dropdown({
+FoodTab:Dropdown({
     Flag = "ExchangeFoodDropdown",
     Title = "Select Food Shop Items",
     Values = ExchangeFoodOptions,
@@ -2054,7 +2055,7 @@ local ExchangeFoodDropdown = FoodTab:Dropdown({
     end,
 })
 
-local ExchangeFoodToggle = FoodTab:Toggle({
+FoodTab:Toggle({
     Flag = "AutoBuyFoodToggle",
     Title = "Auto Exchange Coin to Food",
     Desc = "Automatically Exchange Coin to Selected Food",
@@ -2066,7 +2067,7 @@ local ExchangeFoodToggle = FoodTab:Toggle({
                 while getgenv().AutoExchangeFoodRunning do
                     if getgenv().SelectedFood and #getgenv().SelectedFood > 0 then
                         for _, FoodName in ipairs(getgenv().SelectedFood) do
-                            local FoodData = ExchangeFoodMap[FoodName]
+                            local FoodData = getgenv().ExchangeFoodMap[FoodName]
                             if FoodData then
                                 game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                     ["Bench_Name"] = FoodData.Bench_Name,
@@ -2088,7 +2089,7 @@ local ExchangeFoodToggle = FoodTab:Toggle({
 
 FoodTab:Divider()
 
-local ExchangeMacaronDropdown = FoodTab:Dropdown({
+FoodTab:Dropdown({
     Flag = "ExchangeMacaronDropdown",
     Title = "Select Macaron",
     Values = ExchangeMacaronOptions,
@@ -2100,7 +2101,7 @@ local ExchangeMacaronDropdown = FoodTab:Dropdown({
     end,
 })
 
-local ExchangeMacaronToggle = FoodTab:Toggle({
+FoodTab:Toggle({
     Flag = "AutoExchangeMacaronToggle",
     Title = "Auto Exchange Food to Macaron",
     Desc = "Automatically Exchange Food to Selected Macaron",
@@ -2112,7 +2113,7 @@ local ExchangeMacaronToggle = FoodTab:Toggle({
                 while getgenv().AutoExchangeMacaronRunning do
                     if getgenv().SelectedMacaron and #getgenv().SelectedMacaron > 0 then
                         for _, MacaronName in ipairs(getgenv().SelectedMacaron) do
-                            local FoodData = ExchangeMacaronMap[MacaronName]
+                            local FoodData = getgenv().ExchangeMacaronMap[MacaronName]
                             if FoodData then
                                 game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                     ["Bench_Name"] = FoodData.Bench_Name,
@@ -2138,7 +2139,7 @@ local QuestTab = Window:Tab({
     })
 
 --Auto Get Daily Quest
-local DailyQuestToggle = QuestTab:Toggle({
+QuestTab:Toggle({
     Flag = "DailyQuest1",
    Title = "Auto Get Daily Quest",
    Desc = "Automatically accept daily quests",
@@ -2172,7 +2173,7 @@ end,
 QuestTab:Divider()
 
 --Auto Find & Collect Punching Machine
-local PunchingMachineQuestToggle = QuestTab:Toggle({
+QuestTab:Toggle({
     Flag = "Quest2301",
    Title = "Auto Complete Punching Machine Quest",
    Desc = "Automatically accept and complete Punching Machine quest",
@@ -2216,7 +2217,7 @@ end,
 --Auto Hero Quests
 
 --Auto Demon Fruit Quest
-local DemonFruitQuestToggle = QuestTab:Toggle({
+QuestTab:Toggle({
     Flag = "Quest2302",
    Title = "Auto Complete Demon Fruit Quest",
    Desc = "Automatically accept and complete Demon Fruit quest",
@@ -2258,7 +2259,7 @@ end,
 })
 
 --Auto Complete Briefcase Quest
-local BriefcaseQuestToggle = QuestTab:Toggle({
+QuestTab:Toggle({
     Flag = "Quest2601",
    Title = "Auto Complete Briefcase Quest",
    Desc = "Automatically accept and complete Briefcase quest",
@@ -2300,7 +2301,7 @@ end,
 })
 
 --Auto Complete Assassin Knife Quest
-local AssassinKnifeQuestToggle = QuestTab:Toggle({
+QuestTab:Toggle({
     Flag = "Quest2609",
    Title = "Auto Complete Assassin Knife Quest",
    Desc = "Automatically accept and complete Assassin Knife quest",
@@ -2342,7 +2343,7 @@ end,
 })
 
 --Auto Complete Assassin Pistol Quest
-local AssassinPistolQuestToggle = QuestTab:Toggle({
+QuestTab:Toggle({
     Flag = "Quest2610",
    Title = "Auto Complete Assassin Pistol Quest",
    Desc = "Automatically accept and complete Assassin Pistol quest",
@@ -2384,7 +2385,7 @@ end,
 })
 
 --Auto Complete Exorcise Humans Quest
-local ExorciseHumansQuestToggle = QuestTab:Toggle({
+QuestTab:Toggle({
     Flag = "Quest2303",
    Title = "Auto Complete Exorcise Humans Quest",
    Desc = "Automatically accept and complete Exorcise Humans quest",
@@ -2426,7 +2427,7 @@ end,
 })
 
 --Auto Complete Evil Spirit Quest
-local EvilSpiritQuestToggle = QuestTab:Toggle({
+QuestTab:Toggle({
     Flag = "Quest2304",
    Title = "Auto Complete Evil Spirit Quest",
    Desc = "Automatically accept and complete Evil Spirit quest",
@@ -2468,7 +2469,7 @@ end,
 })
 
 --Auto Complete Bento Box Quest
-local BentoBoxQuestToggle = QuestTab:Toggle({
+QuestTab:Toggle({
     Flag = "Quest2305",
    Title = "Auto Complete Bento Box Quest",
    Desc = "Automatically accept and complete Bento Box quest",
@@ -2515,7 +2516,7 @@ local StarTab = Window:Tab({
     })
 
 --Auto Open Star
-local StarDropdown = StarTab:Dropdown({
+StarTab:Dropdown({
     Flag = "StarDropdown",
    Title = "Star List",
    Values = {"[W1] Earth City","[W2] Windmill Island","[W3] Soul Society","[W4] Cursed School","[W5] Slayer Village",
@@ -2541,7 +2542,7 @@ local StarDropdown = StarTab:Dropdown({
 })
 
 -- Auto Open Star Toggle
-local AutoOpenStarToggle = StarTab:Toggle({
+StarTab:Toggle({
     Flag = "AutoOpenStar1",
     Title = "Auto Open Star",
     Desc = "Automatically Open Max Selected Star",
@@ -2577,7 +2578,7 @@ local RollTab = Window:Tab({
     })
 
 --Auto Roll
-local RollDropdown = RollTab:Dropdown({
+RollTab:Dropdown({
     Flag = "RollDropdown",
    Title = "Roll List",
    Values = {
@@ -2667,8 +2668,9 @@ local WeaponsTab = Window:Tab({
 local specialWeapons = {
     "Venomleaf", "Cryoscythe", "Toxinfang", "Crimson Thorn", "Bonehowl", "Ashfang", "Phantom Requiem", "Stormreaver"
 }
+getgenv().specialWeapons = specialWeapons
 
-local WeaponsEvolveToggle = WeaponsTab:Toggle({
+WeaponsTab:Toggle({
     Flag = "WeaponsEvolve1",
     Title = "Auto Evolve Weapons",
     Default = false,
@@ -2753,7 +2755,7 @@ local WeaponsEvolveToggle = WeaponsTab:Toggle({
                     -- 发送Evolve信号
                     -- Tier 0: Weapon_Evolve or Scythe_Evolve, 5 or 2 weapons
                     for weaponName, weaponList in pairs(getgenv().tier0Groups) do
-                        local isSpecial = table.find(specialWeapons, weaponName) ~= nil
+                        local isSpecial = table.find(getgenv().specialWeapons, weaponName) ~= nil
                         local requiredCount = isSpecial and 2 or 5
                         local benchName = isSpecial and "Scythe_Evolve" or "Weapon_Evolve"
                         if #weaponList >= requiredCount then
@@ -2772,7 +2774,7 @@ local WeaponsEvolveToggle = WeaponsTab:Toggle({
 
                     -- Tier 1: Weapon_Evolve_2 or Scythe_Evolve_2, 4 or 2 weapons
                     for weaponName, weaponList in pairs(getgenv().tier1Groups) do
-                        local isSpecial = table.find(specialWeapons, weaponName) ~= nil
+                        local isSpecial = table.find(getgenv().specialWeapons, weaponName) ~= nil
                         local requiredCount = isSpecial and 2 or 4
                         local benchName = isSpecial and "Scythe_Evolve_2" or "Weapon_Evolve_2"
                         if #weaponList >= requiredCount then
@@ -2791,7 +2793,7 @@ local WeaponsEvolveToggle = WeaponsTab:Toggle({
 
                     -- Tier 2: Weapon_Evolve_3 or Scythe_Evolve_3, 2 weapons
                     for weaponName, weaponList in pairs(getgenv().tier2Groups) do
-                        local isSpecial = table.find(specialWeapons, weaponName) ~= nil
+                        local isSpecial = table.find(getgenv().specialWeapons, weaponName) ~= nil
                         local benchName = isSpecial and "Scythe_Evolve_3" or "Weapon_Evolve_3"
                         if #weaponList >= 2 then
                             local selected = {}
@@ -2855,7 +2857,7 @@ local function getWeaponUniqueId(weaponName)
     return nil
 end
 
-local WeaponsDropdown = WeaponsTab:Dropdown({
+WeaponsTab:Dropdown({
     Flag = "WeaponsDropdown1",
     Title = "Select Weapons to Evolve",
     Values = {},  -- 初始为空
@@ -2867,7 +2869,7 @@ local WeaponsDropdown = WeaponsTab:Dropdown({
     end,
 })
 
-local WeaponRefreshButton = WeaponsTab:Button({
+WeaponsTab:Button({
     Flag = "RefreshButton2",
     Title = "Refresh Weapons List",
     Callback = function()
@@ -2923,7 +2925,7 @@ getgenv().AutoBankaiRunning = false
 getgenv().AutoChakraRunning = false
 getgenv().AutoScytheRunning = false
 
-local AutoBreathingsToggle = WeaponsTab:Toggle({
+WeaponsTab:Toggle({
     Flag = "AutoBreathings1",
     Title = "Auto Roll Breathings",
     Desc = "Automatically Roll Breathings Using Selected Weapon",
@@ -2956,7 +2958,7 @@ local AutoBreathingsToggle = WeaponsTab:Toggle({
     end,
 })
 
-local AutoBankaiToggle = WeaponsTab:Toggle({
+WeaponsTab:Toggle({
     Flag = "AutoBankai1",
     Title = "Auto Roll Bankai",
     Desc = "Automatically Roll Bankai Using Selected Weapon",
@@ -2988,7 +2990,7 @@ local AutoBankaiToggle = WeaponsTab:Toggle({
     end,
 })
 
-local AutoChakraToggle = WeaponsTab:Toggle({
+WeaponsTab:Toggle({
     Flag = "AutoChakra1",
     Title = "Auto Roll Chakra Infusion",
     Desc = "Automatically Roll Chakra Infusion Using Selected Weapon",
@@ -3020,7 +3022,7 @@ local AutoChakraToggle = WeaponsTab:Toggle({
     end,
 })
 
-local AutoScytheToggle = WeaponsTab:Toggle({
+WeaponsTab:Toggle({
     Flag = "AutoScythe1",
     Title = "Auto Upgrade Scythe Leveling",
     Desc = "Automatically Upgrade Scythe Leveling Using Selected Weapon",
@@ -3058,7 +3060,7 @@ local TitansTab = Window:Tab({
 
 getgenv().AutoTitansEvolveRunning = false
 
-local TitansEvolveToggle = TitansTab:Toggle({
+TitansTab:Toggle({
     Flag = "TitansEvolve1",
     Title = "Auto Evolve Titans",
     Default = false,
@@ -3238,7 +3240,7 @@ local function getTitanUniqueId(titanName)
     return nil
 end
 
-local TitansDropdown = TitansTab:Dropdown({
+TitansTab:Dropdown({
     Flag = "TitansDropdown1",
     Title = "Select Titans to Inject",
     Values = {},  -- 初始为空
@@ -3250,7 +3252,7 @@ local TitansDropdown = TitansTab:Dropdown({
     end,
 })
 
-local TitanRefreshButton = TitansTab:Button({
+TitansTab:Button({
     Flag = "RefreshButton3",
     Title = "Refresh Titans List",
     Callback = function()
@@ -3302,7 +3304,7 @@ TitansTab:Divider()
 
 getgenv().AutoInjectionRunning = false
 
-local AutoInjectionTitanToggle = TitansTab:Toggle({
+TitansTab:Toggle({
     Flag = "AutoInjection1",
     Title = "Auto Roll Injection",
     Desc = "Automatically Roll Injection Using Selected Titan",
@@ -3342,7 +3344,7 @@ local StandsTab = Window:Tab({
 
 getgenv().AutoStandsEvolveRunning = false
 
-local StandsEvolveToggle = StandsTab:Toggle({
+StandsTab:Toggle({
     Flag = "StandsEvolve1",
     Title = "Auto Evolve Stands",
     Default = false,
@@ -3522,7 +3524,7 @@ local function getStandUniqueId(standName)
     return nil
 end
 
-local StandsDropdown = StandsTab:Dropdown({
+StandsTab:Dropdown({
     Flag = "StandsDropdown1",
     Title = "Select Stands to Inject",
     Values = {},  -- 初始为空
@@ -3534,7 +3536,7 @@ local StandsDropdown = StandsTab:Dropdown({
     end,
 })
 
-local StandRefreshButton = StandsTab:Button({
+StandsTab:Button({
     Flag = "RefreshButton4",
     Title = "Refresh Stands List",
     Callback = function()
@@ -3586,7 +3588,7 @@ StandsTab:Divider()
 
 getgenv().AutoStandsInjectionRunning = false
 
-local AutoStandsInjectionToggle = StandsTab:Toggle({
+StandsTab:Toggle({
     Flag = "AutoInjection2",
     Title = "Auto Roll Requiem Injection",
     Desc = "Automatically Roll Requiem Injection Using Selected Stand",
@@ -3625,7 +3627,7 @@ local ProgressionTab = Window:Tab({
     })
 
 --Auto Progression Upgrade
-local ProgressionDropdown = ProgressionTab:Dropdown({
+ProgressionTab:Dropdown({
     Flag = "ProgressionDropdown",
    Title = "Progression List",
    Values = {
@@ -3721,7 +3723,7 @@ local ProgressionMap = { -- Upgrade_Name, Bench_Name, Action
 }
 
 -- Auto Progression Toggle
-local UpgradeProgressionToggle = ProgressionTab:Toggle({
+ProgressionTab:Toggle({
     Flag = "AutoProgression1",
     Title = "Auto Progression",
     Desc = "Automatically Upgrade Selected Progression",
@@ -3797,7 +3799,7 @@ local LevelingTab = Window:Tab({
     Icon = "arrow-big-up",
 })
 
-local AutoLevelIceSwordToggle = LevelingTab:Toggle({
+LevelingTab:Toggle({
     Flag = "AutoLevelIceSword",
     Title = "Auto Level Up Ice Sword",
     Desc = "Will works only if you have [Weapon] Ice Sword in your inventory *Do not change weapon name!*",
@@ -3831,7 +3833,7 @@ local AutoLevelIceSwordToggle = LevelingTab:Toggle({
 
 LevelingTab:Divider()
 
-local AutoLevelChristmasGloveToggle = LevelingTab:Toggle({
+LevelingTab:Toggle({
     Flag = "AutoLevelChristmasGlove1",
     Title = "Auto Level Up Christmas Glove",
     Desc = "Will works only if you have [Exotic] Christmas Glove in your inventory",
@@ -3865,7 +3867,7 @@ local AutoLevelChristmasGloveToggle = LevelingTab:Toggle({
 
 LevelingTab:Divider()
 
-local KaguneListDropdown = LevelingTab:Dropdown({
+LevelingTab:Dropdown({
     Flag = "KaguneDropdown1",
     Title = "Select Kagune to Level Up",
     Values = {
@@ -3884,7 +3886,7 @@ local KaguneListDropdown = LevelingTab:Dropdown({
     end,
 })
 
-local AutoLevelKaguneToggle = LevelingTab:Toggle({
+LevelingTab:Toggle({
     Flag = "AutoLevelKagune1",
     Title = "Auto Level Up Kagune",
     Desc = "Will works only if you have the selected [Powers] Kagune in your inventory",
@@ -3937,7 +3939,7 @@ local AutoLevelKaguneToggle = LevelingTab:Toggle({
 
 LevelingTab:Divider()
 
-local PokitaListDropdown = LevelingTab:Dropdown({
+LevelingTab:Dropdown({
     Flag = "PokitaDropdown1",
     Title = "Select Pokita to Level Up",
     Values = {
@@ -3956,7 +3958,7 @@ local PokitaListDropdown = LevelingTab:Dropdown({
     end,
 })
 
-local AutoLevelPokitaToggle = LevelingTab:Toggle({
+LevelingTab:Toggle({
     Flag = "AutoLevelPokita1",
     Title = "Auto Level Up Pokita",
     Desc = "Will works only if you have the selected [Powers] Pokita in your inventory",
@@ -3999,7 +4001,7 @@ local AutoLevelPokitaToggle = LevelingTab:Toggle({
 
 LevelingTab:Divider()
 
-local AutoLevelDemonArtsToggle = LevelingTab:Toggle({
+LevelingTab:Toggle({
     Flag = "AutoLevelDemonArts1",
     Title = "Auto Level Up [Phantom] Demon Arts",
     Desc = "Will works only if you have [Phantom] Blood Control (Demon Arts) in your inventory",
@@ -4033,7 +4035,7 @@ local AutoLevelDemonArtsToggle = LevelingTab:Toggle({
 
 LevelingTab:Divider()
 
-local MagicItemsListDropdown = LevelingTab:Dropdown({
+LevelingTab:Dropdown({
     Flag = "MagicItemsListDropdown",
     Title = "Select Magic Item to Level Up",
     Values = {
@@ -4053,7 +4055,7 @@ local MagicItemsListDropdown = LevelingTab:Dropdown({
     end,
 })
 
-local AutoLevelMagicItemToggle = LevelingTab:Toggle({
+LevelingTab:Toggle({
     Flag = "AutoLevelMagicItem1",
     Title = "Auto Level Up Magic Item",
     Desc = "Will works only if you have the selected [Powers] Magic Item in your inventory",
@@ -4107,7 +4109,7 @@ local AutoLevelMagicItemToggle = LevelingTab:Toggle({
 
 LevelingTab:Divider()
 
-local AutoLevelLegendaryShieldToggle = LevelingTab:Toggle({
+LevelingTab:Toggle({
     Flag = "AutoLevelLegendaryShield",
     Title = "Auto Level Up [Exotic] Legendary Shield",
     Desc = "Will works only if you have [Exotic] Legendary Shield in your inventory",
@@ -4139,7 +4141,7 @@ local AutoLevelLegendaryShieldToggle = LevelingTab:Toggle({
     end
 })
 
-local AutoEnchantLegendaryShieldToggle = LevelingTab:Toggle({
+LevelingTab:Toggle({
     Flag = "AutoEnchantLegendaryShield",
     Title = "Auto Enchant [Exotic] Legendary Shield",
     Desc = "Will works only if you have [Exotic] Legendary Shield in your inventory",
@@ -4173,7 +4175,7 @@ local AutoEnchantLegendaryShieldToggle = LevelingTab:Toggle({
 
 LevelingTab:Divider()
 
-local AutoLevelLegendarySpearToggle = LevelingTab:Toggle({
+LevelingTab:Toggle({
     Flag = "AutoLevelLegendarySpear",
     Title = "Auto Level Up [Exotic] Legendary Spear",
     Desc = "Will works only if you have [Exotic] Legendary Spear in your inventory",
@@ -4207,7 +4209,7 @@ local AutoLevelLegendarySpearToggle = LevelingTab:Toggle({
 
 LevelingTab:Divider()
 
-local AutoLevelLegendarySwordToggle = LevelingTab:Toggle({
+LevelingTab:Toggle({
     Flag = "AutoLevelLegendarySword",
     Title = "Auto Level Up [Exotic] Legendary Sword",
     Desc = "Will works only if you have [Exotic] Legendary Sword in your inventory",
@@ -4239,7 +4241,7 @@ local AutoLevelLegendarySwordToggle = LevelingTab:Toggle({
     end
 })
 
-local AutoEnchantLegendarySwordToggle = LevelingTab:Toggle({
+LevelingTab:Toggle({
     Flag = "AutoEnchantLegendarySword",
     Title = "Auto Enchant [Exotic] Legendary Sword",
     Desc = "Will works only if you have [Exotic] Legendary Sword in your inventory",
@@ -4273,7 +4275,7 @@ local AutoEnchantLegendarySwordToggle = LevelingTab:Toggle({
 
 LevelingTab:Divider()
 
-local AutoLevelLegendaryBowToggle = LevelingTab:Toggle({
+LevelingTab:Toggle({
     Flag = "AutoLevelLegendaryBow",
     Title = "Auto Level Up [Exotic] Legendary Bow",
     Desc = "Will works only if you have [Exotic] Legendary Bow in your inventory",
@@ -4307,7 +4309,7 @@ local AutoLevelLegendaryBowToggle = LevelingTab:Toggle({
 
 LevelingTab:Divider()
 
-local AutoLevelPirateCrewToggle = LevelingTab:Toggle({
+LevelingTab:Toggle({
     Flag = "AutoLevelPirateCrew",
     Title = "Auto Level Up [Phantom] Pirate Crew",
     Desc = "Will works only if you have [Phantom] Pirate Crew in your inventory",
@@ -4339,7 +4341,7 @@ local AutoLevelPirateCrewToggle = LevelingTab:Toggle({
     end
 })
 
-local AutoLevelCursesToggle = LevelingTab:Toggle({
+LevelingTab:Toggle({
     Flag = "AutoLevelCurses",
     Title = "Auto Level Up [Phantom] Curses",
     Desc = "Will works only if you have [Phantom] Curses in your inventory",
@@ -4371,7 +4373,7 @@ local AutoLevelCursesToggle = LevelingTab:Toggle({
     end
 })
 
-local AutoLevelSoloHunterRankToggle = LevelingTab:Toggle({
+LevelingTab:Toggle({
     Flag = "AutoLevelSoloHunterRank",
     Title = "Auto Level Up Solo Hunter Rank",
     Desc = "Will works only if you have [Phantom] Solo Hunter Rank in your inventory",
@@ -4403,7 +4405,7 @@ local AutoLevelSoloHunterRankToggle = LevelingTab:Toggle({
     end
 })
 
-local AutoLevelPsychicMayhemToggle = LevelingTab:Toggle({
+LevelingTab:Toggle({
     Flag = "AutoLevelPsychicMayhem",
     Title = "Auto Level Up Psychic Mayhem",
     Desc = "Will works only if you have [Phantom] Psychic Mayhem in your inventory",
@@ -4435,7 +4437,7 @@ local AutoLevelPsychicMayhemToggle = LevelingTab:Toggle({
     end
 })
 
-local AutoLevelEnergySpellCardToggle = LevelingTab:Toggle({
+LevelingTab:Toggle({
     Flag = "AutoLevelEnergySpellCard",
     Title = "Auto Level Up Energy Spell Card",
     Desc = "Will works only if you have [Phantom] Energy Spell Card in your inventory",
@@ -4467,7 +4469,7 @@ local AutoLevelEnergySpellCardToggle = LevelingTab:Toggle({
     end
 })
 
-local AutoLevelDamageSpellCardToggle = LevelingTab:Toggle({
+LevelingTab:Toggle({
     Flag = "AutoLevelDamageSpellCard",
     Title = "Auto Level Up Damage Spell Card",
     Desc = "Will works only if you have [Exotic] Damage Spell Card in your inventory",
@@ -4536,7 +4538,7 @@ local RuneTab = Window:Tab({
     Icon = "book",
 })
 
-local RuneDropdown = RuneTab:Dropdown({
+RuneTab:Dropdown({
     Flag = "RunesDropdown1",
     Title = "Select Runes to Level Up (Currently only support Damage Runes)",
     Values = {},  -- 初始为空
@@ -4548,7 +4550,7 @@ local RuneDropdown = RuneTab:Dropdown({
     end,
 })
 
-local RuneRefreshButton = RuneTab:Button({
+RuneTab:Button({
     Flag = "RefreshButton5",
     Title = "Refresh Runes List",
     Callback = function()
@@ -4598,7 +4600,7 @@ local upgradeMap = {
     ["Attack Range 2"] = {Upgrading_Name = "Attack_Range", Upgrade_Name = "Attack_Range_2"},
 }
 
-local AutoUpgradeDropdown = UpgradesTab:Dropdown({
+UpgradesTab:Dropdown({
     Flag = "UpgradeSelect1",
     Title = "Select Upgrades",
     Values = UpgradeOptions,
@@ -4612,7 +4614,7 @@ local AutoUpgradeDropdown = UpgradesTab:Dropdown({
 -- 全局控制变量
 getgenv().AutoUpgradeRunning = false
 
-local AutoUpgradesToggle = UpgradesTab:Toggle({
+UpgradesTab:Toggle({
     Flag = "AutoUpgrades1",
     Title = "Auto Upgrades",
     Desc = "Automatically Upgrade Selected Dungeon Upgrades",
@@ -4646,7 +4648,7 @@ local AutoUpgradesToggle = UpgradesTab:Toggle({
 
 UpgradesTab:Divider()
 
-local AutoUpgradeAllToggle = UpgradesTab:Toggle({
+UpgradesTab:Toggle({
     Flag = "AutoUpgradeAll1",
     Title = "Auto Upgrades ALL",
     Desc = "Automatically Upgrade ALL Dungeon Upgrades",
@@ -4696,7 +4698,7 @@ local FarmTab = Window:Tab({
 })
 
 -- ✅ Mob 列表 Dropdown
-local MobDropdown = FarmTab:Dropdown({
+FarmTab:Dropdown({
     Flag = "Dropdown1",
     Title = "Mobs List",
     Values = {"None"},
@@ -4710,7 +4712,7 @@ local MobDropdown = FarmTab:Dropdown({
 })
 
 -- ✅ 刷新按钮
-local MobRefreshButton = FarmTab:Button({
+FarmTab:Button({
     Flag = "RefreshButton1",
     Title = "Refresh Mobs List",
     Callback = function()
@@ -4744,7 +4746,7 @@ local MobRefreshButton = FarmTab:Button({
 })
 
 -- ✅ 普通 Auto Farm 逻辑
-local AutoFarmToggle = FarmTab:Toggle({
+FarmTab:Toggle({
     Flag = "AutoFarm1",
     Title = "Auto Farm",
     Default = false,
@@ -4814,6 +4816,7 @@ local DungeonOptions = {
     "Dungeon Easy","Dungeon Medium","Dungeon Hard","Dungeon Insane",
     "Dungeon Crazy","Dungeon Nightmare","Leaf Raid"
 }
+getgenv().DungeonOptions = DungeonOptions
 
 -- Raid / KeyDungeon / Defense 选项
 local RaidOptions = {
@@ -4823,8 +4826,8 @@ local RaidOptions = {
     "Hollow Raid","One Hero Raid","Tomb Arena Raid","Halloween Raid","Graveyard Defense",
     "Dungeon Suffering","Dungeon Adventurer","Dungeon Torment","Maze Level 1","Maze Level 2","Maze Level 3","Maze Level 4","Maze Level 5","Maze Level 6","Dungeon Labyrinth","Crimson Canyon",
     "Body Improvement Challenge","Breathing Raid","Mugen Dungeon","Ice Raid","Santa Raid","Calamity Raid"
-
 }
+getgenv().RaidOptions = RaidOptions
 
 local SpeedRaids = {
     ["Cursed Raid"] = true,
@@ -5410,7 +5413,7 @@ local AutoDungeonTab = Window:Tab({
         Icon = "castle",
     })
 
-local AutoDungeonDropdown = AutoDungeonTab:Dropdown({
+AutoDungeonTab:Dropdown({
     Flag = "DungeonSelect1",
     Title = "Select Dungeons",
     Values = DungeonOptions,
@@ -5422,7 +5425,7 @@ local AutoDungeonDropdown = AutoDungeonTab:Dropdown({
     end,
 })
 
-local AutoDungeonToggle = AutoDungeonTab:Toggle({
+AutoDungeonTab:Toggle({
     Flag = "AutoJoinDungeon1",
     Title = "Auto Join Dungeon + Auto Farm",
     Default = false,
@@ -5439,7 +5442,7 @@ local AutoRaidTab = Window:Tab({
         Icon = "skull",
     })
 
-local AutoRaidDropdown = AutoRaidTab:Dropdown({
+AutoRaidTab:Dropdown({
     Flag = "RaidSelect1",
     Title = "Select Raid",
     Values = RaidOptions,
@@ -5452,7 +5455,7 @@ local AutoRaidDropdown = AutoRaidTab:Dropdown({
     end,
 })
 
-local AutoRaidSpeedDropdown = AutoRaidTab:Dropdown({
+AutoRaidTab:Dropdown({
     Flag = "RaidSpeedSelect1",
     Title = "Raid Speed",
     Values = RaidSpeedOptions,
@@ -5465,7 +5468,7 @@ local AutoRaidSpeedDropdown = AutoRaidTab:Dropdown({
 
 AutoRaidTab:Divider()
 
-local AutoLeaveRaidOnWaveSlider = AutoRaidTab:Slider({
+AutoRaidTab:Slider({
     Flag = "AutoLeaveRaidOnWaveSlider1",
     Title = "Leave Raid At Wave",
     Step = 5,
@@ -5479,7 +5482,7 @@ local AutoLeaveRaidOnWaveSlider = AutoRaidTab:Slider({
     end,
 })
 
-local AutoLeaveRaidOnWaveToggle = AutoRaidTab:Toggle({
+AutoRaidTab:Toggle({
     Flag = "AutoLeaveRaidOnWaveToggle1",
     Title = "Enable Auto Leave Raid At Selected Wave",
     Default = false,
@@ -5490,7 +5493,7 @@ local AutoLeaveRaidOnWaveToggle = AutoRaidTab:Toggle({
 
 AutoRaidTab:Divider()
 
-local AutoRaidToggle = AutoRaidTab:Toggle({
+AutoRaidTab:Toggle({
     Flag = "AutoJoinRaid1",
     Title = "Auto Join Raid + Auto Farm",
     Default = false,
