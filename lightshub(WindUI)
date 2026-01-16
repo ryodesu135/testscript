@@ -699,7 +699,8 @@ local redeemCodesButton = CodesTab:Button({
     "Update32P2","Update32P2Code","Update32P2Code2","Update32P2Code3","815KFav","Update32Part2RestartCode",
     "Update32P3","Update32P3Code","Update32P3Code2","Update32P3Code3","820KFav","Super32Part3Code","Super32Part3Code2",
     "Update33","Update33Code","Update33Code2","Update33Code3","825KFav","33UltraCode",
-    "Update33P2","Update33P2Code","Update33P2Code2","Update33P2Code3","825KFav","P2Ultra33Code"
+    "Update33P2","Update33P2Code","Update33P2Code2","Update33P2Code3","825KFav","P2Ultra33Code",
+    "Update33P3","Update33P3Code","Update33P3Code2","Update33P3Code3","300MVisits","Ultra33CodeP3","Update33Part3RobloxBroken"
 
 
 }
@@ -4822,6 +4823,519 @@ local AutoLevelLegendaryBowToggle = LevelingTab:Toggle({
     end
 })
 
+LevelingTab:Divider()
+
+local AutoLevelPirateCrewToggle = LevelingTab:Toggle({
+    Flag = "AutoLevelPirateCrew",
+    Title = "Auto Level Up [Phantom] Pirate Crew",
+    Desc = "Will works only if you have [Phantom] Pirate Crew in your inventory",
+    Default = false,
+    Callback = function(state)
+        if state then
+            getgenv().AutoLevelPirateCrewRunning = true
+            task.spawn(function()
+                local pirateCrewId = nil
+                
+                -- 获取玩家背包
+                local player = game:GetService("Players").LocalPlayer
+                local playerGui = player:FindFirstChild("PlayerGui")
+                
+                if playerGui and playerGui:IsA("PlayerGui") then
+                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                        local hub = inventoryGui:FindFirstChild("Hub")
+                        if hub and hub:IsA("Frame") then
+                            local powers = hub:FindFirstChild("Powers")
+                            if powers and powers:IsA("Frame") then
+                                local listFrame = powers:FindFirstChild("List_Frame")
+                                if listFrame and listFrame:IsA("Frame") then
+                                    local list = listFrame:FindFirstChild("List")
+                                    if list and list:IsA("ScrollingFrame") then
+
+                                        for _, itemButton in pairs(list:GetChildren()) do
+                                            if itemButton:IsA("ImageButton") then
+                                                local inside = itemButton:FindFirstChild("Inside")
+                                                if inside and inside:IsA("CanvasGroup") then
+                                                    local title = inside:FindFirstChild("Title")
+                                                    if title and title:IsA("TextLabel") then
+                                                        local itemName = title.Text
+                                                        if itemName == "Red-Haired Pirates" then
+                                                            pirateCrewId = itemButton.Name
+                                                            break
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+
+                if not pirateCrewId then
+                    getgenv().AutoLevelPirateCrewRunning = false
+                    WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Unable to find [Phantom] Pirate Crew in your inventory. Auto Leveling Stopped.",
+                        Duration = 3,
+                    })
+                    return
+                end
+
+                -- 找到了[Phantom] Pirate Crew，开始每0.1秒发送升级请求
+                while getgenv().AutoLevelPirateCrewRunning and task.wait(0.1) do
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Upgrade_Name"] = "Level",
+                        ["UniqueId"] = pirateCrewId,
+                        ["Action"] = "Prog_Lv_Items",
+                        ["Bench_Name"] = "Pirate_Crew_Leveling",
+                    })
+                end    
+            end)
+        else
+            getgenv().AutoLevelPirateCrewRunning = false
+        end
+    end
+})
+
+local AutoLevelCursesToggle = LevelingTab:Toggle({
+    Flag = "AutoLevelCurses",
+    Title = "Auto Level Up [Phantom] Curses",
+    Desc = "Will works only if you have [Phantom] Curses in your inventory",
+    Default = false,
+    Callback = function(state)
+        if state then
+            getgenv().AutoLevelCursesRunning = true
+            task.spawn(function()
+                local cursesId = nil
+                
+                -- 获取玩家背包
+                local player = game:GetService("Players").LocalPlayer
+                local playerGui = player:FindFirstChild("PlayerGui")
+                
+                if playerGui and playerGui:IsA("PlayerGui") then
+                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                        local hub = inventoryGui:FindFirstChild("Hub")
+                        if hub and hub:IsA("Frame") then
+                            local powers = hub:FindFirstChild("Powers")
+                            if powers and powers:IsA("Frame") then
+                                local listFrame = powers:FindFirstChild("List_Frame")
+                                if listFrame and listFrame:IsA("Frame") then
+                                    local list = listFrame:FindFirstChild("List")
+                                    if list and list:IsA("ScrollingFrame") then
+
+                                        for _, itemButton in pairs(list:GetChildren()) do
+                                            if itemButton:IsA("ImageButton") then
+                                                local inside = itemButton:FindFirstChild("Inside")
+                                                if inside and inside:IsA("CanvasGroup") then
+                                                    local title = inside:FindFirstChild("Title")
+                                                    if title and title:IsA("TextLabel") then
+                                                        local itemName = title.Text
+                                                        if itemName == "Wandered Mind" then
+                                                            cursesId = itemButton.Name
+                                                            break
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+
+                if not cursesId then
+                    getgenv().AutoLevelCursesRunning = false
+                    WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Unable to find [Phantom] Curses in your inventory. Auto Leveling Stopped.",
+                        Duration = 3,
+                    })
+                    return
+                end
+
+                -- 找到了[Phantom] Curses，开始每0.1秒发送升级请求
+                while getgenv().AutoLevelCursesRunning and task.wait(0.1) do
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Upgrade_Name"] = "Level",
+                        ["UniqueId"] = cursesId,
+                        ["Action"] = "Prog_Lv_Items",
+                        ["Bench_Name"] = "Curses_Leveling",
+                    })
+                end    
+            end)
+        else
+            getgenv().AutoLevelCursesRunning = false
+        end
+    end
+})
+
+local AutoLevelSoloHunterRankToggle = LevelingTab:Toggle({
+    Flag = "AutoLevelSoloHunterRank",
+    Title = "Auto Level Up Solo Hunter Rank",
+    Desc = "Will works only if you have [Phantom] Solo Hunter Rank in your inventory",
+    Default = false,
+    Callback = function(state)
+        if state then
+            getgenv().AutoLevelSoloHunterRankRunning = true
+            task.spawn(function()
+                local soloHunterRankId = nil
+                
+                -- 获取玩家背包
+                local player = game:GetService("Players").LocalPlayer
+                local playerGui = player:FindFirstChild("PlayerGui")
+                
+                if playerGui and playerGui:IsA("PlayerGui") then
+                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                        local hub = inventoryGui:FindFirstChild("Hub")
+                        if hub and hub:IsA("Frame") then
+                            local powers = hub:FindFirstChild("Powers")
+                            if powers and powers:IsA("Frame") then
+                                local listFrame = powers:FindFirstChild("List_Frame")
+                                if listFrame and listFrame:IsA("Frame") then
+                                    local list = listFrame:FindFirstChild("List")
+                                    if list and list:IsA("ScrollingFrame") then
+
+                                        for _, itemButton in pairs(list:GetChildren()) do
+                                            if itemButton:IsA("ImageButton") then
+                                                local inside = itemButton:FindFirstChild("Inside")
+                                                if inside and inside:IsA("CanvasGroup") then
+                                                    local title = inside:FindFirstChild("Title")
+                                                    if title and title:IsA("TextLabel") then
+                                                        local itemName = title.Text
+                                                        if itemName == "National Level Hunter" then
+                                                            soloHunterRankId = itemButton.Name
+                                                            break
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+
+                if not soloHunterRankId then
+                    getgenv().AutoLevelSoloHunterRankRunning = false
+                    WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Unable to find [Phantom] Solo Hunter Rank in your inventory. Auto Leveling Stopped.",
+                        Duration = 3,
+                    })
+                    return
+                end
+
+                -- 找到了[Phantom] Solo Hunter Rank，开始每0.1秒发送升级请求
+                while getgenv().AutoLevelSoloHunterRankRunning and task.wait(0.1) do
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Upgrade_Name"] = "Level",
+                        ["UniqueId"] = soloHunterRankId,
+                        ["Action"] = "Prog_Lv_Items",
+                        ["Bench_Name"] = "Solo_Hunter_Rank_Leveling",
+                    })
+                end    
+            end)
+        else
+            getgenv().AutoLevelSoloHunterRankRunning = false
+        end
+    end
+})
+
+local AutoLevelPsychicMayhemToggle = LevelingTab:Toggle({
+    Flag = "AutoLevelPsychicMayhem",
+    Title = "Auto Level Up Psychic Mayhem",
+    Desc = "Will works only if you have [Phantom] Psychic Mayhem in your inventory",
+    Default = false,
+    Callback = function(state)
+        if state then
+            getgenv().AutoLevelPsychicMayhemRunning = true
+            task.spawn(function()
+                local psychicMayhemId = nil
+                
+                -- 获取玩家背包
+                local player = game:GetService("Players").LocalPlayer
+                local playerGui = player:FindFirstChild("PlayerGui")
+                
+                if playerGui and playerGui:IsA("PlayerGui") then
+                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                        local hub = inventoryGui:FindFirstChild("Hub")
+                        if hub and hub:IsA("Frame") then
+                            local powers = hub:FindFirstChild("Powers")
+                            if powers and powers:IsA("Frame") then
+                                local listFrame = powers:FindFirstChild("List_Frame")
+                                if listFrame and listFrame:IsA("Frame") then
+                                    local list = listFrame:FindFirstChild("List")
+                                    if list and list:IsA("ScrollingFrame") then
+
+                                        for _, itemButton in pairs(list:GetChildren()) do
+                                            if itemButton:IsA("ImageButton") then
+                                                local inside = itemButton:FindFirstChild("Inside")
+                                                if inside and inside:IsA("CanvasGroup") then
+                                                    local title = inside:FindFirstChild("Title")
+                                                    if title and title:IsA("TextLabel") then
+                                                        local itemName = title.Text
+                                                        if itemName == "Energy Aura Blast" then
+                                                            psychicMayhemId = itemButton.Name
+                                                            break
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+
+                if not psychicMayhemId then
+                    getgenv().AutoLevelPsychicMayhemRunning = false
+                    WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Unable to find [Phantom] Psychic Mayhem in your inventory. Auto Leveling Stopped.",
+                        Duration = 3,
+                    })
+                    return
+                end
+
+                -- 找到了[Phantom] Psychic Mayhem，开始每0.1秒发送升级请求
+                while getgenv().AutoLevelPsychicMayhemRunning and task.wait(0.1) do
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Upgrade_Name"] = "Level",
+                        ["UniqueId"] = psychicMayhemId,
+                        ["Action"] = "Prog_Lv_Items",
+                        ["Bench_Name"] = "Psychic_Mayhem_Leveling",
+                    })
+                end    
+            end)
+        else
+            getgenv().AutoLevelPsychicMayhemRunning = false
+        end
+    end
+})
+
+local AutoLevelEnergySpellCardToggle = LevelingTab:Toggle({
+    Flag = "AutoLevelEnergySpellCard",
+    Title = "Auto Level Up Energy Spell Card",
+    Desc = "Will works only if you have [Phantom] Energy Spell Card in your inventory",
+    Default = false,
+    Callback = function(state)
+        if state then
+            getgenv().AutoLevelEnergySpellCardRunning = true
+            task.spawn(function()
+                local energySpellCardId = nil
+                
+                -- 获取玩家背包
+                local player = game:GetService("Players").LocalPlayer
+                local playerGui = player:FindFirstChild("PlayerGui")
+                
+                if playerGui and playerGui:IsA("PlayerGui") then
+                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                        local hub = inventoryGui:FindFirstChild("Hub")
+                        if hub and hub:IsA("Frame") then
+                            local powers = hub:FindFirstChild("Powers")
+                            if powers and powers:IsA("Frame") then
+                                local listFrame = powers:FindFirstChild("List_Frame")
+                                if listFrame and listFrame:IsA("Frame") then
+                                    local list = listFrame:FindFirstChild("List")
+                                    if list and list:IsA("ScrollingFrame") then
+
+                                        for _, itemButton in pairs(list:GetChildren()) do
+                                            if itemButton:IsA("ImageButton") then
+                                                local inside = itemButton:FindFirstChild("Inside")
+                                                if inside and inside:IsA("CanvasGroup") then
+                                                    local title = inside:FindFirstChild("Title")
+                                                    if title and title:IsA("TextLabel") then
+                                                        local itemName = title.Text
+                                                        if itemName == "Energy Card VII" then
+                                                            energySpellCardId = itemButton.Name
+                                                            break
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+
+                if not energySpellCardId then
+                    getgenv().AutoLevelEnergySpellCardRunning = false
+                    WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Unable to find [Phantom] Energy Spell Card in your inventory. Auto Leveling Stopped.",
+                        Duration = 3,
+                    })
+                    return
+                end
+
+                -- 找到了[Phantom] Energy Spell Card，开始每0.1秒发送升级请求
+                while getgenv().AutoLevelEnergySpellCardRunning and task.wait(0.1) do
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Upgrade_Name"] = "Level",
+                        ["UniqueId"] = energySpellCardId,
+                        ["Action"] = "Prog_Lv_Items",
+                        ["Bench_Name"] = "Energy_Spell_Card_Leveling",
+                    })
+                end    
+            end)
+        else
+            getgenv().AutoLevelEnergySpellCardRunning = false
+        end
+    end
+})
+
+local AutoLevelDamageSpellCardToggle = LevelingTab:Toggle({
+    Flag = "AutoLevelDamageSpellCard",
+    Title = "Auto Level Up Damage Spell Card",
+    Desc = "Will works only if you have [Exotic] Damage Spell Card in your inventory",
+    Default = false,
+    Callback = function(state)
+        if state then
+            getgenv().AutoLevelDamageSpellCardRunning = true
+            task.spawn(function()
+                local damageSpellCardId = nil
+                
+                -- 获取玩家背包
+                local player = game:GetService("Players").LocalPlayer
+                local playerGui = player:FindFirstChild("PlayerGui")
+                
+                if playerGui and playerGui:IsA("PlayerGui") then
+                    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+                    if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                        local hub = inventoryGui:FindFirstChild("Hub")
+                        if hub and hub:IsA("Frame") then
+                            local powers = hub:FindFirstChild("Powers")
+                            if powers and powers:IsA("Frame") then
+                                local listFrame = powers:FindFirstChild("List_Frame")
+                                if listFrame and listFrame:IsA("Frame") then
+                                    local list = listFrame:FindFirstChild("List")
+                                    if list and list:IsA("ScrollingFrame") then
+
+                                        for _, itemButton in pairs(list:GetChildren()) do
+                                            if itemButton:IsA("ImageButton") then
+                                                local inside = itemButton:FindFirstChild("Inside")
+                                                if inside and inside:IsA("CanvasGroup") then
+                                                    local title = inside:FindFirstChild("Title")
+                                                    if title and title:IsA("TextLabel") then
+                                                        local itemName = title.Text
+                                                        if itemName == "Damage Card VIII" then
+                                                            damageSpellCardId = itemButton.Name
+                                                            break
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+
+                if not damageSpellCardId then
+                    getgenv().AutoLevelDamageSpellCardRunning = false
+                    WindUI:Notify({
+                        Title = "Lights Hub",
+                        Content = "Unable to find [Exotic] Damage Spell Card in your inventory. Auto Leveling Stopped.",
+                        Duration = 3,
+                    })
+                    return
+                end
+
+                -- 找到了[Exotic] Damage Spell Card，开始每0.1秒发送升级请求
+                while getgenv().AutoLevelDamageSpellCardRunning and task.wait(0.1) do
+                    game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
+                        ["Upgrade_Name"] = "Level",
+                        ["UniqueId"] = damageSpellCardId,
+                        ["Action"] = "Prog_Lv_Items",
+                        ["Bench_Name"] = "Damage_Spell_Card_Leveling",
+                    })
+                end    
+            end)
+        else
+            getgenv().AutoLevelDamageSpellCardRunning = false
+        end
+    end
+})
+
+LevelingTab:Divider()
+
+local RuneDropdown = LevelingTab:Dropdown({
+    Flag = "RunesDropdown1",
+    Title = "Select Runes to Level Up (Currently only support Damage Runes)",
+    Values = {},  -- 初始为空
+    Value = {},
+    Multi = true,
+    AllowNone = true,
+    Callback = function(option)
+        getgenv().SelectedRunes = option
+    end,
+})
+
+local RuneRefreshButton = LevelingTab:Button({
+    Flag = "RefreshButton5",
+    Title = "Refresh Runes List",
+    Callback = function()
+        -- 类似Mob刷新逻辑：重新扫描并刷新dropdown
+        local runeList = {}
+        local player = game:GetService("Players").LocalPlayer
+        local playerGui = player:FindFirstChild("PlayerGui")
+        if playerGui and playerGui:IsA("PlayerGui") then
+            local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+            if inventoryGui and inventoryGui:IsA("ScreenGui") then
+                local hub = inventoryGui:FindFirstChild("Hub")
+                if hub and hub:IsA("Frame") then
+                    local runes = hub:FindFirstChild("Runes")
+                    if runes and runes:IsA("Frame") then
+                        local listFrame = runes:FindFirstChild("List_Frame")
+                        if listFrame and listFrame:IsA("Frame") then
+                            local list = listFrame:FindFirstChild("List")
+                            if list and list:IsA("ScrollingFrame") then
+                                for _, runeButton in pairs(list:GetChildren()) do
+                                    if runeButton:IsA("ImageButton") and runeButton:FindFirstChild("Inside") then
+                                        local inside = runeButton.Inside
+                                        if inside:IsA("Frame") and inside:FindFirstChild("Title") then
+                                            local title = inside.Title
+                                            if title:IsA("TextLabel") then
+                                                local runeName = title.Text  -- 直接获取Text属性
+                                                if runeName and runeName ~= "" then
+                                                    table.insert(runeList, runeName)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        if #runeList == 0 then
+            RuneDropdown:Refresh({"None"})
+        else
+            RuneDropdown:Refresh(runeList)
+        end
+    end,
+})
 
 local UpgradesTab = Window:Tab({
         Title = "Upgrades",
