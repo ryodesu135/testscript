@@ -4509,10 +4509,42 @@ local AutoLevelDamageSpellCardToggle = LevelingTab:Toggle({
     end
 })
 
+-- 全局变量：存储Rune列表，避免重复声明
+getgenv().RuneList = {}
+
+-- 公共函数：查找Runes列表，避免重复代码
+local function findRunes()
+    local runes = {}
+    local playerGui = game:GetService("Players").LocalPlayer.PlayerGui  -- 内联：删除local player
+    if not (playerGui and playerGui:IsA("PlayerGui")) then return {} end
+    local inventoryGui = playerGui:FindFirstChild("Inventory_1")
+    if not (inventoryGui and inventoryGui:IsA("ScreenGui")) then return {} end
+    local hub = inventoryGui:FindFirstChild("Hub")
+    if not (hub and hub:IsA("Frame")) then return {} end
+    local runeCategory = hub:FindFirstChild("Runes")
+    if not (runeCategory and runeCategory:IsA("Frame")) then return {} end
+    local listFrame = runeCategory:FindFirstChild("List_Frame")
+    if not (listFrame and listFrame:IsA("Frame")) then return {} end
+    local list = listFrame:FindFirstChild("List")
+    if not (list and list:IsA("ScrollingFrame")) then return {} end
+    for _, runeButton in pairs(list:GetChildren()) do
+        if runeButton:IsA("ImageButton") and runeButton:FindFirstChild("Inside") then
+            local inside = runeButton.Inside
+            if inside:IsA("Frame") and inside:FindFirstChild("Title") then
+                local title = inside.Title
+                if title:IsA("TextLabel") and title.Text and title.Text ~= "" then
+                    table.insert(runes, title.Text)  -- 内联runeName
+                end
+            end
+        end
+    end
+    return runes
+end
+
 local RuneTab = Window:Tab({
-        Title = "Runes",
-        Icon = "book",
-    })
+    Title = "Runes",
+    Icon = "book",
+})
 
 local RuneDropdown = RuneTab:Dropdown({
     Flag = "RunesDropdown1",
@@ -4530,54 +4562,20 @@ local RuneRefreshButton = RuneTab:Button({
     Flag = "RefreshButton5",
     Title = "Refresh Runes List",
     Callback = function()
-        -- 类似Mob刷新逻辑：重新扫描并刷新dropdown
-        local runeList = {}
-        local player = game:GetService("Players").LocalPlayer
-        local playerGui = player:FindFirstChild("PlayerGui")
-        if playerGui and playerGui:IsA("PlayerGui") then
-            local inventoryGui = playerGui:FindFirstChild("Inventory_1")
-            if inventoryGui and inventoryGui:IsA("ScreenGui") then
-                local hub = inventoryGui:FindFirstChild("Hub")
-                if hub and hub:IsA("Frame") then
-                    local runes = hub:FindFirstChild("Runes")
-                    if runes and runes:IsA("Frame") then
-                        local listFrame = runes:FindFirstChild("List_Frame")
-                        if listFrame and listFrame:IsA("Frame") then
-                            local list = listFrame:FindFirstChild("List")
-                            if list and list:IsA("ScrollingFrame") then
-                                for _, runeButton in pairs(list:GetChildren()) do
-                                    if runeButton:IsA("ImageButton") and runeButton:FindFirstChild("Inside") then
-                                        local inside = runeButton.Inside
-                                        if inside:IsA("Frame") and inside:FindFirstChild("Title") then
-                                            local title = inside.Title
-                                            if title:IsA("TextLabel") then
-                                                local runeName = title.Text  -- 直接获取Text属性
-                                                if runeName and runeName ~= "" then
-                                                    table.insert(runeList, runeName)
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        end
-
-        if #runeList == 0 then
+        -- 使用公共函数刷新
+        getgenv().RuneList = findRunes()
+        if #getgenv().RuneList == 0 then
             RuneDropdown:Refresh({"None"})
         else
-            RuneDropdown:Refresh(runeList)
+            RuneDropdown:Refresh(getgenv().RuneList)
         end
     end,
 })
 
 local UpgradesTab = Window:Tab({
-        Title = "Upgrades",
-        Icon = "square-plus",
-    })
+    Title = "Upgrades",
+    Icon = "square-plus",
+})
 
 local UpgradeOptions = {
     "Star Luck","Damage","Energy","Coins",
@@ -4637,7 +4635,7 @@ local AutoUpgradesToggle = UpgradesTab:Toggle({
                 while getgenv().AutoUpgradeRunning do
                     if getgenv().selectedUpgrades and #getgenv().selectedUpgrades > 0 then
                         for _, upgradeName in ipairs(getgenv().selectedUpgrades) do
-                            local upgradeData = upgradeMap[upgradeName]
+                            local upgradeData = upgradeMap[upgradeName]  -- 保留必要local
                             if upgradeData then
                                 game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                     ["Upgrading_Name"] = upgradeData.Upgrading_Name,
@@ -4655,7 +4653,9 @@ local AutoUpgradesToggle = UpgradesTab:Toggle({
         end
     end,
 })
+
 UpgradesTab:Divider()
+
 local AutoUpgradeAllToggle = UpgradesTab:Toggle({
     Flag = "AutoUpgradeAll1",
     Title = "Auto Upgrades ALL",
@@ -4668,7 +4668,7 @@ local AutoUpgradeAllToggle = UpgradesTab:Toggle({
             task.spawn(function()
                 while getgenv().AutoUpgradeAllRunning do
                     for _, upgradeName in ipairs(UpgradeOptions) do
-                        local upgradeData = upgradeMap[upgradeName]
+                        local upgradeData = upgradeMap[upgradeName]  -- 保留必要local
                         if upgradeData then
                             game:GetService("ReplicatedStorage").Events.To_Server:FireServer({
                                 ["Upgrading_Name"] = upgradeData.Upgrading_Name,
@@ -4686,14 +4686,10 @@ local AutoUpgradeAllToggle = UpgradesTab:Toggle({
     end,
 })
 
--------------------------------------------------
---🌾 Farm Tab
--------------------------------------------------
-local mobNames = {}
-local mobMap = {}
-local selectedMobs = {}
-local player = game.Players.LocalPlayer
-local rootPart = player.Character:WaitForChild("HumanoidRootPart")
+-- 全局变量：存储Mob数据，避免局部声明
+getgenv().mobNames = {}
+getgenv().mobMap = {}
+getgenv().selectedMobs = {}
 
 -- 全局控制变量
 getgenv().AutoFarmRunning = false
@@ -4705,9 +4701,9 @@ getgenv().WasAutoFarmRunning = false
 
 --Farm Tab
 local FarmTab = Window:Tab({
-        Title = "Farm",
-        Icon = "sprout",
-    })
+    Title = "Farm",
+    Icon = "sprout",
+})
 
 -- ✅ Mob 列表 Dropdown
 local MobDropdown = FarmTab:Dropdown({
@@ -4718,7 +4714,7 @@ local MobDropdown = FarmTab:Dropdown({
     Multi = true,
     AllowNone = true,
     Callback = function(option)
-        selectedMobs = option or {}
+        getgenv().selectedMobs = option or {}
         getgenv().FarmTargetChanged = true
     end,
 })
@@ -4728,8 +4724,8 @@ local MobRefreshButton = FarmTab:Button({
     Flag = "RefreshButton1",
     Title = "Refresh Mobs List",
     Callback = function()
-        mobNames, mobMap, selectedMobs = {}, {}, {}
-        local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
+        getgenv().mobNames, getgenv().mobMap, getgenv().selectedMobs = {}, {}, {}
+        local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")  -- 内联：删除local monstersFolder的重复
 
         if not monstersFolder then
             MobDropdown:Refresh({"None"})
@@ -4738,21 +4734,21 @@ local MobRefreshButton = FarmTab:Button({
 
         for _, mob in pairs(monstersFolder:GetChildren()) do
             if mob and mob:IsA("Model") then
-                local mobsname = mob:GetAttribute("Title") or mob.Name
+                local mobsname = mob:GetAttribute("Title") or mob.Name  -- 保留必要local
                 local mobsrank = mob:GetAttribute("Rank")
                 local mobsdisplayname = mobsrank and mobsrank ~= "" and string.format("[%s] %s", mobsrank, mobsname) or mobsname
-                if not mobMap[mobsdisplayname] then
-                    mobMap[mobsdisplayname] = {}
-                    table.insert(mobNames, mobsdisplayname)
+                if not getgenv().mobMap[mobsdisplayname] then
+                    getgenv().mobMap[mobsdisplayname] = {}
+                    table.insert(getgenv().mobNames, mobsdisplayname)
                 end
-                table.insert(mobMap[mobsdisplayname], mob)
+                table.insert(getgenv().mobMap[mobsdisplayname], mob)
             end
         end
 
-        if #mobNames == 0 then
+        if #getgenv().mobNames == 0 then
             MobDropdown:Refresh({"None"})
         else
-            MobDropdown:Refresh(mobNames)
+            MobDropdown:Refresh(getgenv().mobNames)
         end
     end,
 })
@@ -4774,33 +4770,33 @@ local AutoFarmToggle = FarmTab:Toggle({
                         getgenv().FarmTargetChanged = false
                     end
 
-                    local char = player.Character
-                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                    local char = game.Players.LocalPlayer.Character  -- 内联：删除local player
+                    local hrp = char and char:FindFirstChild("HumanoidRootPart")  -- 保留必要local
                     if not hrp then task.wait(1) continue end
 
-                    local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")
+                    local monstersFolder = workspace:FindFirstChild("Debris") and workspace.Debris:FindFirstChild("Monsters")  -- 内联
                     if monstersFolder then
-                        mobMap = {}
+                        getgenv().mobMap = {}
                         for _, mob in pairs(monstersFolder:GetChildren()) do
                             if mob and mob:IsA("Model") then
-                                local mobsname = mob:GetAttribute("Title") or mob.Name
+                                local mobsname = mob:GetAttribute("Title") or mob.Name  -- 保留必要local
                                 local mobsrank = mob:GetAttribute("Rank")
                                 local mobsdisplayname = mobsrank and mobsrank ~= "" and string.format("[%s] %s", mobsrank, mobsname) or mobsname
-                                if not mobMap[mobsdisplayname] then
-                                    mobMap[mobsdisplayname] = {}
+                                if not getgenv().mobMap[mobsdisplayname] then
+                                    getgenv().mobMap[mobsdisplayname] = {}
                                 end
-                                table.insert(mobMap[mobsdisplayname], mob)
+                                table.insert(getgenv().mobMap[mobsdisplayname], mob)
                             end
                         end
                     end
 
-                    for _, mobName in ipairs(selectedMobs) do
+                    for _, mobName in ipairs(getgenv().selectedMobs) do
                         if not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged or getgenv().InDungeon then break end
-                        local mobList = mobMap[mobName]
+                        local mobList = getgenv().mobMap[mobName]  -- 保留必要local
                         if mobList then
                             for _, mob in ipairs(mobList) do
                                 if not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged or getgenv().InDungeon then break end
-                                local mobHRP = mob:FindFirstChild("HumanoidRootPart")
+                                local mobHRP = mob:FindFirstChild("HumanoidRootPart")  -- 保留必要local
                                 if mobHRP then
                                     hrp.CFrame = mobHRP.CFrame + Vector3.new(0, 0, 2)
                                     repeat task.wait(0.05) until not mob.Parent or not getgenv().AutoFarmRunning or getgenv().FarmTargetChanged or getgenv().InDungeon
